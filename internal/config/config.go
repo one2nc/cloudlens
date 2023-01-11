@@ -26,9 +26,10 @@ func GetSession(profile, region string, awsCfg awsV2.Config) (*session.Session, 
 	crds, _ := awsCfg.Credentials.Retrieve(context.TODO())
 	sess, err := session.NewSessionWithOptions(session.Options{Config: aws.Config{
 		//TODO: remove hardcoded enpoint
-		Endpoint:    aws.String("http://localhost:4566"),
-		Region:      aws.String(region),
-		Credentials: credentials.NewStaticCredentials(crds.AccessKeyID, crds.SecretAccessKey, ""),
+		Endpoint:         aws.String("http://localhost:4566"),
+		Region:           aws.String(region),
+		Credentials:      credentials.NewStaticCredentials(crds.AccessKeyID, crds.SecretAccessKey, ""),
+		S3ForcePathStyle: aws.Bool(true),
 	},
 		Profile: profile})
 	if err != nil {
