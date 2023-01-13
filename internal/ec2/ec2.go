@@ -10,9 +10,11 @@ import (
 
 type EC2Resp struct {
 	InstanceId       string
-	InstanceState    string
 	InstanceType     string
 	AvailabilityZone string
+	InstanceState    string
+	PublicDNS        string
+	PublicIPv4       string
 	MonitoringState  string
 	LaunchTime       string
 }
@@ -40,7 +42,15 @@ func (e ec2Service) GetInstances() ([]EC2Resp, error) {
 	// Iterate through the instances and print their ID and state
 	for _, reservation := range result.Reservations {
 		for _, instance := range reservation.Instances {
-			ec2Resp := &EC2Resp{InstanceId: *instance.InstanceId, InstanceState: *instance.State.Name, InstanceType: *instance.InstanceType, AvailabilityZone: *instance.Placement.AvailabilityZone, MonitoringState: *instance.Monitoring.State, LaunchTime: instance.LaunchTime.Format("2006-01-02 15:04:05")}
+			ec2Resp := &EC2Resp{
+				InstanceId:       *instance.InstanceId,
+				InstanceType:     *instance.InstanceType,
+				AvailabilityZone: *instance.Placement.AvailabilityZone,
+				InstanceState:    *instance.State.Name,
+				PublicDNS:        *instance.PublicDnsName,
+				PublicIPv4:       *instance.PublicIpAddress,
+				MonitoringState:  *instance.Monitoring.State,
+				LaunchTime:       instance.LaunchTime.Format("2006-01-02 15:04:05")}
 			ec2Info = append(ec2Info, *ec2Resp)
 		}
 	}

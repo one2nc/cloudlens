@@ -23,10 +23,8 @@ func CreateAndListS3Buckets(sess *session.Session) []s3.BucketResp {
 }
 
 func CreateAndListEC2Instances(sess *session.Session) []ec2.EC2Resp {
-
 	ec2Service := ec2.NewEc2Service(*sess)
 	ec2Service.CreateInstances()
-
 	ec2InstanceInfoList, err := ec2Service.GetInstances()
 	if err != nil {
 		fmt.Println("Error while listing the bucket")
