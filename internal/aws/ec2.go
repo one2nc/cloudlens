@@ -25,7 +25,6 @@ type Ec2Service interface {
 	GetInstances() ([]EC2Resp, error)
 	CreateEc2() (*ec2.Reservation, error)
 	CreateSecGrp(name, desc, vpcId string)
-	RegionsAndAvailZones()
 	CreateKeyPair(keyName string) (*ec2.CreateKeyPairOutput, error)
 	ListAllKeyPairs() ([]*string, error)
 }
@@ -36,6 +35,10 @@ type ec2Service struct {
 
 func NewEc2Service(sess session.Session) Ec2Service {
 	return ec2Service{client: *ec2.New(&sess)}
+}
+
+func GetAllRegions() []string {
+	return []string{"us-east-1", "us-east-2", "us-west-1", "us-west-2", "af-south-1", "ap-east-1", "ap-south-2", "ap-southeast-3", "ap-south-1", "ap-northeast-3", "ap-northeast-2", "ap-southeast-1", "ap-southeast-2", "ap-northeast-1", "ca-central-1", "eu-central-1", "eu-west-1", "eu-west-2", "eu-south-1", "eu-west-3", "eu-south-2", "eu-north-1", "eu-central-2", "me-south-1", "me-central-1", "sa-east-1", "us-gov-east-1", "us-gov-west-1"}
 }
 
 func (e ec2Service) GetInstances() ([]EC2Resp, error) {
@@ -127,21 +130,6 @@ func (e ec2Service) CreateSecGrp(name, desc, vpcId string) {
 
 	fmt.Printf("Created security group %s with VPC %s.\n",
 		aws.StringValue(createRes.GroupId), vpcId)
-}
-
-func (e ec2Service) RegionsAndAvailZones() {
-	regions, err := e.client.DescribeRegions(nil)
-	if err != nil {
-		fmt.Println("Error", err)
-		return
-	}
-	availZones, err := e.client.DescribeAvailabilityZones(nil)
-	if err != nil {
-		fmt.Println("Error", err)
-		return
-	}
-
-	fmt.Println("Regions: ", regions, "\n Available Zones: ", availZones.AvailabilityZones)
 }
 
 func (e ec2Service) CreateKeyPair(keyName string) (*ec2.CreateKeyPairOutput, error) {

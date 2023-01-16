@@ -47,7 +47,7 @@ func (a *App) layout() {
 	var currentRegion *string
 	var currentProfile *string
 	profiles := cfg.Profiles
-	regions := []string{"us-east-1", "us-east-2", "us-west-1", "us-west-2", "af-south-1", "ap-east-1", "ap-south-2", "ap-southeast-3", "ap-south-1", "ap-northeast-3", "ap-northeast-2", "ap-southeast-1", "ap-southeast-2", "ap-northeast-1", "ca-central-1", "eu-central-1", "eu-west-1", "eu-west-2", "eu-south-1", "eu-west-3", "eu-south-2", "eu-north-1", "eu-central-2", "me-south-1", "me-central-1", "sa-east-1", "us-gov-east-1", "us-gov-west-1"}
+	regions := aws.GetAllRegions()
 
 	currentProfile = &profiles[0]
 	currentRegion = &regions[0]
@@ -99,16 +99,6 @@ func (a *App) layout() {
 	servicePageContent.SetBorderFocusColor(tcell.ColorDarkSeaGreen)
 	servicePage.AddItem(servicePageContent, 0, 6, true)
 
-	/*
-		TODO:
-		- Press ":", to get the modal view for typing the service
-		- The model view will be having ok and cancel buttons
-		- Upon pressing cancel button, close the modal and view the current page
-		- Upon pressing ok button, the services will be shown accordingly
-			- in our current case, "ec2" instances and "s3" buckets
-		- To change the service again, go to #1 point
-	*/
-
 	inputField := tview.NewInputField().
 		SetLabel("🐶>").
 		SetAcceptanceFunc(func(textToCheck string, lastChar rune) bool {
@@ -117,9 +107,8 @@ func (a *App) layout() {
 	inputField.SetFieldBackgroundColor(tcell.ColorBlack)
 	inputField.SetDoneFunc(func(key tcell.Key) {
 		if key == tcell.KeyEnter {
-			text := inputField.GetText()
-			// fmt.Println(text)
-			switch text {
+			serviceName := inputField.GetText()
+			switch serviceName {
 			case "S3":
 				servicePage.RemoveItemAtIndex(0)
 				servicePageContent = DisplayS3Buckets(buckets)
