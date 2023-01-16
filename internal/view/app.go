@@ -121,7 +121,7 @@ func (a *App) layout() {
 			// fmt.Println(text)
 			switch text {
 			case "S3":
-				servicePage.RemoveItem(servicePageContent)
+				servicePage.RemoveItemAtIndex(0)
 				servicePageContent = DisplayS3Buckets(buckets)
 				servicePage.SetInputCapture(func(event *tcell.EventKey) *tcell.EventKey {
 					servicePage.RemoveItem(servicePage.RemoveItemAtIndex(0))
@@ -131,8 +131,9 @@ func (a *App) layout() {
 				servicePageContent.SetBorderFocusColor(tcell.ColorDarkSeaGreen)
 				servicePage.AddItem(servicePageContent, 0, 6, true)
 				inputField.SetText("")
+
 			case "EC2":
-				servicePage.RemoveItem(servicePageContent)
+				servicePage.RemoveItemAtIndex(0)
 				servicePageContent = DisplayEc2Instances(ins)
 				servicePage.SetInputCapture(func(event *tcell.EventKey) *tcell.EventKey {
 					servicePage.RemoveItem(servicePage.RemoveItemAtIndex(0))
