@@ -109,7 +109,7 @@ func (a *App) layout() {
 		if key == tcell.KeyEnter {
 			serviceName := inputField.GetText()
 			switch serviceName {
-			case "S3":
+			case "S3", "s3":
 				servicePage.RemoveItemAtIndex(0)
 				servicePageContent = DisplayS3Buckets(buckets)
 				servicePage.SetInputCapture(func(event *tcell.EventKey) *tcell.EventKey {
@@ -121,7 +121,7 @@ func (a *App) layout() {
 				servicePage.AddItem(servicePageContent, 0, 6, true)
 				inputField.SetText("")
 
-			case "EC2":
+			case "EC2", "ec2", "Ec2", "eC2":
 				servicePage.RemoveItemAtIndex(0)
 				servicePageContent = DisplayEc2Instances(ins)
 				servicePage.SetInputCapture(func(event *tcell.EventKey) *tcell.EventKey {
