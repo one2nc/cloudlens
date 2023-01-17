@@ -27,7 +27,7 @@ func (a *App) Init() {
 	a.App.Run()
 }
 
-func (a *App) layout() {
+func (a *App) layout() *tview.Flex {
 	cfg, _ := config.Get()
 
 	main := tview.NewFlex().SetDirection(tview.FlexRow)
@@ -150,10 +150,11 @@ func (a *App) layout() {
 	main.AddItem(textv, 0, 2, false)
 	a.Main.AddPage("main", main, true, false)
 	a.Main.ShowPage("main")
+	return main
 }
 
 func (a *App) DisplayEc2Instances(ins []aws.EC2Resp, sess *session.Session) *tview.Table {
-	flex := tview.NewFlex()
+	flex := tview.NewFlex().SetDirection(tview.FlexRow)
 	table := tview.NewTable()
 	table.SetBorder(true)
 	table.SetBorderFocusColor(tcell.ColorSpringGreen)
@@ -188,17 +189,25 @@ func (a *App) DisplayEc2Instances(ins []aws.EC2Resp, sess *session.Session) *tvi
 		r = row - 1
 	})
 
-	// ins[r].InstanceId
 	table.SetInputCapture(func(event *tcell.EventKey) *tcell.EventKey {
 		if event.Rune() == 100 {
 			insId := ins[r].InstanceId
-			// println(insId, aws.GetSingleInstance(*sess, insId).Reservations)
-			// page := tview.NewPages()
-			a1 := tview.NewTextView()
-			a1.SetText(aws.GetSingleInstance(*sess, insId).GoString())
-			// flex.AddItem(page, 0, 6, true)
-			flex.AddItem(a1, 0, 50, true)
-			a.Main.AddAndSwitchToPage("json", flex, false)
+			newPage := tview.NewTextView()
+			newPage.SetBorder(true)
+			newPage.SetTitle(" JSON ")
+			newPage.SetText(aws.GetSingleInstance(*sess, insId).GoString())
+			desc := tview.NewTextView()
+			desc.SetText("<b> shift to previous page")
+			flex.AddItem(desc, 0, 1, true)
+			flex.AddItem(newPage, 0, 10, true)
+			a.Main.AddAndSwitchToPage("json", flex, true)
+			newPage.SetInputCapture(func(event *tcell.EventKey) *tcell.EventKey {
+				if event.Rune() == 98 {
+					 layout := a.layout()
+					a.Main.AddAndSwitchToPage("table",layout,true)
+				}
+				return event
+			})
 		}
 		return event
 	})
