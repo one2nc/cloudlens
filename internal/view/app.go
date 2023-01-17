@@ -58,8 +58,8 @@ func (a *App) layout() {
 		SetOptions(profiles, func(text string, index int) {
 			currentProfile = &text
 			sess, _ = config.GetSession(*currentProfile, *currentRegion, cfg.AwsConfig)
-			ins, _ = aws.NewEc2Service(*sess).GetInstances()
-			buckets, _ = aws.NewS3Service(*sess).ListBuckets()
+			ins, _ = aws.GetInstances(*sess)
+			buckets, _ = aws.ListBuckets(*sess)
 			textv.SetText("🌈🌧️ cloudlens profile..." + fmt.Sprintf("%v", a.Main.Pages.CurrentPage()))
 		})
 	profileDropdown.SetBorderFocusColor(tcell.ColorSpringGreen)
@@ -72,8 +72,8 @@ func (a *App) layout() {
 		SetOptions(regions, func(text string, index int) {
 			currentRegion = &text
 			sess, _ = config.GetSession(*currentProfile, *currentRegion, cfg.AwsConfig)
-			ins, _ = aws.NewEc2Service(*sess).GetInstances()
-			buckets, _ = aws.NewS3Service(*sess).ListBuckets()
+			ins, _ = aws.GetInstances(*sess)
+			buckets, _ = aws.ListBuckets(*sess)
 			textv.SetText("🌈🌧️ cloudlens region..." + fmt.Sprintf("%v", ins))
 		})
 	regionDropdown.SetBorderFocusColor(tcell.ColorSpringGreen)
