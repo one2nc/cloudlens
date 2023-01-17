@@ -24,6 +24,8 @@ github.com/aws/aws-sdk-go-v2/service/sts v1.18.0 h1:kOO++CYo50RcTFISESluhWEi5Prh
 github.com/aws/aws-sdk-go-v2/service/sts v1.18.0/go.mod h1:+lGbb3+1ugwKrNTWcf2RT05Xmp543B06zDFTwiTLp7I=
 github.com/aws/smithy-go v1.13.5 h1:hgz0X/DX0dGqTYpGALqXJoRKRj5oQ7150i5FdTePzO8=
 github.com/aws/smithy-go v1.13.5/go.mod h1:Tg+OJXh4MB2R/uN61Ko2f6hTZwB/ZYGOtib8J3gBHzA=
+github.com/brianvoe/gofakeit v3.18.0+incompatible h1:wDOmHc9DLG4nRjUVVaxA+CEglKOW72Y5+4WNxUIkjM8=
+github.com/brianvoe/gofakeit v3.18.0+incompatible/go.mod h1:kfwdRA90vvNhPutZWfH7WPaDzUjz+CZFqG+rPkOjGOc=
 github.com/brianvoe/gofakeit/v6 v6.20.1 h1:8ihJ60OvPnPJ2W6wZR7M+TTeaZ9bml0z6oy4gvyJ/ek=
 github.com/brianvoe/gofakeit/v6 v6.20.1/go.mod h1:Ow6qC71xtwm79anlwKRlWZW6zVq9D2XHE4QSSMP/rU8=
 github.com/cpuguy83/go-md2man/v2 v2.0.2/go.mod h1:tgQtvFlXSQOSOSIRvRPT7W67SCa46tRHOmNcaadrF8o=
