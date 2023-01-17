@@ -12,7 +12,7 @@ import (
 
 type BucketResp struct {
 	BucketName   string
-	CreationTime *time.Time
+	CreationTime string
 	Region       string
 }
 
@@ -54,7 +54,10 @@ func (s s3Service) ListBuckets() ([]BucketResp, error) {
 			fmt.Println("error getting bucket location")
 			return nil, err
 		}
-		bucketresp := &BucketResp{BucketName: *buc.Name, CreationTime: buc.CreationDate, Region: aws.StringValue(reg.LocationConstraint)}
+		launchTime := buc.CreationDate
+		loc, _ := time.LoadLocation("Asia/Kolkata")
+		IST := launchTime.In(loc)
+		bucketresp := &BucketResp{BucketName: *buc.Name, CreationTime: IST.Format("Mon Jan _2 15:04:05 2006"), Region: aws.StringValue(reg.LocationConstraint)}
 		bucketInfo = append(bucketInfo, *bucketresp)
 	}
 	return bucketInfo, nil

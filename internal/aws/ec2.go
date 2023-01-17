@@ -3,6 +3,7 @@ package aws
 import (
 	"fmt"
 	"log"
+	"time"
 
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/awserr"
@@ -52,6 +53,9 @@ func (e ec2Service) GetInstances() ([]EC2Resp, error) {
 	// Iterate through the instances and print their ID and state
 	for _, reservation := range result.Reservations {
 		for _, instance := range reservation.Instances {
+			launchTime := instance.LaunchTime
+			loc, _ := time.LoadLocation("Asia/Kolkata")
+			IST := launchTime.In(loc)
 			ec2Resp := &EC2Resp{
 				InstanceId:       *instance.InstanceId,
 				InstanceType:     *instance.InstanceType,
@@ -60,7 +64,7 @@ func (e ec2Service) GetInstances() ([]EC2Resp, error) {
 				PublicDNS:        *instance.PublicDnsName,
 				PublicIPv4:       *instance.PublicIpAddress,
 				MonitoringState:  *instance.Monitoring.State,
-				LaunchTime:       instance.LaunchTime.Format("2006-01-02 15:04:05")}
+				LaunchTime:       IST.Format("Mon Jan _2 15:04:05 2006")}
 			ec2Info = append(ec2Info, *ec2Resp)
 		}
 	}
