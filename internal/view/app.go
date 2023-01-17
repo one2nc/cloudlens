@@ -3,6 +3,7 @@ package view
 import (
 	"fmt"
 
+	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/derailed/tview"
 	"github.com/gdamore/tcell/v2"
 	"github.com/one2nc/cloud-lens/internal/aws"
@@ -52,6 +53,8 @@ func (a *App) layout() {
 	currentProfile = &profiles[0]
 	currentRegion = &regions[0]
 	sess, _ := config.GetSession(*currentProfile, *currentRegion, cfg.AwsConfig)
+	servicePage := tview.NewFlex().SetDirection(tview.FlexRow)
+	servicePageContent := a.DisplayEc2Instances(ins, sess)
 
 	profileDropdown := tview.NewDropDown().
 		SetLabel("Profile  ").
@@ -61,6 +64,12 @@ func (a *App) layout() {
 			ins, _ = aws.GetInstances(*sess)
 			buckets, _ = aws.ListBuckets(*sess)
 			textv.SetText("🌈🌧️ cloudlens profile..." + fmt.Sprintf("%v", a.Main.Pages.CurrentPage()))
+			if servicePage.ItemAt(0) != nil {
+				servicePage.RemoveItemAtIndex(0)
+			}
+			servicePageContent = a.DisplayEc2Instances(ins, sess)
+			servicePageContent.SetBorderFocusColor(tcell.ColorDarkSeaGreen)
+			servicePage.AddItem(servicePageContent, 0, 6, true)
 		})
 	profileDropdown.SetBorderFocusColor(tcell.ColorSpringGreen)
 	profileDropdown.SetCurrentOption(0)
@@ -74,7 +83,13 @@ func (a *App) layout() {
 			sess, _ = config.GetSession(*currentProfile, *currentRegion, cfg.AwsConfig)
 			ins, _ = aws.GetInstances(*sess)
 			buckets, _ = aws.ListBuckets(*sess)
-			textv.SetText("🌈🌧️ cloudlens region..." + fmt.Sprintf("%v", ins))
+			textv.SetText("🌈🌧️ cloudlens region... " + fmt.Sprintf("%v", ins))
+			if servicePage.ItemAt(0) != nil {
+				servicePage.RemoveItemAtIndex(0)
+			}
+			servicePageContent = a.DisplayEc2Instances(ins, sess)
+			servicePageContent.SetBorderFocusColor(tcell.ColorDarkSeaGreen)
+			servicePage.AddItem(servicePageContent, 0, 6, true)
 		})
 	regionDropdown.SetBorderFocusColor(tcell.ColorSpringGreen)
 	regionDropdown.SetCurrentOption(0)
@@ -89,13 +104,8 @@ func (a *App) layout() {
 	menuColFlex.AddItem(tview.NewBox(), 0, 1, false)
 	menuColFlex.AddItem(ddRowFlex, 0, 1, false)
 
-	servicePage := tview.NewFlex().SetDirection(tview.FlexRow)
-	servicePageContent := DisplayEc2Instances(ins)
-	servicePage.SetInputCapture(func(event *tcell.EventKey) *tcell.EventKey {
-		servicePage.RemoveItem(servicePage.RemoveItemAtIndex(0))
-		servicePage.AddItemAtIndex(0, DisplayEc2Instances(ins), 0, 6, true)
-		return event
-	})
+	servicePage = tview.NewFlex().SetDirection(tview.FlexRow)
+	servicePageContent = a.DisplayEc2Instances(ins, sess)
 	servicePageContent.SetBorderFocusColor(tcell.ColorDarkSeaGreen)
 	servicePage.AddItem(servicePageContent, 0, 6, true)
 
@@ -112,23 +122,13 @@ func (a *App) layout() {
 			case "S3", "s3":
 				servicePage.RemoveItemAtIndex(0)
 				servicePageContent = DisplayS3Buckets(buckets)
-				servicePage.SetInputCapture(func(event *tcell.EventKey) *tcell.EventKey {
-					servicePage.RemoveItem(servicePage.RemoveItemAtIndex(0))
-					servicePage.AddItemAtIndex(0, DisplayS3Buckets(buckets), 0, 6, true)
-					return event
-				})
 				servicePageContent.SetBorderFocusColor(tcell.ColorDarkSeaGreen)
 				servicePage.AddItem(servicePageContent, 0, 6, true)
 				inputField.SetText("")
 
 			case "EC2", "ec2", "Ec2", "eC2":
 				servicePage.RemoveItemAtIndex(0)
-				servicePageContent = DisplayEc2Instances(ins)
-				servicePage.SetInputCapture(func(event *tcell.EventKey) *tcell.EventKey {
-					servicePage.RemoveItem(servicePage.RemoveItemAtIndex(0))
-					servicePage.AddItemAtIndex(0, DisplayEc2Instances(ins), 0, 6, true)
-					return event
-				})
+				servicePageContent = a.DisplayEc2Instances(ins, sess)
 				servicePageContent.SetBorderFocusColor(tcell.ColorDarkSeaGreen)
 				// ec2Page.AddItem(menuColFlex, 0, 2, false)
 				servicePage.AddItem(servicePageContent, 0, 6, true)
@@ -152,11 +152,12 @@ func (a *App) layout() {
 	a.Main.ShowPage("main")
 }
 
-func DisplayEc2Instances(ins []aws.EC2Resp) *tview.Flex {
+func (a *App) DisplayEc2Instances(ins []aws.EC2Resp, sess *session.Session) *tview.Table {
 	flex := tview.NewFlex()
 	table := tview.NewTable()
 	table.SetBorder(true)
 	table.SetBorderFocusColor(tcell.ColorSpringGreen)
+	// flex.AddItem(table, 0, 1, true).SetDirection(tview.FlexRow)
 	//table data
 	table.SetCell(0, 0, tview.NewTableCell("Instance-Id").SetTextColor(tcell.ColorOrangeRed).SetAlign(tview.AlignCenter))
 	table.SetCell(0, 1, tview.NewTableCell("Instance-State").SetTextColor(tcell.ColorOrangeRed).SetAlign(tview.AlignCenter))
@@ -177,19 +178,34 @@ func DisplayEc2Instances(ins []aws.EC2Resp) *tview.Flex {
 		table.SetCell((i + 1), 6, tview.NewTableCell(in.MonitoringState).SetAlign(tview.AlignCenter))
 		table.SetCell((i + 1), 7, tview.NewTableCell(in.LaunchTime).SetAlign(tview.AlignCenter))
 	}
+	r := 0
 	table.Select(1, 1).SetFixed(1, 1).SetDoneFunc(func(key tcell.Key) {
 		if key == tcell.KeyEnter {
 			table.SetSelectable(true, false)
 		}
 	}).SetSelectedFunc(func(row int, column int) {
 		table.SetSelectable(true, false)
+		r = row - 1
 	})
 
-	flex.AddItem(table, 0, 1, true).SetDirection(tview.FlexRow)
-	return flex
+	// ins[r].InstanceId
+	table.SetInputCapture(func(event *tcell.EventKey) *tcell.EventKey {
+		if event.Rune() == 100 {
+			insId := ins[r].InstanceId
+			// println(insId, aws.GetSingleInstance(*sess, insId).Reservations)
+			// page := tview.NewPages()
+			a1 := tview.NewTextView()
+			a1.SetText(aws.GetSingleInstance(*sess, insId).GoString())
+			// flex.AddItem(page, 0, 6, true)
+			flex.AddItem(a1, 0, 50, true)
+			a.Main.AddAndSwitchToPage("json", flex, false)
+		}
+		return event
+	})
+	return table
 }
 
-func DisplayS3Buckets(buckets []aws.BucketResp) *tview.Flex {
+func DisplayS3Buckets(buckets []aws.BucketResp) *tview.Table {
 	flex := tview.NewFlex()
 
 	table := tview.NewTable()
@@ -214,5 +230,5 @@ func DisplayS3Buckets(buckets []aws.BucketResp) *tview.Flex {
 			table.SetSelectable(true, false)
 		})
 	}
-	return flex
+	return table
 }
