@@ -13,7 +13,7 @@ import (
 
 func CreateBuckets(sess *session.Session) error {
 	s3Service := s3.New(sess)
-	for i := 0; i < 5; i++ {
+	for i := 0; i < 40; i++ {
 		_, err := s3Service.CreateBucket(&s3.CreateBucketInput{Bucket: aws.String("test" + "-bucket" + strconv.Itoa(gofakeit.Number(0, 999999999999999999))), CreateBucketConfiguration: &s3.CreateBucketConfiguration{LocationConstraint: aws.String("ap-south-1")}})
 		if err != nil {
 			fmt.Println(err)
@@ -29,8 +29,8 @@ func CreateEC2Instances(sess *session.Session) error {
 	params := &ec2.RunInstancesInput{
 		ImageId:      aws.String("ami-12345678"), // specify the ID of the image you want to use
 		InstanceType: aws.String("t2.micro"),     // specify the instance type
-		MinCount:     aws.Int64(3),
-		MaxCount:     aws.Int64(3),
+		MinCount:     aws.Int64(40),
+		MaxCount:     aws.Int64(40),
 	}
 
 	_, err := ec2Service.RunInstances(params)
