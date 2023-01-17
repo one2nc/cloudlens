@@ -1,0 +1,17 @@
+version: '3'
+services:
+  localstack:
+    image: localstack/localstack
+    environment:
+      - SERVICES=s3,ec2
+      - DEBUG=1
+      - DATA_DIR=/tmp/localstack/data
+      - HOSTNAME_EXTERNAL=localhost
+    ports:
+      - "4566:4566"
+    volumes:
+      - "./data:/tmp/localstack/data"
+    networks:
+        - default
+networks:
+    default:
