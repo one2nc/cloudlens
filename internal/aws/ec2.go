@@ -23,6 +23,9 @@ type Ec2Service interface {
 	// CreateSecGrp(name, desc, vpcId string)
 	// CreateKeyPair(keyName string) (*ec2.CreateKeyPairOutput, error)
 	// ListAllKeyPairs() ([]*string, error)
+	// CreateInstances()
+	GetSingleInstance() *ec2.DescribeInstancesOutput
+	// CreateEc2() (*ec2.Reservation, error)
 }
 
 // type ec2Service struct {
@@ -66,6 +69,48 @@ func GetInstances(sess session.Session) ([]EC2Resp, error) {
 	}
 	return ec2Info, nil
 }
+
+func GetSingleInstance(sess session.Session, insId string) *ec2.DescribeInstancesOutput {
+	ec2Serv := *ec2.New(&sess)
+	result, err := ec2Serv.DescribeInstances(&ec2.DescribeInstancesInput{
+		InstanceIds: []*string{&insId},
+	})
+	if err != nil {
+		fmt.Println("Error fetching instance with id: ", insId, " err: ", err)
+		return nil
+	}
+	return result
+}
+
+// func (e ec2Service) CreateInstances() {
+// 	params := &ec2.RunInstancesInput{
+// 		ImageId:      aws.String("ami-12345678"), // specify the ID of the image you want to use
+// 		InstanceType: aws.String("t2.micro"),     // specify the instance type
+// 		MinCount:     aws.Int64(3),
+// 		MaxCount:     aws.Int64(3),
+// 	}
+
+// 	_, err := e.client.RunInstances(params)
+// 	if err != nil {
+// 		fmt.Println("Error in creating instances:", err)
+// 	}
+// }
+
+// func (e ec2Service) CreateEc2() (*ec2.Reservation, error) {
+// 	res, err := e.client.RunInstances(&ec2.RunInstancesInput{
+// 		ImageId:      aws.String("new-image-id-one2n"),
+// 		MinCount:     aws.Int64(int64(2)),
+// 		MaxCount:     aws.Int64(int64(3)),
+// 		InstanceType: aws.String("t4g.xlarge"),
+// 		KeyName:      aws.String(""),
+// 	})
+
+// 	if err != nil {
+// 		return nil, err
+// 	}
+
+// 	return res, nil
+// }
 
 // func CreateSecGrp(name, desc, vpcId string) {
 // 	if name == "" || desc == "" {
