@@ -5,6 +5,7 @@ import (
 	"strings"
 
 	"github.com/aws/aws-sdk-go/aws/session"
+	"github.com/aws/aws-sdk-go/service/s3"
 	"github.com/derailed/tview"
 	"github.com/gdamore/tcell/v2"
 	"github.com/one2nc/cloud-lens/internal/aws"
@@ -250,14 +251,39 @@ func (a *App) DisplayS3Buckets(sess *session.Session, buckets []aws.BucketResp) 
 			if event.Rune() == 100 {
 				flex.RemoveItem(table)
 				bucketInfo := aws.GetInfoAboutBucket(*sess, buckets[r].BucketName)
-				for j, bi := range bucketInfo.Contents {
-					key := bi.Key
-					if !strings.Contains(*key, "/") {
-						s3DataT.SetCell((j + 2), 0, tview.NewTableCell(*key).SetTextColor(tcell.ColorAntiqueWhite).SetAlign(tview.AlignCenter))
+				levelInfo := getLevelInfo(bucketInfo)
+				for j, bi := range levelInfo {
+					
+					if !strings.Contains(bi, "/") {
+						s3DataT.SetCell((j + 2), 0, tview.NewTableCell(bi).SetTextColor(tcell.ColorAntiqueWhite).SetAlign(tview.AlignCenter))
 					}
-					if strings.Contains(*key, "/") {
-						keyA := strings.Split(*key, "/")
+
+					if strings.Contains(bi, "/") {
+						keyA := strings.Split(bi, "/")
 						s3DataT.SetCell((j + 2), 0, tview.NewTableCell(keyA[0]).SetTextColor(tcell.ColorYellow).SetAlign(tview.AlignCenter))
+						s3DataT.SetInputCapture(func(event *tcell.EventKey) *tcell.EventKey {
+							if event.Rune() == 100 { //d
+								flex.RemoveItem(s3DataT)
+
+								s3DataTR := tview.NewTable()
+								s3DataTR.SetCell(0, 0, tview.NewTableCell("Bucket-Name").SetTextColor(tcell.ColorOrangeRed).SetAlign(tview.AlignCenter))
+								s3DataTR.SetCell(1, 0, tview.NewTableCell("-----------").SetTextColor(tcell.ColorOrangeRed).SetAlign(tview.AlignCenter))
+								s3DataTR.SetBorder(true)
+								
+								s3DataTR.SetCell(3, 0, tview.NewTableCell("dummy").SetTextColor(tcell.ColorAntiqueWhite).SetAlign(tview.AlignCenter))
+								s3DataTR.Select(3, 0).SetFixed(3, 0).SetDoneFunc(func(key tcell.Key) {
+									if key == tcell.KeyEnter {
+										s3DataTR.SetSelectable(true, false)
+									}
+								}).SetSelectedFunc(func(row int, column int) {
+									s3DataTR.SetSelectable(true, false)
+								})
+								flex.AddItem(s3DataTR, 0, 1, false)
+								a.Main.AddAndSwitchToPage("s3dataView", flex, true)
+								a.inputCaptureS3(s3DataTR, flex)
+							}
+							return event
+						})
 					}
 					s3DataT.Select(1, 1).SetFixed(1, 1).SetDoneFunc(func(key tcell.Key) {
 						if key == tcell.KeyEnter {
@@ -267,15 +293,7 @@ func (a *App) DisplayS3Buckets(sess *session.Session, buckets []aws.BucketResp) 
 						s3DataT.SetSelectable(true, false)
 					})
 				}
-				s3DataT.SetInputCapture(func(event *tcell.EventKey) *tcell.EventKey {
-					if event.Rune() == 100 { //d
-						flex.RemoveItem(s3DataT)
-						s3dataView := tview.NewTextView()
-						flex.AddItem(s3dataView, 0, 1, false)
-						a.Main.AddAndSwitchToPage("s3dataView", flex, true)
-					}
-					return event
-				})
+
 				// desc := tview.NewTextView()
 				// desc.SetText("<b> shift to previous page")
 				//flex.AddItem(desc, 0, 1, true)
@@ -295,4 +313,40 @@ func (a *App) DisplayS3Buckets(sess *session.Session, buckets []aws.BucketResp) 
 		})
 	}
 	return table
+}
+
+func (a *App) inputCaptureS3(s3DataT *tview.Table, flex *tview.Flex) {
+	s3DataT.SetInputCapture(func(event *tcell.EventKey) *tcell.EventKey {
+		if event.Rune() == 100 { //d
+			flex.RemoveItem(s3DataT)
+			s3DataTR := tview.NewTable()
+			s3DataTR.SetCell(0, 0, tview.NewTableCell("Bucket-Name").SetTextColor(tcell.ColorOrangeRed).SetAlign(tview.AlignCenter))
+			s3DataTR.SetCell(1, 0, tview.NewTableCell("-----------").SetTextColor(tcell.ColorOrangeRed).SetAlign(tview.AlignCenter))
+			s3DataTR.SetBorder(true)
+			s3DataTR.SetCell(3, 0, tview.NewTableCell("dummy").SetTextColor(tcell.ColorAntiqueWhite).SetAlign(tview.AlignCenter))
+			s3DataTR.Select(3, 0).SetFixed(3, 0).SetDoneFunc(func(key tcell.Key) {
+				if key == tcell.KeyEnter {
+					s3DataTR.SetSelectable(true, false)
+				}
+			}).SetSelectedFunc(func(row int, column int) {
+				s3DataTR.SetSelectable(true, false)
+			})
+			flex.AddItem(s3DataTR, 0, 1, false)
+			a.Main.AddAndSwitchToPage("s3dataView", flex, true)
+			a.inputCaptureS3(s3DataTR, flex)
+		}
+		return event
+	})
+}
+
+func getLevelInfo(bucketInfo *s3.ListObjectsOutput) []string {
+	var levelInfo []string
+	for _,i:=range bucketInfo.CommonPrefixes {
+		levelInfo = append(levelInfo, *i.Prefix)
+	}
+	for _,i:=range bucketInfo.Contents {
+		levelInfo = append(levelInfo, *i.Key)
+	}
+
+	return levelInfo
 }
