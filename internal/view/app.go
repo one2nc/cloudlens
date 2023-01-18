@@ -2,6 +2,7 @@ package view
 
 import (
 	"fmt"
+	"strings"
 
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/derailed/tview"
@@ -121,7 +122,7 @@ func (a *App) layout() *tview.Flex {
 			switch serviceName {
 			case "S3", "s3":
 				servicePage.RemoveItemAtIndex(0)
-				servicePageContent = DisplayS3Buckets(buckets)
+				servicePageContent = a.DisplayS3Buckets(sess, buckets)
 				servicePageContent.SetBorderFocusColor(tcell.ColorDarkSeaGreen)
 				servicePage.AddItem(servicePageContent, 0, 6, true)
 				inputField.SetText("")
@@ -216,7 +217,7 @@ func (a *App) DisplayEc2Instances(ins []aws.EC2Resp, sess *session.Session) *tvi
 	return table
 }
 
-func DisplayS3Buckets(buckets []aws.BucketResp) *tview.Table {
+func (a *App) DisplayS3Buckets(sess *session.Session, buckets []aws.BucketResp) *tview.Table {
 	flex := tview.NewFlex()
 
 	table := tview.NewTable()
@@ -229,7 +230,7 @@ func DisplayS3Buckets(buckets []aws.BucketResp) *tview.Table {
 	//table data
 	table.SetCell(0, 0, tview.NewTableCell("Bucket-Name").SetTextColor(tcell.ColorOrangeRed).SetAlign(tview.AlignCenter))
 	table.SetCell(0, 1, tview.NewTableCell("Creation-Time").SetTextColor(tcell.ColorOrangeRed).SetAlign(tview.AlignCenter))
-
+	r := 0
 	for i, b := range buckets {
 		table.SetCell((i + 1), 0, tview.NewTableCell(b.BucketName).SetAlign(tview.AlignCenter))
 		table.SetCell((i + 1), 1, tview.NewTableCell(fmt.Sprintf("%v", b.CreationTime)).SetAlign(tview.AlignCenter))
@@ -239,6 +240,42 @@ func DisplayS3Buckets(buckets []aws.BucketResp) *tview.Table {
 			}
 		}).SetSelectedFunc(func(row int, column int) {
 			table.SetSelectable(true, false)
+			r = row - 1
+		})
+		s3DataT := tview.NewTable()
+		s3DataT.SetCell(0, 0, tview.NewTableCell("Bucket-Name").SetTextColor(tcell.ColorOrangeRed).SetAlign(tview.AlignCenter))
+		s3DataT.SetCell(1, 0, tview.NewTableCell("-----------").SetTextColor(tcell.ColorOrangeRed).SetAlign(tview.AlignCenter))
+		s3DataT.SetBorder(true)
+		table.SetInputCapture(func(event *tcell.EventKey) *tcell.EventKey {
+			if event.Rune() == 100 {
+				flex.RemoveItem(table)
+				bucketInfo := aws.GetInfoAboutBucket(*sess, buckets[r].BucketName)
+				for j, bi := range bucketInfo.Contents {
+					key := bi.Key
+					if !strings.Contains(*key, "/") {
+						s3DataT.SetCell((j + 2), 0, tview.NewTableCell(*key).SetTextColor(tcell.ColorAntiqueWhite).SetAlign(tview.AlignCenter))
+					}
+					if strings.Contains(*key, "/") {
+						keyA:=strings.Split(*key,"/")
+						s3DataT.SetCell((j + 2), 0, tview.NewTableCell(keyA[0]).SetTextColor(tcell.ColorYellow).SetAlign(tview.AlignCenter))
+					}
+				}
+				desc := tview.NewTextView()
+				desc.SetText("<b> shift to previous page")
+				flex.AddItem(desc, 0, 1, true)
+				flex.AddItem(s3DataT, 0, 10, true)
+				a.Main.AddAndSwitchToPage("s3data", flex, true)
+				flex.SetInputCapture(func(event *tcell.EventKey) *tcell.EventKey {
+					if event.Rune() == 98 {
+						flex.RemoveItem(desc)
+						flex.RemoveItem(s3DataT)
+						a.Main.RemovePage("s3data")
+						a.Main.ShowPage("main")
+					}
+					return event
+				})
+			}
+			return event
 		})
 	}
 	return table

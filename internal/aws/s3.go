@@ -3,6 +3,7 @@ package aws
 import (
 	"context"
 	"fmt"
+	"strings"
 	"time"
 
 	"github.com/aws/aws-sdk-go/aws"
@@ -18,6 +19,8 @@ type BucketResp struct {
 
 type S3Service interface {
 	ListBuckets(sess session.Session) ([]BucketResp, error)
+	GetInfoAboutBucket(sess session.Session)
+	PutObjects(sess session.Session)
 }
 
 func ListBuckets(sess session.Session) ([]BucketResp, error) {
@@ -41,4 +44,28 @@ func ListBuckets(sess session.Session) ([]BucketResp, error) {
 		bucketInfo = append(bucketInfo, *bucketresp)
 	}
 	return bucketInfo, nil
+}
+
+func GetInfoAboutBucket(sess session.Session,bucketName string)* s3.ListObjectsOutput{
+	s3Serv := *s3.New(&sess)
+	result, err := s3Serv.ListObjects(&s3.ListObjectsInput{Bucket: aws.String(bucketName)})
+	if err != nil {
+		fmt.Println("Error", err)
+		return nil
+	}
+	return result
+}
+
+func PutObjects(sess session.Session) {
+	body := strings.NewReader("Hello, I'm working on aws cli!")
+	s3Serv := *s3.New(&sess)
+	_, err := s3Serv.PutObject(&s3.PutObjectInput{
+		Bucket: aws.String("test-bucket577006791947779410"),
+		Key:    aws.String("foldertemp/key2"),
+		Body:   body,
+	})
+	if err != nil {
+		fmt.Println(err)
+	}
+	fmt.Println("uploaded object")
 }
