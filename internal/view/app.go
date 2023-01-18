@@ -256,24 +256,40 @@ func (a *App) DisplayS3Buckets(sess *session.Session, buckets []aws.BucketResp) 
 						s3DataT.SetCell((j + 2), 0, tview.NewTableCell(*key).SetTextColor(tcell.ColorAntiqueWhite).SetAlign(tview.AlignCenter))
 					}
 					if strings.Contains(*key, "/") {
-						keyA:=strings.Split(*key,"/")
+						keyA := strings.Split(*key, "/")
 						s3DataT.SetCell((j + 2), 0, tview.NewTableCell(keyA[0]).SetTextColor(tcell.ColorYellow).SetAlign(tview.AlignCenter))
 					}
+					s3DataT.Select(1, 1).SetFixed(1, 1).SetDoneFunc(func(key tcell.Key) {
+						if key == tcell.KeyEnter {
+							s3DataT.SetSelectable(true, false)
+						}
+					}).SetSelectedFunc(func(row int, column int) {
+						s3DataT.SetSelectable(true, false)
+					})
 				}
-				desc := tview.NewTextView()
-				desc.SetText("<b> shift to previous page")
-				flex.AddItem(desc, 0, 1, true)
-				flex.AddItem(s3DataT, 0, 10, true)
-				a.Main.AddAndSwitchToPage("s3data", flex, true)
-				flex.SetInputCapture(func(event *tcell.EventKey) *tcell.EventKey {
-					if event.Rune() == 98 {
-						flex.RemoveItem(desc)
+				s3DataT.SetInputCapture(func(event *tcell.EventKey) *tcell.EventKey {
+					if event.Rune() == 100 { //d
 						flex.RemoveItem(s3DataT)
-						a.Main.RemovePage("s3data")
-						a.Main.ShowPage("main")
+						s3dataView := tview.NewTextView()
+						flex.AddItem(s3dataView, 0, 1, false)
+						a.Main.AddAndSwitchToPage("s3dataView", flex, true)
 					}
 					return event
 				})
+				// desc := tview.NewTextView()
+				// desc.SetText("<b> shift to previous page")
+				//flex.AddItem(desc, 0, 1, true)
+				flex.AddItem(s3DataT, 0, 10, true)
+				a.Main.AddAndSwitchToPage("s3data", flex, true)
+				// flex.SetInputCapture(func(event *tcell.EventKey) *tcell.EventKey {
+				// 	if event.Rune() == 98 {
+				// 		flex.RemoveItem(desc)
+				// 		flex.RemoveItem(s3DataT)
+				// 		a.Main.RemovePage("s3data")
+				// 		a.Main.ShowPage("main")
+				// 	}
+				// 	return event
+				// })
 			}
 			return event
 		})
