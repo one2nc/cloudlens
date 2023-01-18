@@ -6,7 +6,7 @@ require (
 	github.com/aws/aws-sdk-go v1.44.177
 	github.com/aws/aws-sdk-go-v2 v1.17.3
 	github.com/aws/aws-sdk-go-v2/config v1.18.8
-	github.com/brianvoe/gofakeit/v6 v6.20.1
+	github.com/brianvoe/gofakeit v3.18.0+incompatible
 	github.com/derailed/tview v0.7.2
 	github.com/gdamore/tcell/v2 v2.5.2
 	github.com/spf13/cobra v1.6.1
@@ -23,7 +23,6 @@ require (
 	github.com/aws/aws-sdk-go-v2/service/ssooidc v1.14.0 // indirect
 	github.com/aws/aws-sdk-go-v2/service/sts v1.18.0 // indirect
 	github.com/aws/smithy-go v1.13.5 // indirect
-	github.com/brianvoe/gofakeit v3.18.0+incompatible // indirect
 	github.com/gdamore/encoding v1.0.0 // indirect
 	github.com/inconshreveable/mousetrap v1.0.1 // indirect
 	github.com/jmespath/go-jmespath v0.4.0 // indirect

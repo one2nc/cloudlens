@@ -201,10 +201,12 @@ func (a *App) DisplayEc2Instances(ins []aws.EC2Resp, sess *session.Session) *tvi
 			flex.AddItem(desc, 0, 1, true)
 			flex.AddItem(newPage, 0, 10, true)
 			a.Main.AddAndSwitchToPage("json", flex, true)
-			newPage.SetInputCapture(func(event *tcell.EventKey) *tcell.EventKey {
+			flex.SetInputCapture(func(event *tcell.EventKey) *tcell.EventKey {
 				if event.Rune() == 98 {
-					 layout := a.layout()
-					a.Main.AddAndSwitchToPage("table",layout,true)
+					flex.RemoveItem(desc)
+					flex.RemoveItem(newPage)
+					a.Main.RemovePage("json")
+					a.Main.ShowPage("main")
 				}
 				return event
 			})
