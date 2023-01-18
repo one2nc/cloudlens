@@ -199,12 +199,12 @@ func (a *App) DisplayEc2Instances(ins []aws.EC2Resp, sess *session.Session) *tvi
 			newPage.SetTitle(" JSON ")
 			newPage.SetText(aws.GetSingleInstance(*sess, insId).GoString())
 			desc := tview.NewTextView()
-			desc.SetText("<b> shift to previous page")
+			desc.SetText("<esc> shift to previous page")
 			flex.AddItem(desc, 0, 1, true)
 			flex.AddItem(newPage, 0, 10, true)
 			a.Main.AddAndSwitchToPage("json", flex, true)
 			flex.SetInputCapture(func(event *tcell.EventKey) *tcell.EventKey {
-				if event.Rune() == 98 {
+				if event.Key() == tcell.KeyESC {
 					flex.RemoveItem(desc)
 					flex.RemoveItem(newPage)
 					a.Main.RemovePage("json")
