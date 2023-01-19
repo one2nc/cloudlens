@@ -9,6 +9,7 @@ import (
 )
 
 type EC2Resp struct {
+	Instance         ec2.Instance
 	InstanceId       string
 	InstanceType     string
 	AvailabilityZone string
@@ -17,6 +18,26 @@ type EC2Resp struct {
 	PublicIPv4       string
 	MonitoringState  string
 	LaunchTime       string
+}
+
+type ByInstanceId []EC2Resp
+
+func (e ByInstanceId) Len() int           { return len(e) }
+func (e ByInstanceId) Swap(i, j int)      { e[i], e[j] = e[j], e[i] }
+func (e ByInstanceId) Less(i, j int) bool { return e[i].InstanceId < e[j].InstanceId }
+
+type ByInstanceType []EC2Resp
+
+func (e ByInstanceType) Len() int           { return len(e) }
+func (e ByInstanceType) Swap(i, j int)      { e[i], e[j] = e[j], e[i] }
+func (e ByInstanceType) Less(i, j int) bool { return e[i].InstanceType < e[j].InstanceType }
+
+type ByLaunchTime []EC2Resp
+
+func (e ByLaunchTime) Len() int      { return len(e) }
+func (e ByLaunchTime) Swap(i, j int) { e[i], e[j] = e[j], e[i] }
+func (e ByLaunchTime) Less(i, j int) bool {
+	return e[i].Instance.LaunchTime.Before(*e[j].Instance.LaunchTime)
 }
 
 type Ec2Service interface {
@@ -43,6 +64,7 @@ func GetInstances(sess session.Session) ([]EC2Resp, error) {
 			loc, _ := time.LoadLocation("Asia/Kolkata")
 			IST := launchTime.In(loc)
 			ec2Resp := &EC2Resp{
+				Instance:         *instance,
 				InstanceId:       *instance.InstanceId,
 				InstanceType:     *instance.InstanceType,
 				AvailabilityZone: *instance.Placement.AvailabilityZone,

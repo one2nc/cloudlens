@@ -2,6 +2,7 @@ package view
 
 import (
 	"fmt"
+	"sort"
 	"strings"
 
 	"github.com/aws/aws-sdk-go/aws/session"
@@ -16,10 +17,11 @@ import (
 
 type App struct {
 	*ui.App
+	IsPageContentSorted bool
 }
 
 func NewApp() App {
-	app := App{App: ui.NewApp()}
+	app := App{App: ui.NewApp(), IsPageContentSorted: false}
 	return app
 }
 
@@ -109,6 +111,69 @@ func (a *App) layout() *tview.Flex {
 	servicePage = tview.NewFlex().SetDirection(tview.FlexRow)
 	servicePageContent = a.DisplayEc2Instances(ins, sess)
 	servicePageContent.SetBorderFocusColor(tcell.ColorDarkSeaGreen)
+	servicePage.SetInputCapture(func(event *tcell.EventKey) *tcell.EventKey {
+		//sorting s3 Buckets
+		//66 - Key B
+		if event.Rune() == 66 {
+			servicePage.RemoveItemAtIndex(0)
+			if a.IsPageContentSorted {
+				sort.Sort(sort.Reverse(aws.ByBucketName(buckets)))
+				a.IsPageContentSorted = false
+			} else {
+				sort.Sort(aws.ByBucketName(buckets))
+				a.IsPageContentSorted = true
+			}
+			servicePageContent = a.DisplayS3Buckets(sess, buckets)
+			servicePageContent.SetBorderFocusColor(tcell.ColorDarkSeaGreen)
+			servicePage.AddItem(servicePageContent, 0, 6, true)
+		}
+		//sorting ec2 instances
+		//73 - Key I
+		if event.Rune() == 73 {
+			servicePage.RemoveItemAtIndex(0)
+			if a.IsPageContentSorted {
+				sort.Sort(sort.Reverse(aws.ByInstanceId(ins)))
+				a.IsPageContentSorted = false
+			} else {
+				sort.Sort(aws.ByInstanceId(ins))
+				a.IsPageContentSorted = true
+			}
+			servicePageContent = a.DisplayEc2Instances(ins, sess)
+			servicePageContent.SetBorderFocusColor(tcell.ColorDarkSeaGreen)
+			servicePage.AddItem(servicePageContent, 0, 6, true)
+		}
+
+		//84 - Key T
+		if event.Rune() == 84 {
+			servicePage.RemoveItemAtIndex(0)
+			if a.IsPageContentSorted {
+				sort.Sort(sort.Reverse(aws.ByInstanceType(ins)))
+				a.IsPageContentSorted = false
+			} else {
+				sort.Sort(aws.ByInstanceType(ins))
+				a.IsPageContentSorted = true
+			}
+			servicePageContent = a.DisplayEc2Instances(ins, sess)
+			servicePageContent.SetBorderFocusColor(tcell.ColorDarkSeaGreen)
+			servicePage.AddItem(servicePageContent, 0, 6, true)
+		}
+
+		//76 - Key L
+		if event.Rune() == 76 {
+			servicePage.RemoveItemAtIndex(0)
+			if a.IsPageContentSorted {
+				sort.Sort(sort.Reverse(aws.ByLaunchTime(ins)))
+				a.IsPageContentSorted = false
+			} else {
+				sort.Sort(aws.ByLaunchTime(ins))
+				a.IsPageContentSorted = true
+			}
+			servicePageContent = a.DisplayEc2Instances(ins, sess)
+			servicePageContent.SetBorderFocusColor(tcell.ColorDarkSeaGreen)
+			servicePage.AddItem(servicePageContent, 0, 6, true)
+		}
+		return event
+	})
 	servicePage.AddItem(servicePageContent, 0, 6, true)
 
 	inputField := tview.NewInputField().
