@@ -2,6 +2,7 @@ package view
 
 import (
 	"fmt"
+	"sort"
 	"strings"
 
 	"github.com/aws/aws-sdk-go/aws/session"
@@ -16,10 +17,11 @@ import (
 
 type App struct {
 	*ui.App
+	IsPageContentSorted bool
 }
 
 func NewApp() App {
-	app := App{App: ui.NewApp()}
+	app := App{App: ui.NewApp(), IsPageContentSorted: false}
 	return app
 }
 
@@ -109,6 +111,54 @@ func (a *App) layout() *tview.Flex {
 	servicePage = tview.NewFlex().SetDirection(tview.FlexRow)
 	servicePageContent = a.DisplayEc2Instances(ins, sess)
 	servicePageContent.SetBorderFocusColor(tcell.ColorDarkSeaGreen)
+	servicePage.SetInputCapture(func(event *tcell.EventKey) *tcell.EventKey {
+		//sorting ec2 instances
+		//73 - Key I
+		if event.Rune() == 73 {
+			servicePage.RemoveItemAtIndex(0)
+			if a.IsPageContentSorted {
+				sort.Sort(sort.Reverse(aws.ByInstanceId(ins)))
+				a.IsPageContentSorted = false
+			} else {
+				sort.Sort(aws.ByInstanceId(ins))
+				a.IsPageContentSorted = true
+			}
+			servicePageContent = a.DisplayEc2Instances(ins, sess)
+			servicePageContent.SetBorderFocusColor(tcell.ColorDarkSeaGreen)
+			servicePage.AddItem(servicePageContent, 0, 6, true)
+		}
+
+		//84 - Key T
+		if event.Rune() == 84 {
+			servicePage.RemoveItemAtIndex(0)
+			if a.IsPageContentSorted {
+				sort.Sort(sort.Reverse(aws.ByInstanceType(ins)))
+				a.IsPageContentSorted = false
+			} else {
+				sort.Sort(aws.ByInstanceType(ins))
+				a.IsPageContentSorted = true
+			}
+			servicePageContent = a.DisplayEc2Instances(ins, sess)
+			servicePageContent.SetBorderFocusColor(tcell.ColorDarkSeaGreen)
+			servicePage.AddItem(servicePageContent, 0, 6, true)
+		}
+
+		//76 - Key L
+		if event.Rune() == 76 {
+			servicePage.RemoveItemAtIndex(0)
+			if a.IsPageContentSorted {
+				sort.Sort(sort.Reverse(aws.ByLaunchTime(ins)))
+				a.IsPageContentSorted = false
+			} else {
+				sort.Sort(aws.ByLaunchTime(ins))
+				a.IsPageContentSorted = true
+			}
+			servicePageContent = a.DisplayEc2Instances(ins, sess)
+			servicePageContent.SetBorderFocusColor(tcell.ColorDarkSeaGreen)
+			servicePage.AddItem(servicePageContent, 0, 6, true)
+		}
+		return event
+	})
 	servicePage.AddItem(servicePageContent, 0, 6, true)
 
 	inputField := tview.NewInputField().
@@ -253,7 +303,7 @@ func (a *App) DisplayS3Buckets(sess *session.Session, buckets []aws.BucketResp) 
 				bucketInfo := aws.GetInfoAboutBucket(*sess, buckets[r].BucketName)
 				levelInfo := getLevelInfo(bucketInfo)
 				for j, bi := range levelInfo {
-					
+
 					if !strings.Contains(bi, "/") {
 						s3DataT.SetCell((j + 2), 0, tview.NewTableCell(bi).SetTextColor(tcell.ColorAntiqueWhite).SetAlign(tview.AlignCenter))
 					}
@@ -269,7 +319,7 @@ func (a *App) DisplayS3Buckets(sess *session.Session, buckets []aws.BucketResp) 
 								s3DataTR.SetCell(0, 0, tview.NewTableCell("Bucket-Name").SetTextColor(tcell.ColorOrangeRed).SetAlign(tview.AlignCenter))
 								s3DataTR.SetCell(1, 0, tview.NewTableCell("-----------").SetTextColor(tcell.ColorOrangeRed).SetAlign(tview.AlignCenter))
 								s3DataTR.SetBorder(true)
-								
+
 								s3DataTR.SetCell(3, 0, tview.NewTableCell("dummy").SetTextColor(tcell.ColorAntiqueWhite).SetAlign(tview.AlignCenter))
 								s3DataTR.Select(3, 0).SetFixed(3, 0).SetDoneFunc(func(key tcell.Key) {
 									if key == tcell.KeyEnter {
@@ -341,10 +391,10 @@ func (a *App) inputCaptureS3(s3DataT *tview.Table, flex *tview.Flex) {
 
 func getLevelInfo(bucketInfo *s3.ListObjectsOutput) []string {
 	var levelInfo []string
-	for _,i:=range bucketInfo.CommonPrefixes {
+	for _, i := range bucketInfo.CommonPrefixes {
 		levelInfo = append(levelInfo, *i.Prefix)
 	}
-	for _,i:=range bucketInfo.Contents {
+	for _, i := range bucketInfo.Contents {
 		levelInfo = append(levelInfo, *i.Key)
 	}
 
