@@ -46,14 +46,15 @@ func ListBuckets(sess session.Session) ([]BucketResp, error) {
 	return bucketInfo, nil
 }
 
-func GetInfoAboutBucket(sess session.Session, bucketName string) *s3.ListObjectsOutput {
+func GetInfoAboutBucket(sess session.Session, bucketName string, delimiter string, prefix string) *s3.ListObjectsV2Output {
 	s3Serv := *s3.New(&sess)
-	result, err := s3Serv.ListObjects(&s3.ListObjectsInput{Bucket: aws.String(bucketName), Delimiter: aws.String("/"), Prefix: aws.String("")})
+	//result, err := s3Serv.ListObjectsV2(&s3.ListObjectsV2Input{Bucket: aws.String(bucketName), StartAfter: aws.String("folder3")})
+	result, err := s3Serv.ListObjectsV2(&s3.ListObjectsV2Input{Bucket: aws.String(bucketName), Delimiter: aws.String(delimiter), Prefix: aws.String(prefix)})
 	if err != nil {
-		fmt.Println("Error", err)
+		fmt.Println("Error is:", err)
 		return nil
 	}
-	// fmt.Println(result)
+	//fmt.Println(result)
 	return result
 }
 
@@ -61,8 +62,8 @@ func PutObjects(sess session.Session) {
 	body := strings.NewReader("Hello, I'm working on aws cli!")
 	s3Serv := *s3.New(&sess)
 	_, err := s3Serv.PutObject(&s3.PutObjectInput{
-		Bucket: aws.String("test-bucket577006791947779410"),
-		Key:    aws.String("folder1/folder2/key1.png"),
+		Bucket: aws.String("test-bucket37200794235010051"),
+		Key:    aws.String("Bird/crow.txt"),
 		Body:   body,
 	})
 	if err != nil {

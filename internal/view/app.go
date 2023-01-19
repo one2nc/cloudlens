@@ -186,11 +186,10 @@ func (a *App) DisplayEc2Instances(ins []aws.EC2Resp, sess *session.Session) *tvi
 		if key == tcell.KeyEnter {
 			table.SetSelectable(true, false)
 		}
-	}).SetSelectedFunc(func(row int, column int) {
+	}).SetSelectionChangedFunc(func(row int, column int) {
 		table.SetSelectable(true, false)
 		r = row - 1
 	})
-
 	table.SetInputCapture(func(event *tcell.EventKey) *tcell.EventKey {
 		if event.Rune() == 100 {
 			insId := ins[r].InstanceId
@@ -231,122 +230,129 @@ func (a *App) DisplayS3Buckets(sess *session.Session, buckets []aws.BucketResp) 
 	//table data
 	table.SetCell(0, 0, tview.NewTableCell("Bucket-Name").SetTextColor(tcell.ColorOrangeRed).SetAlign(tview.AlignCenter))
 	table.SetCell(0, 1, tview.NewTableCell("Creation-Time").SetTextColor(tcell.ColorOrangeRed).SetAlign(tview.AlignCenter))
-	r := 0
 	for i, b := range buckets {
 		table.SetCell((i + 1), 0, tview.NewTableCell(b.BucketName).SetAlign(tview.AlignCenter))
 		table.SetCell((i + 1), 1, tview.NewTableCell(fmt.Sprintf("%v", b.CreationTime)).SetAlign(tview.AlignCenter))
-		table.Select(1, 1).SetFixed(1, 1).SetDoneFunc(func(key tcell.Key) {
-			if key == tcell.KeyEnter {
-				table.SetSelectable(true, false)
-			}
-		}).SetSelectedFunc(func(row int, column int) {
+	}
+	r := 0
+	table.Select(1, 1).SetFixed(1, 1).SetDoneFunc(func(key tcell.Key) {
+		if key == tcell.KeyEnter {
 			table.SetSelectable(true, false)
-			r = row - 1
-		})
-		s3DataT := tview.NewTable()
-		s3DataT.SetCell(0, 0, tview.NewTableCell("Bucket-Name").SetTextColor(tcell.ColorOrangeRed).SetAlign(tview.AlignCenter))
-		s3DataT.SetCell(1, 0, tview.NewTableCell("-----------").SetTextColor(tcell.ColorOrangeRed).SetAlign(tview.AlignCenter))
-		s3DataT.SetBorder(true)
-		table.SetInputCapture(func(event *tcell.EventKey) *tcell.EventKey {
-			if event.Rune() == 100 {
-				flex.RemoveItem(table)
-				bucketInfo := aws.GetInfoAboutBucket(*sess, buckets[r].BucketName)
-				levelInfo := getLevelInfo(bucketInfo)
-				for j, bi := range levelInfo {
-					
-					if !strings.Contains(bi, "/") {
-						s3DataT.SetCell((j + 2), 0, tview.NewTableCell(bi).SetTextColor(tcell.ColorAntiqueWhite).SetAlign(tview.AlignCenter))
+		}
+	}).SetSelectionChangedFunc(func(row int, column int) {
+		table.SetSelectable(true, false)
+		r = row - 1
+	})
+	s3DataT := tview.NewTable()
+	s3DataT.SetCell(0, 0, tview.NewTableCell("Bucket-Name").SetTextColor(tcell.ColorOrangeRed).SetAlign(tview.AlignCenter))
+	s3DataT.SetCell(1, 0, tview.NewTableCell("-----------").SetTextColor(tcell.ColorOrangeRed).SetAlign(tview.AlignCenter))
+	s3DataT.SetBorder(true)
+	table.SetInputCapture(func(event *tcell.EventKey) *tcell.EventKey {
+		if event.Rune() == 100 {
+			flex.RemoveItem(table)
+			bucketInfo := aws.GetInfoAboutBucket(*sess, buckets[r].BucketName, "/", "")
+			folderArrayInfo, fileArrayInfo := getLevelInfo(bucketInfo)
+			indx := 0
+			for _, bi := range folderArrayInfo {
+				if strings.Contains(bi, "/") {
+					keyA := strings.Split(bi, "/")
+					s3DataT.SetCell((indx + 2), 0, tview.NewTableCell(keyA[0]+"/").SetTextColor(tcell.ColorYellow).SetAlign(tview.AlignCenter))
+					indx++
+					s3DataT.SetInputCapture(func(event *tcell.EventKey) *tcell.EventKey {
+						if event.Rune() == 100 { //d
+							flex.RemoveItem(s3DataT)
+							s3DataTR := tview.NewTable()
+							s3DataTR.SetCell(0, 0, tview.NewTableCell("Bucket-Name").SetTextColor(tcell.ColorOrangeRed).SetAlign(tview.AlignCenter))
+							s3DataTR.SetCell(1, 0, tview.NewTableCell("-----------").SetTextColor(tcell.ColorOrangeRed).SetAlign(tview.AlignCenter))
+							s3DataTR.SetBorder(true)
+							flex.AddItem(s3DataTR, 0, 1, false)
+							a.Main.AddAndSwitchToPage("s3dataView", flex, true)
+							a.inputCaptureS3(s3DataTR, flex, folderArrayInfo, fileArrayInfo, *sess, buckets[r].BucketName)
+						}
+						return event
+					})
+				}
+				s3DataT.Select(1, 1).SetFixed(1, 1).SetDoneFunc(func(key tcell.Key) {
+					if key == tcell.KeyEnter {
+						s3DataT.SetSelectable(true, false)
 					}
+				}).SetSelectionChangedFunc(func(row int, column int) {
+					s3DataT.SetSelectable(true, false)
+				})
+			}
+			for _, fi := range fileArrayInfo {
+				if !strings.Contains(fi, "/") {
+					s3DataT.SetCell((indx + 2), 0, tview.NewTableCell(fi).SetTextColor(tcell.ColorAntiqueWhite).SetAlign(tview.AlignCenter))
+					indx++
+				}
+			}
+			flex.AddItem(s3DataT, 0, 10, true)
+			a.Main.AddAndSwitchToPage("s3data", flex, true)
+		}
+		return event
+	})
 
-					if strings.Contains(bi, "/") {
-						keyA := strings.Split(bi, "/")
-						s3DataT.SetCell((j + 2), 0, tview.NewTableCell(keyA[0]).SetTextColor(tcell.ColorYellow).SetAlign(tview.AlignCenter))
-						s3DataT.SetInputCapture(func(event *tcell.EventKey) *tcell.EventKey {
-							if event.Rune() == 100 { //d
-								flex.RemoveItem(s3DataT)
+	return table
+}
 
-								s3DataTR := tview.NewTable()
-								s3DataTR.SetCell(0, 0, tview.NewTableCell("Bucket-Name").SetTextColor(tcell.ColorOrangeRed).SetAlign(tview.AlignCenter))
-								s3DataTR.SetCell(1, 0, tview.NewTableCell("-----------").SetTextColor(tcell.ColorOrangeRed).SetAlign(tview.AlignCenter))
-								s3DataTR.SetBorder(true)
-								
-								s3DataTR.SetCell(3, 0, tview.NewTableCell("dummy").SetTextColor(tcell.ColorAntiqueWhite).SetAlign(tview.AlignCenter))
-								s3DataTR.Select(3, 0).SetFixed(3, 0).SetDoneFunc(func(key tcell.Key) {
-									if key == tcell.KeyEnter {
-										s3DataTR.SetSelectable(true, false)
-									}
-								}).SetSelectedFunc(func(row int, column int) {
-									s3DataTR.SetSelectable(true, false)
-								})
-								flex.AddItem(s3DataTR, 0, 1, false)
-								a.Main.AddAndSwitchToPage("s3dataView", flex, true)
-								a.inputCaptureS3(s3DataTR, flex)
-							}
-							return event
-						})
-					}
+func (a *App) inputCaptureS3(s3DataT *tview.Table, flex *tview.Flex, folderArrayInfo []string, fileArrayInfo []string, sess session.Session, bucketName string) {
+	s3DataT.SetInputCapture(func(event *tcell.EventKey) *tcell.EventKey {
+		if event.Rune() == 100 { //d
+			flex.RemoveItem(s3DataT)
+			for _, i := range folderArrayInfo {
+				println("i is :", i)
+				bucketInfo := aws.GetInfoAboutBucket(sess, bucketName, "/", i)
+				folderArrayInfoTemp, fileArrayInfoTemp := getLevelInfo(bucketInfo)
+				indx := 0
+				for _, bi := range folderArrayInfoTemp {
+					keyA := strings.Split(bi, "/")
+					s3DataT.SetCell((indx + 2), 0, tview.NewTableCell(keyA[len(keyA)-2]+"/").SetTextColor(tcell.ColorYellow).SetAlign(tview.AlignCenter))
+					indx++
+					s3DataT.SetInputCapture(func(event *tcell.EventKey) *tcell.EventKey {
+						if event.Rune() == 100 { //d
+							flex.RemoveItem(s3DataT)
+							s3DataTR := tview.NewTable()
+							s3DataTR.SetCell(0, 0, tview.NewTableCell("Bucket-Name").SetTextColor(tcell.ColorOrangeRed).SetAlign(tview.AlignCenter))
+							s3DataTR.SetCell(1, 0, tview.NewTableCell("-----------").SetTextColor(tcell.ColorOrangeRed).SetAlign(tview.AlignCenter))
+							s3DataTR.SetBorder(true)
+							flex.AddItem(s3DataTR, 0, 1, false)
+							a.Main.AddAndSwitchToPage("s3dataView", flex, true)
+							a.inputCaptureS3(s3DataTR, flex, folderArrayInfoTemp, fileArrayInfoTemp, sess, bucketName)
+						}
+						return event
+					})
 					s3DataT.Select(1, 1).SetFixed(1, 1).SetDoneFunc(func(key tcell.Key) {
 						if key == tcell.KeyEnter {
 							s3DataT.SetSelectable(true, false)
 						}
-					}).SetSelectedFunc(func(row int, column int) {
+					}).SetSelectionChangedFunc(func(row int, column int) {
 						s3DataT.SetSelectable(true, false)
 					})
 				}
+				for _, fi := range fileArrayInfoTemp {
+					println("file is:", fi)
+					keyA := strings.Split(fi, "/")
+					s3DataT.SetCell((indx + 2), 0, tview.NewTableCell(keyA[len(keyA)-1]).SetTextColor(tcell.ColorAntiqueWhite).SetAlign(tview.AlignCenter))
+					indx++
+				}
 
-				// desc := tview.NewTextView()
-				// desc.SetText("<b> shift to previous page")
-				//flex.AddItem(desc, 0, 1, true)
 				flex.AddItem(s3DataT, 0, 10, true)
 				a.Main.AddAndSwitchToPage("s3data", flex, true)
-				// flex.SetInputCapture(func(event *tcell.EventKey) *tcell.EventKey {
-				// 	if event.Rune() == 98 {
-				// 		flex.RemoveItem(desc)
-				// 		flex.RemoveItem(s3DataT)
-				// 		a.Main.RemovePage("s3data")
-				// 		a.Main.ShowPage("main")
-				// 	}
-				// 	return event
-				// })
 			}
-			return event
-		})
-	}
-	return table
-}
-
-func (a *App) inputCaptureS3(s3DataT *tview.Table, flex *tview.Flex) {
-	s3DataT.SetInputCapture(func(event *tcell.EventKey) *tcell.EventKey {
-		if event.Rune() == 100 { //d
-			flex.RemoveItem(s3DataT)
-			s3DataTR := tview.NewTable()
-			s3DataTR.SetCell(0, 0, tview.NewTableCell("Bucket-Name").SetTextColor(tcell.ColorOrangeRed).SetAlign(tview.AlignCenter))
-			s3DataTR.SetCell(1, 0, tview.NewTableCell("-----------").SetTextColor(tcell.ColorOrangeRed).SetAlign(tview.AlignCenter))
-			s3DataTR.SetBorder(true)
-			s3DataTR.SetCell(3, 0, tview.NewTableCell("dummy").SetTextColor(tcell.ColorAntiqueWhite).SetAlign(tview.AlignCenter))
-			s3DataTR.Select(3, 0).SetFixed(3, 0).SetDoneFunc(func(key tcell.Key) {
-				if key == tcell.KeyEnter {
-					s3DataTR.SetSelectable(true, false)
-				}
-			}).SetSelectedFunc(func(row int, column int) {
-				s3DataTR.SetSelectable(true, false)
-			})
-			flex.AddItem(s3DataTR, 0, 1, false)
-			a.Main.AddAndSwitchToPage("s3dataView", flex, true)
-			a.inputCaptureS3(s3DataTR, flex)
 		}
 		return event
 	})
 }
 
-func getLevelInfo(bucketInfo *s3.ListObjectsOutput) []string {
-	var levelInfo []string
-	for _,i:=range bucketInfo.CommonPrefixes {
-		levelInfo = append(levelInfo, *i.Prefix)
-	}
-	for _,i:=range bucketInfo.Contents {
-		levelInfo = append(levelInfo, *i.Key)
+func getLevelInfo(bucketInfo *s3.ListObjectsV2Output) ([]string, []string) {
+	var folderArrayInfo []string
+	var fileArrayInfo []string
+	for _, i := range bucketInfo.CommonPrefixes {
+		folderArrayInfo = append(folderArrayInfo, *i.Prefix)
 	}
 
-	return levelInfo
+	for i := 1; i < len(bucketInfo.Contents); i++ {
+		fileArrayInfo = append(fileArrayInfo, *bucketInfo.Contents[i].Key)
+	}
+	return folderArrayInfo, fileArrayInfo
 }
