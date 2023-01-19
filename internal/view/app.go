@@ -112,6 +112,21 @@ func (a *App) layout() *tview.Flex {
 	servicePageContent = a.DisplayEc2Instances(ins, sess)
 	servicePageContent.SetBorderFocusColor(tcell.ColorDarkSeaGreen)
 	servicePage.SetInputCapture(func(event *tcell.EventKey) *tcell.EventKey {
+		//sorting s3 Buckets
+		//66 - Key B
+		if event.Rune() == 66 {
+			servicePage.RemoveItemAtIndex(0)
+			if a.IsPageContentSorted {
+				sort.Sort(sort.Reverse(aws.ByBucketName(buckets)))
+				a.IsPageContentSorted = false
+			} else {
+				sort.Sort(aws.ByBucketName(buckets))
+				a.IsPageContentSorted = true
+			}
+			servicePageContent = a.DisplayS3Buckets(sess, buckets)
+			servicePageContent.SetBorderFocusColor(tcell.ColorDarkSeaGreen)
+			servicePage.AddItem(servicePageContent, 0, 6, true)
+		}
 		//sorting ec2 instances
 		//73 - Key I
 		if event.Rune() == 73 {
