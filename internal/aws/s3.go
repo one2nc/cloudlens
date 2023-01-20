@@ -69,7 +69,7 @@ func PutObjects(sess session.Session) {
 	s3Serv := *s3.New(&sess)
 	_, err := s3Serv.PutObject(&s3.PutObjectInput{
 		Bucket: aws.String("test-bucket37200794235010051"),
-		Key:    aws.String("Bird/crow.txt"),
+		Key:    aws.String("Animal/Cheetah/CheetahBabyCub.txt"),
 		Body:   body,
 	})
 	if err != nil {

@@ -134,9 +134,9 @@ func (a *App) layout() *tview.Flex {
 			servicePageContent = a.DisplayS3Buckets(sess, buckets)
 			hc := servicePageContent.GetCell(0, 0)
 			if a.IsPageContentSorted {
-				hc.SetText(hc.Text+"↑")
-			}else{
-				hc.SetText(hc.Text+"↓")
+				hc.SetText(hc.Text + "↑")
+			} else {
+				hc.SetText(hc.Text + "↓")
 			}
 			servicePageContent.SetBorderFocusColor(tcell.ColorDarkSeaGreen)
 			servicePage.AddItem(servicePageContent, 0, 6, true)
@@ -155,9 +155,9 @@ func (a *App) layout() *tview.Flex {
 			servicePageContent = a.DisplayEc2Instances(ins, sess)
 			hc := servicePageContent.GetCell(0, 0)
 			if a.IsPageContentSorted {
-				hc.SetText(hc.Text+"↑")
-			}else{
-				hc.SetText(hc.Text+"↓")
+				hc.SetText(hc.Text + "↑")
+			} else {
+				hc.SetText(hc.Text + "↓")
 			}
 			servicePageContent.SetBorderFocusColor(tcell.ColorDarkSeaGreen)
 			servicePage.AddItem(servicePageContent, 0, 6, true)
@@ -176,9 +176,9 @@ func (a *App) layout() *tview.Flex {
 			servicePageContent = a.DisplayEc2Instances(ins, sess)
 			hc := servicePageContent.GetCell(0, 2)
 			if a.IsPageContentSorted {
-				hc.SetText(hc.Text+"↑")
-			}else{
-				hc.SetText(hc.Text+"↓")
+				hc.SetText(hc.Text + "↑")
+			} else {
+				hc.SetText(hc.Text + "↓")
 			}
 			servicePageContent.SetBorderFocusColor(tcell.ColorDarkSeaGreen)
 			servicePage.AddItem(servicePageContent, 0, 6, true)
@@ -197,9 +197,9 @@ func (a *App) layout() *tview.Flex {
 			servicePageContent = a.DisplayEc2Instances(ins, sess)
 			hc := servicePageContent.GetCell(0, 7)
 			if a.IsPageContentSorted {
-				hc.SetText(hc.Text+"↑")
-			}else{
-				hc.SetText(hc.Text+"↓")
+				hc.SetText(hc.Text + "↑")
+			} else {
+				hc.SetText(hc.Text + "↓")
 			}
 			servicePageContent.SetBorderFocusColor(tcell.ColorDarkSeaGreen)
 			servicePage.AddItem(servicePageContent, 0, 6, true)
@@ -331,51 +331,30 @@ func (a *App) DisplayS3Buckets(sess *session.Session, buckets []aws.BucketResp) 
 		table.SetCell((i + 1), 0, tview.NewTableCell(b.BucketName).SetAlign(tview.AlignCenter))
 		table.SetCell((i + 1), 1, tview.NewTableCell(fmt.Sprintf("%v", b.CreationTime)).SetAlign(tview.AlignCenter))
 	}
-	r := 0
+	//r := 0
 	table.Select(1, 1).SetFixed(1, 1).SetDoneFunc(func(key tcell.Key) {
 		if key == tcell.KeyEnter {
 			table.SetSelectable(true, false)
 		}
 	}).SetSelectionChangedFunc(func(row int, column int) {
 		table.SetSelectable(true, false)
-		r = row - 1
+		//	r = row - 1
 	})
 	s3DataT := tview.NewTable()
-	s3DataT.SetCell(0, 0, tview.NewTableCell("Bucket-Name").SetTextColor(tcell.ColorOrangeRed).SetAlign(tview.AlignCenter))
+	s3DataT.SetCell(0, 0, tview.NewTableCell("Folder-Name").SetTextColor(tcell.ColorOrangeRed).SetAlign(tview.AlignCenter))
 	s3DataT.SetCell(1, 0, tview.NewTableCell("-----------").SetTextColor(tcell.ColorOrangeRed).SetAlign(tview.AlignCenter))
 	s3DataT.SetBorder(true)
 	table.SetInputCapture(func(event *tcell.EventKey) *tcell.EventKey {
 		if event.Rune() == 100 {
 			flex.RemoveItem(table)
-			bucketInfo := aws.GetInfoAboutBucket(*sess, buckets[r].BucketName, "/", "")
+			r, _ := table.GetSelection()
+			bucketName := buckets[r-1].BucketName
+			bucketInfo := aws.GetInfoAboutBucket(*sess, bucketName, "/", "")
 			folderArrayInfo, fileArrayInfo := getLevelInfo(bucketInfo)
 			indx := 0
 			for _, bi := range folderArrayInfo {
-				if strings.Contains(bi, "/") {
-					keyA := strings.Split(bi, "/")
-					s3DataT.SetCell((indx + 2), 0, tview.NewTableCell(keyA[0]+"/").SetTextColor(tcell.ColorYellow).SetAlign(tview.AlignCenter))
-					indx++
-					s3DataT.SetInputCapture(func(event *tcell.EventKey) *tcell.EventKey {
-						if event.Rune() == 100 { //d
-							flex.RemoveItem(s3DataT)
-							s3DataTR := tview.NewTable()
-							s3DataTR.SetCell(0, 0, tview.NewTableCell("Bucket-Name").SetTextColor(tcell.ColorOrangeRed).SetAlign(tview.AlignCenter))
-							s3DataTR.SetCell(1, 0, tview.NewTableCell("-----------").SetTextColor(tcell.ColorOrangeRed).SetAlign(tview.AlignCenter))
-							s3DataTR.SetBorder(true)
-							flex.AddItem(s3DataTR, 0, 1, false)
-							a.Main.AddAndSwitchToPage("s3dataView", flex, true)
-							a.inputCaptureS3(s3DataTR, flex, folderArrayInfo, fileArrayInfo, *sess, buckets[r].BucketName)
-						}
-						return event
-					})
-				}
-				s3DataT.Select(1, 1).SetFixed(1, 1).SetDoneFunc(func(key tcell.Key) {
-					if key == tcell.KeyEnter {
-						s3DataT.SetSelectable(true, false)
-					}
-				}).SetSelectionChangedFunc(func(row int, column int) {
-					s3DataT.SetSelectable(true, false)
-				})
+				s3DataT.SetCell((indx + 2), 0, tview.NewTableCell(bi).SetTextColor(tcell.ColorYellow).SetAlign(tview.AlignCenter))
+				indx++
 			}
 			for _, fi := range fileArrayInfo {
 				if !strings.Contains(fi, "/") {
@@ -383,6 +362,30 @@ func (a *App) DisplayS3Buckets(sess *session.Session, buckets []aws.BucketResp) 
 					indx++
 				}
 			}
+			s3DataT.SetInputCapture(func(event *tcell.EventKey) *tcell.EventKey {
+				if event.Rune() == 100 { //d
+					flex.RemoveItem(s3DataT)
+					r, _ := s3DataT.GetSelection()
+					cell := s3DataT.GetCell(r, 0)
+					s3DataTR := tview.NewTable()
+					s3DataTR.SetCell(0, 0, tview.NewTableCell("Folder-Name").SetTextColor(tcell.ColorOrangeRed).SetAlign(tview.AlignCenter))
+					s3DataTR.SetCell(1, 0, tview.NewTableCell("-----------").SetTextColor(tcell.ColorOrangeRed).SetAlign(tview.AlignCenter))
+					s3DataTR.SetBorder(true)
+					flex.AddItem(s3DataTR, 0, 1, false)
+					a.Main.AddAndSwitchToPage("s3dataView", flex, true)
+					a.inputCaptureS3(s3DataTR, flex, cell.Text, fileArrayInfo, *sess, bucketName)
+				}
+				return event
+			})
+			//	}
+			s3DataT.Select(1, 1).SetFixed(1, 1).SetDoneFunc(func(key tcell.Key) {
+				if key == tcell.KeyEnter {
+					s3DataT.SetSelectable(true, false)
+				}
+			}).SetSelectionChangedFunc(func(row int, column int) {
+				s3DataT.SetSelectable(true, false)
+			})
+
 			flex.AddItem(s3DataT, 0, 10, true)
 			a.Main.AddAndSwitchToPage("s3data", flex, true)
 		}
@@ -392,55 +395,49 @@ func (a *App) DisplayS3Buckets(sess *session.Session, buckets []aws.BucketResp) 
 	return table
 }
 
-func (a *App) inputCaptureS3(s3DataT *tview.Table, flex *tview.Flex, folderArrayInfo []string, fileArrayInfo []string, sess session.Session, bucketName string) {
+func (a *App) inputCaptureS3(s3DataT *tview.Table, flex *tview.Flex, folderName string, fileArrayInfo []string, sess session.Session, bucketName string) {
 	s3DataT.SetInputCapture(func(event *tcell.EventKey) *tcell.EventKey {
-		if event.Rune() == 100 { //d
-			flex.RemoveItem(s3DataT)
-			for _, i := range folderArrayInfo {
-				println("i is :", i)
-				bucketInfo := aws.GetInfoAboutBucket(sess, bucketName, "/", i)
-				folderArrayInfoTemp, fileArrayInfoTemp := getLevelInfo(bucketInfo)
-				indx := 0
-				for _, bi := range folderArrayInfoTemp {
-					keyA := strings.Split(bi, "/")
-					s3DataT.SetCell((indx + 2), 0, tview.NewTableCell(keyA[len(keyA)-2]+"/").SetTextColor(tcell.ColorYellow).SetAlign(tview.AlignCenter))
-					indx++
-					s3DataT.SetInputCapture(func(event *tcell.EventKey) *tcell.EventKey {
-						if event.Rune() == 100 { //d
-							flex.RemoveItem(s3DataT)
-							s3DataTR := tview.NewTable()
-							s3DataTR.SetCell(0, 0, tview.NewTableCell("Bucket-Name").SetTextColor(tcell.ColorOrangeRed).SetAlign(tview.AlignCenter))
-							s3DataTR.SetCell(1, 0, tview.NewTableCell("-----------").SetTextColor(tcell.ColorOrangeRed).SetAlign(tview.AlignCenter))
-							s3DataTR.SetBorder(true)
-							flex.AddItem(s3DataTR, 0, 1, false)
-							a.Main.AddAndSwitchToPage("s3dataView", flex, true)
-							a.inputCaptureS3(s3DataTR, flex, folderArrayInfoTemp, fileArrayInfoTemp, sess, bucketName)
-						}
-						return event
-					})
-					s3DataT.Select(1, 1).SetFixed(1, 1).SetDoneFunc(func(key tcell.Key) {
-						if key == tcell.KeyEnter {
-							s3DataT.SetSelectable(true, false)
-						}
-					}).SetSelectionChangedFunc(func(row int, column int) {
-						s3DataT.SetSelectable(true, false)
-					})
-				}
-				for _, fi := range fileArrayInfoTemp {
-					println("file is:", fi)
-					keyA := strings.Split(fi, "/")
-					s3DataT.SetCell((indx + 2), 0, tview.NewTableCell(keyA[len(keyA)-1]).SetTextColor(tcell.ColorAntiqueWhite).SetAlign(tview.AlignCenter))
-					indx++
-				}
-
-				flex.AddItem(s3DataT, 0, 10, true)
-				a.Main.AddAndSwitchToPage("s3data", flex, true)
+		if event.Rune() == 100 {
+			bucketInfo := aws.GetInfoAboutBucket(sess, bucketName, "/", folderName)
+			folderArrayInfoTemp, fileArrayInfoTemp := getLevelInfo(bucketInfo)
+			indx := 0
+			for _, bi := range folderArrayInfoTemp {
+				keyA := strings.Split(bi, "/")
+				s3DataT.SetCell((indx + 2), 0, tview.NewTableCell(keyA[len(keyA)-2]).SetTextColor(tcell.ColorYellow).SetAlign(tview.AlignCenter))
+				indx++
 			}
+			for _, fi := range fileArrayInfoTemp {
+				keyA := strings.Split(fi, "/")
+				s3DataT.SetCell((indx + 2), 0, tview.NewTableCell(keyA[len(keyA)-1]).SetTextColor(tcell.ColorAntiqueWhite).SetAlign(tview.AlignCenter))
+				indx++
+			}
+			s3DataT.SetInputCapture(func(event *tcell.EventKey) *tcell.EventKey {
+				if event.Rune() == 100 {
+					flex.RemoveItem(s3DataT)
+					r, _ := s3DataT.GetSelection()
+					cell := s3DataT.GetCell(r, 0)
+					s3DataTR := tview.NewTable()
+					s3DataTR.SetCell(0, 0, tview.NewTableCell("Bucket-Name").SetTextColor(tcell.ColorOrangeRed).SetAlign(tview.AlignCenter))
+					s3DataTR.SetCell(1, 0, tview.NewTableCell("-----------").SetTextColor(tcell.ColorOrangeRed).SetAlign(tview.AlignCenter))
+					s3DataTR.SetBorder(true)
+					flex.AddItem(s3DataTR, 0, 1, false)
+					a.Main.AddAndSwitchToPage("s3dataView", flex, true)
+					foldN := cell.Text
+					a.inputCaptureS3(s3DataTR, flex, folderName+foldN+"/", fileArrayInfoTemp, sess, bucketName)
+				}
+				return event
+			})
+			s3DataT.Select(1, 1).SetFixed(1, 1).SetDoneFunc(func(key tcell.Key) {
+				if key == tcell.KeyEnter {
+					s3DataT.SetSelectable(true, false)
+				}
+			}).SetSelectionChangedFunc(func(row int, column int) {
+				s3DataT.SetSelectable(true, false)
+			})
 		}
 		return event
 	})
 }
-
 func getLevelInfo(bucketInfo *s3.ListObjectsV2Output) ([]string, []string) {
 	var folderArrayInfo []string
 	var fileArrayInfo []string
@@ -448,7 +445,7 @@ func getLevelInfo(bucketInfo *s3.ListObjectsV2Output) ([]string, []string) {
 		folderArrayInfo = append(folderArrayInfo, *i.Prefix)
 	}
 
-	for i := 1; i < len(bucketInfo.Contents); i++ {
+	for i := 0; i < len(bucketInfo.Contents); i++ {
 		fileArrayInfo = append(fileArrayInfo, *bucketInfo.Contents[i].Key)
 	}
 	return folderArrayInfo, fileArrayInfo
