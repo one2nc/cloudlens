@@ -488,14 +488,3 @@ func getLevelInfo(bucketInfo *s3.ListObjectsV2Output) ([]string, []string) {
 func (a *App) statusIndicator() *ui.StatusIndicator {
 	return a.Views()["statusIndicator"].(*ui.StatusIndicator)
 }
-
-func Gets3ObjectData(data s3.ListObjectsV2Output) []S3Response {
-	var s3Resp []S3Response
-	for _, i := range data.CommonPrefixes {
-		s3Resp = append(s3Resp, S3Response{Name: *i.Prefix, Type: "Folder", LastModified: "", Size: 0, StorageClass: ""})
-	}
-	for i := 1; i < len(data.Contents); i++ {
-		s3Resp = append(s3Resp, S3Response{Name: *data.Contents[i].Key, Type: "File", LastModified: data.Contents[i].LastModified.String(), Size: *data.Contents[i].Size, StorageClass: *data.Contents[i].StorageClass})
-	}
-	return s3Resp
-}
