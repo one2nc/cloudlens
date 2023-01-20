@@ -1,6 +1,7 @@
 package view
 
 import (
+	"context"
 	"fmt"
 	"sort"
 	"strings"
@@ -9,6 +10,7 @@ import (
 	"github.com/aws/aws-sdk-go/service/s3"
 	"github.com/derailed/tview"
 	"github.com/gdamore/tcell/v2"
+	"github.com/one2nc/cloud-lens/internal"
 	"github.com/one2nc/cloud-lens/internal/aws"
 	"github.com/one2nc/cloud-lens/internal/config"
 
@@ -20,15 +22,19 @@ type App struct {
 	IsPageContentSorted bool
 }
 
-func NewApp() App {
-	app := App{App: ui.NewApp(), IsPageContentSorted: false}
-	return app
+func NewApp() *App {
+	a := App{App: ui.NewApp(), IsPageContentSorted: false}
+	a.Views()["statusIndicator"] = ui.NewStatusIndicator(a.App)
+	return &a
 }
 
-func (a *App) Init() {
+func (a *App) Init() error {
+	_ = context.WithValue(context.Background(), internal.KeyApp, a)
+
 	a.App.Init()
 	a.layout()
 	a.App.Run()
+	return nil
 }
 
 func (a *App) layout() *tview.Flex {
@@ -77,6 +83,7 @@ func (a *App) layout() *tview.Flex {
 		})
 	profileDropdown.SetBorderFocusColor(tcell.ColorSpringGreen)
 	profileDropdown.SetCurrentOption(0)
+	profileDropdown.SetTextOptions(" ▲ ", "", " ▼ ", " ", "-")
 	profileDropdown.SetBorderPadding(2, 0, 0, 0)
 	//profileDropdown.SetBorder(true)
 
@@ -97,6 +104,7 @@ func (a *App) layout() *tview.Flex {
 		})
 	regionDropdown.SetBorderFocusColor(tcell.ColorSpringGreen)
 	regionDropdown.SetCurrentOption(0)
+	regionDropdown.SetTextOptions(" ▲ ", "", " ▼ ", " ", "-")
 	regionDropdown.SetBorderPadding(0, 0, 0, 0)
 	//regionDropdown.SetBorder(true)
 
@@ -420,4 +428,8 @@ func getLevelInfo(bucketInfo *s3.ListObjectsV2Output) ([]string, []string) {
 		fileArrayInfo = append(fileArrayInfo, *bucketInfo.Contents[i].Key)
 	}
 	return folderArrayInfo, fileArrayInfo
+}
+
+func (a *App) statusIndicator() *ui.StatusIndicator {
+	return a.Views()["statusIndicator"].(*ui.StatusIndicator)
 }
