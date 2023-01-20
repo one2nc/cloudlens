@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"sort"
+	"strconv"
 	"strings"
 
 	"github.com/aws/aws-sdk-go/aws/session"
@@ -16,6 +17,14 @@ import (
 
 	"github.com/one2nc/cloud-lens/internal/ui"
 )
+
+type S3Response struct {
+	Name         string
+	Type         string
+	LastModified string
+	Size         int64
+	StorageClass string
+}
 
 type App struct {
 	*ui.App
@@ -341,8 +350,11 @@ func (a *App) DisplayS3Buckets(sess *session.Session, buckets []aws.BucketResp) 
 		//	r = row - 1
 	})
 	s3DataT := tview.NewTable()
-	s3DataT.SetCell(0, 0, tview.NewTableCell("Folder-Name").SetTextColor(tcell.ColorOrangeRed).SetAlign(tview.AlignCenter))
-	s3DataT.SetCell(1, 0, tview.NewTableCell("-----------").SetTextColor(tcell.ColorOrangeRed).SetAlign(tview.AlignCenter))
+	s3DataT.SetCell(0, 0, tview.NewTableCell("Name").SetTextColor(tcell.ColorOrangeRed).SetAlign(tview.AlignCenter))
+	s3DataT.SetCell(0, 1, tview.NewTableCell("Type").SetTextColor(tcell.ColorOrangeRed).SetAlign(tview.AlignCenter))
+	s3DataT.SetCell(0, 2, tview.NewTableCell("Last modified").SetTextColor(tcell.ColorOrangeRed).SetAlign(tview.AlignCenter))
+	s3DataT.SetCell(0, 3, tview.NewTableCell("Size").SetTextColor(tcell.ColorOrangeRed).SetAlign(tview.AlignCenter))
+	s3DataT.SetCell(0, 4, tview.NewTableCell("Storage class").SetTextColor(tcell.ColorOrangeRed).SetAlign(tview.AlignCenter))
 	s3DataT.SetBorder(true)
 	table.SetInputCapture(func(event *tcell.EventKey) *tcell.EventKey {
 		if event.Rune() == 100 {
@@ -350,17 +362,24 @@ func (a *App) DisplayS3Buckets(sess *session.Session, buckets []aws.BucketResp) 
 			r, _ := table.GetSelection()
 			bucketName := buckets[r-1].BucketName
 			bucketInfo := aws.GetInfoAboutBucket(*sess, bucketName, "/", "")
-			folderArrayInfo, fileArrayInfo := getLevelInfo(bucketInfo)
+			_, fileArrayInfo := getLevelInfo(bucketInfo)
 			indx := 0
-			for _, bi := range folderArrayInfo {
-				s3DataT.SetCell((indx + 2), 0, tview.NewTableCell(bi).SetTextColor(tcell.ColorYellow).SetAlign(tview.AlignCenter))
+			for _, bi := range bucketInfo.CommonPrefixes {
+				s3DataT.SetCell((indx + 2), 0, tview.NewTableCell(*bi.Prefix).SetTextColor(tcell.ColorYellow).SetAlign(tview.AlignCenter))
+				s3DataT.SetCell((indx + 2), 1, tview.NewTableCell("Folder").SetTextColor(tcell.ColorYellow).SetAlign(tview.AlignCenter))
+				s3DataT.SetCell((indx + 2), 2, tview.NewTableCell("_").SetTextColor(tcell.ColorYellow).SetAlign(tview.AlignCenter))
+				s3DataT.SetCell((indx + 2), 3, tview.NewTableCell("0").SetTextColor(tcell.ColorYellow).SetAlign(tview.AlignCenter))
+				s3DataT.SetCell((indx + 2), 4, tview.NewTableCell("_").SetTextColor(tcell.ColorYellow).SetAlign(tview.AlignCenter))
 				indx++
 			}
-			for _, fi := range fileArrayInfo {
-				if !strings.Contains(fi, "/") {
-					s3DataT.SetCell((indx + 2), 0, tview.NewTableCell(fi).SetTextColor(tcell.ColorAntiqueWhite).SetAlign(tview.AlignCenter))
-					indx++
-				}
+			for _, fi := range bucketInfo.Contents {
+				s3DataT.SetCell((indx + 2), 0, tview.NewTableCell(*fi.Key).SetTextColor(tcell.ColorAntiqueWhite).SetAlign(tview.AlignCenter))
+				s3DataT.SetCell((indx + 2), 1, tview.NewTableCell("File").SetTextColor(tcell.ColorAntiqueWhite).SetAlign(tview.AlignCenter))
+				s3DataT.SetCell((indx + 2), 2, tview.NewTableCell(fi.LastModified.String()).SetTextColor(tcell.ColorAntiqueWhite).SetAlign(tview.AlignCenter))
+				s3DataT.SetCell((indx + 2), 3, tview.NewTableCell(strconv.Itoa(int(*fi.Size))).SetTextColor(tcell.ColorAntiqueWhite).SetAlign(tview.AlignCenter))
+				s3DataT.SetCell((indx + 2), 4, tview.NewTableCell(*fi.StorageClass).SetTextColor(tcell.ColorAntiqueWhite).SetAlign(tview.AlignCenter))
+				indx++
+
 			}
 			s3DataT.SetInputCapture(func(event *tcell.EventKey) *tcell.EventKey {
 				if event.Rune() == 100 { //d
@@ -368,8 +387,11 @@ func (a *App) DisplayS3Buckets(sess *session.Session, buckets []aws.BucketResp) 
 					r, _ := s3DataT.GetSelection()
 					cell := s3DataT.GetCell(r, 0)
 					s3DataTR := tview.NewTable()
-					s3DataTR.SetCell(0, 0, tview.NewTableCell("Folder-Name").SetTextColor(tcell.ColorOrangeRed).SetAlign(tview.AlignCenter))
-					s3DataTR.SetCell(1, 0, tview.NewTableCell("-----------").SetTextColor(tcell.ColorOrangeRed).SetAlign(tview.AlignCenter))
+					s3DataTR.SetCell(0, 0, tview.NewTableCell("Name").SetTextColor(tcell.ColorOrangeRed).SetAlign(tview.AlignCenter))
+					s3DataTR.SetCell(0, 1, tview.NewTableCell("Type").SetTextColor(tcell.ColorOrangeRed).SetAlign(tview.AlignCenter))
+					s3DataTR.SetCell(0, 2, tview.NewTableCell("Last modified").SetTextColor(tcell.ColorOrangeRed).SetAlign(tview.AlignCenter))
+					s3DataTR.SetCell(0, 3, tview.NewTableCell("Size").SetTextColor(tcell.ColorOrangeRed).SetAlign(tview.AlignCenter))
+					s3DataTR.SetCell(0, 4, tview.NewTableCell("Storage class").SetTextColor(tcell.ColorOrangeRed).SetAlign(tview.AlignCenter))
 					s3DataTR.SetBorder(true)
 					flex.AddItem(s3DataTR, 0, 1, false)
 					a.Main.AddAndSwitchToPage("s3dataView", flex, true)
@@ -399,16 +421,25 @@ func (a *App) inputCaptureS3(s3DataT *tview.Table, flex *tview.Flex, folderName 
 	s3DataT.SetInputCapture(func(event *tcell.EventKey) *tcell.EventKey {
 		if event.Rune() == 100 {
 			bucketInfo := aws.GetInfoAboutBucket(sess, bucketName, "/", folderName)
-			folderArrayInfoTemp, fileArrayInfoTemp := getLevelInfo(bucketInfo)
+			_, fileArrayInfoTemp := getLevelInfo(bucketInfo)
 			indx := 0
-			for _, bi := range folderArrayInfoTemp {
-				keyA := strings.Split(bi, "/")
+			for _, bi := range bucketInfo.CommonPrefixes {
+				keyA := strings.Split(*bi.Prefix, "/")
 				s3DataT.SetCell((indx + 2), 0, tview.NewTableCell(keyA[len(keyA)-2]).SetTextColor(tcell.ColorYellow).SetAlign(tview.AlignCenter))
+				s3DataT.SetCell((indx + 2), 1, tview.NewTableCell("Folder").SetTextColor(tcell.ColorYellow).SetAlign(tview.AlignCenter))
+				s3DataT.SetCell((indx + 2), 2, tview.NewTableCell("-").SetTextColor(tcell.ColorYellow).SetAlign(tview.AlignCenter))
+				s3DataT.SetCell((indx + 2), 3, tview.NewTableCell("0").SetTextColor(tcell.ColorYellow).SetAlign(tview.AlignCenter))
+				s3DataT.SetCell((indx + 2), 4, tview.NewTableCell("-").SetTextColor(tcell.ColorYellow).SetAlign(tview.AlignCenter))
 				indx++
+
 			}
-			for _, fi := range fileArrayInfoTemp {
-				keyA := strings.Split(fi, "/")
+			for _, fi := range bucketInfo.Contents {
+				keyA := strings.Split(*fi.Key, "/")
 				s3DataT.SetCell((indx + 2), 0, tview.NewTableCell(keyA[len(keyA)-1]).SetTextColor(tcell.ColorAntiqueWhite).SetAlign(tview.AlignCenter))
+				s3DataT.SetCell((indx + 2), 1, tview.NewTableCell("File").SetTextColor(tcell.ColorAntiqueWhite).SetAlign(tview.AlignCenter))
+				s3DataT.SetCell((indx + 2), 2, tview.NewTableCell(fi.LastModified.String()).SetTextColor(tcell.ColorAntiqueWhite).SetAlign(tview.AlignCenter))
+				s3DataT.SetCell((indx + 2), 3, tview.NewTableCell(strconv.Itoa(int(*fi.Size))).SetTextColor(tcell.ColorAntiqueWhite).SetAlign(tview.AlignCenter))
+				s3DataT.SetCell((indx + 2), 4, tview.NewTableCell(*fi.StorageClass).SetTextColor(tcell.ColorAntiqueWhite).SetAlign(tview.AlignCenter))
 				indx++
 			}
 			s3DataT.SetInputCapture(func(event *tcell.EventKey) *tcell.EventKey {
@@ -417,8 +448,11 @@ func (a *App) inputCaptureS3(s3DataT *tview.Table, flex *tview.Flex, folderName 
 					r, _ := s3DataT.GetSelection()
 					cell := s3DataT.GetCell(r, 0)
 					s3DataTR := tview.NewTable()
-					s3DataTR.SetCell(0, 0, tview.NewTableCell("Bucket-Name").SetTextColor(tcell.ColorOrangeRed).SetAlign(tview.AlignCenter))
-					s3DataTR.SetCell(1, 0, tview.NewTableCell("-----------").SetTextColor(tcell.ColorOrangeRed).SetAlign(tview.AlignCenter))
+					s3DataTR.SetCell(0, 0, tview.NewTableCell("Name").SetTextColor(tcell.ColorOrangeRed).SetAlign(tview.AlignCenter))
+					s3DataTR.SetCell(0, 1, tview.NewTableCell("Type").SetTextColor(tcell.ColorOrangeRed).SetAlign(tview.AlignCenter))
+					s3DataTR.SetCell(0, 2, tview.NewTableCell("Last modified").SetTextColor(tcell.ColorOrangeRed).SetAlign(tview.AlignCenter))
+					s3DataTR.SetCell(0, 3, tview.NewTableCell("Size").SetTextColor(tcell.ColorOrangeRed).SetAlign(tview.AlignCenter))
+					s3DataTR.SetCell(0, 4, tview.NewTableCell("Storage class").SetTextColor(tcell.ColorOrangeRed).SetAlign(tview.AlignCenter))
 					s3DataTR.SetBorder(true)
 					flex.AddItem(s3DataTR, 0, 1, false)
 					a.Main.AddAndSwitchToPage("s3dataView", flex, true)
@@ -453,4 +487,15 @@ func getLevelInfo(bucketInfo *s3.ListObjectsV2Output) ([]string, []string) {
 
 func (a *App) statusIndicator() *ui.StatusIndicator {
 	return a.Views()["statusIndicator"].(*ui.StatusIndicator)
+}
+
+func Gets3ObjectData(data s3.ListObjectsV2Output) []S3Response {
+	var s3Resp []S3Response
+	for _, i := range data.CommonPrefixes {
+		s3Resp = append(s3Resp, S3Response{Name: *i.Prefix, Type: "Folder", LastModified: "", Size: 0, StorageClass: ""})
+	}
+	for i := 1; i < len(data.Contents); i++ {
+		s3Resp = append(s3Resp, S3Response{Name: *data.Contents[i].Key, Type: "File", LastModified: data.Contents[i].LastModified.String(), Size: *data.Contents[i].Size, StorageClass: *data.Contents[i].StorageClass})
+	}
+	return s3Resp
 }
