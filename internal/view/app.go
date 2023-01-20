@@ -132,6 +132,12 @@ func (a *App) layout() *tview.Flex {
 				a.IsPageContentSorted = true
 			}
 			servicePageContent = a.DisplayS3Buckets(sess, buckets)
+			hc := servicePageContent.GetCell(0, 0)
+			if a.IsPageContentSorted {
+				hc.SetText(hc.Text+"↑")
+			}else{
+				hc.SetText(hc.Text+"↓")
+			}
 			servicePageContent.SetBorderFocusColor(tcell.ColorDarkSeaGreen)
 			servicePage.AddItem(servicePageContent, 0, 6, true)
 		}
@@ -147,6 +153,12 @@ func (a *App) layout() *tview.Flex {
 				a.IsPageContentSorted = true
 			}
 			servicePageContent = a.DisplayEc2Instances(ins, sess)
+			hc := servicePageContent.GetCell(0, 0)
+			if a.IsPageContentSorted {
+				hc.SetText(hc.Text+"↑")
+			}else{
+				hc.SetText(hc.Text+"↓")
+			}
 			servicePageContent.SetBorderFocusColor(tcell.ColorDarkSeaGreen)
 			servicePage.AddItem(servicePageContent, 0, 6, true)
 		}
@@ -162,6 +174,12 @@ func (a *App) layout() *tview.Flex {
 				a.IsPageContentSorted = true
 			}
 			servicePageContent = a.DisplayEc2Instances(ins, sess)
+			hc := servicePageContent.GetCell(0, 2)
+			if a.IsPageContentSorted {
+				hc.SetText(hc.Text+"↑")
+			}else{
+				hc.SetText(hc.Text+"↓")
+			}
 			servicePageContent.SetBorderFocusColor(tcell.ColorDarkSeaGreen)
 			servicePage.AddItem(servicePageContent, 0, 6, true)
 		}
@@ -177,6 +195,12 @@ func (a *App) layout() *tview.Flex {
 				a.IsPageContentSorted = true
 			}
 			servicePageContent = a.DisplayEc2Instances(ins, sess)
+			hc := servicePageContent.GetCell(0, 7)
+			if a.IsPageContentSorted {
+				hc.SetText(hc.Text+"↑")
+			}else{
+				hc.SetText(hc.Text+"↓")
+			}
 			servicePageContent.SetBorderFocusColor(tcell.ColorDarkSeaGreen)
 			servicePage.AddItem(servicePageContent, 0, 6, true)
 		}
