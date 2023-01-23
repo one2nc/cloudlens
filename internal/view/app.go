@@ -76,7 +76,7 @@ func (a *App) layout() *tview.Flex {
 	servicePageContent := a.DisplayEc2Instances(ins, sess)
 
 	profileDropdown := tview.NewDropDown().
-		SetLabel("Profile  ").
+		SetLabel("Profile ▼ ").
 		SetOptions(profiles, func(text string, index int) {
 			currentProfile = &text
 			sess, _ = config.GetSession(*currentProfile, *currentRegion, cfg.AwsConfig)
@@ -92,12 +92,12 @@ func (a *App) layout() *tview.Flex {
 		})
 	profileDropdown.SetBorderFocusColor(tcell.ColorSpringGreen)
 	profileDropdown.SetCurrentOption(0)
-	profileDropdown.SetTextOptions(" ▲ ", "", " ▼ ", " ", "-")
+	//profileDropdown.SetTextOptions(" ▲ ", "", " ▼ ", " ", "-")
 	profileDropdown.SetBorderPadding(2, 0, 0, 0)
 	//profileDropdown.SetBorder(true)
 
 	regionDropdown := tview.NewDropDown().
-		SetLabel("Region   ").
+		SetLabel("Region ▼ ").
 		SetOptions(regions, func(text string, index int) {
 			currentRegion = &text
 			sess, _ = config.GetSession(*currentProfile, *currentRegion, cfg.AwsConfig)
@@ -113,7 +113,7 @@ func (a *App) layout() *tview.Flex {
 		})
 	regionDropdown.SetBorderFocusColor(tcell.ColorSpringGreen)
 	regionDropdown.SetCurrentOption(0)
-	regionDropdown.SetTextOptions(" ▲ ", "", " ▼ ", " ", "-")
+	//regionDropdown.SetTextOptions(" ▲ ", "", " ▼ ", " ", "-")
 	regionDropdown.SetBorderPadding(0, 0, 0, 0)
 	//regionDropdown.SetBorder(true)
 
@@ -143,9 +143,9 @@ func (a *App) layout() *tview.Flex {
 			servicePageContent = a.DisplayS3Buckets(sess, buckets)
 			hc := servicePageContent.GetCell(0, 0)
 			if a.IsPageContentSorted {
-				hc.SetText(hc.Text + "↑")
-			} else {
-				hc.SetText(hc.Text + "↓")
+				hc.SetText(hc.Text+"↑")
+			}else{
+				hc.SetText(hc.Text+"↓")
 			}
 			servicePageContent.SetBorderFocusColor(tcell.ColorDarkSeaGreen)
 			servicePage.AddItem(servicePageContent, 0, 6, true)
