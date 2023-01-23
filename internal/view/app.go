@@ -84,7 +84,7 @@ func (a *App) layout() *tview.Flex {
 		})
 	profileDropdown.SetBorderFocusColor(tcell.ColorSpringGreen)
 	profileDropdown.SetCurrentOption(0)
-	// profileDropdown.SetTextOptions(" ▲ ", "", " ▼ ", " ", "-")
+	//profileDropdown.SetTextOptions(" ▲ ", "", " ▼ ", " ", "-")
 	profileDropdown.SetBorderPadding(2, 0, 0, 0)
 	//profileDropdown.SetBorder(true)
 
@@ -105,7 +105,7 @@ func (a *App) layout() *tview.Flex {
 		})
 	regionDropdown.SetBorderFocusColor(tcell.ColorSpringGreen)
 	regionDropdown.SetCurrentOption(0)
-	// regionDropdown.SetTextOptions(" ▲ ", "", " ▼ ", " ", "-")
+	//regionDropdown.SetTextOptions(" ▲ ", "", " ▼ ", " ", "-")
 	regionDropdown.SetBorderPadding(0, 0, 0, 0)
 	//regionDropdown.SetBorder(true)
 
@@ -362,9 +362,9 @@ func (a *App) DisplayS3Buckets(sess *session.Session, buckets []aws.BucketResp) 
 				keyA := strings.Split(*bi.Prefix, "/")
 				s3DataT.SetCell((indx + 2), 0, tview.NewTableCell(keyA[len(keyA)-2]+"/").SetTextColor(tcell.ColorYellow).SetAlign(tview.AlignCenter))
 				s3DataT.SetCell((indx + 2), 1, tview.NewTableCell("Folder").SetTextColor(tcell.ColorYellow).SetAlign(tview.AlignCenter))
-				s3DataT.SetCell((indx + 2), 2, tview.NewTableCell("_").SetTextColor(tcell.ColorYellow).SetAlign(tview.AlignCenter))
+				s3DataT.SetCell((indx + 2), 2, tview.NewTableCell("-").SetTextColor(tcell.ColorYellow).SetAlign(tview.AlignCenter))
 				s3DataT.SetCell((indx + 2), 3, tview.NewTableCell("0").SetTextColor(tcell.ColorYellow).SetAlign(tview.AlignCenter))
-				s3DataT.SetCell((indx + 2), 4, tview.NewTableCell("_").SetTextColor(tcell.ColorYellow).SetAlign(tview.AlignCenter))
+				s3DataT.SetCell((indx + 2), 4, tview.NewTableCell("-").SetTextColor(tcell.ColorYellow).SetAlign(tview.AlignCenter))
 				indx++
 			}
 
@@ -382,15 +382,21 @@ func (a *App) DisplayS3Buckets(sess *session.Session, buckets []aws.BucketResp) 
 			a.Main.AddAndSwitchToPage("s3data", flex, true)
 
 			//ESCAPE
-			// flex.SetInputCapture(func(event *tcell.EventKey) *tcell.EventKey {
-			// 	if event.Key() == tcell.KeyESC {
-			// 		flex.RemoveItem(s3DataT)
-			// 		flex.AddItem(table, 0, 10, true)
-			// 		a.Main.RemovePage("s3data")
-			//         a.Main.SwitchToPage("main")
-			// 	}
-			// 	return event
-			// })
+			s3DataT.SetInputCapture(func(event *tcell.EventKey) *tcell.EventKey {
+				if event.Key() == tcell.KeyESC {
+					println("esc pressed")
+					//working-----
+					for i := 1; i < table.GetRowCount(); i++ {
+						s3DataT.RemoveRow(1)
+					}
+					flex.RemoveItem(s3DataT)
+					flex.AddItem(table, 0, 10, true)
+					a.Main.RemovePage("s3data")
+					a.Main.SwitchToPage("main")
+					//----------
+				}
+				return event
+			})
 
 			if len(bucketInfo.CommonPrefixes) != 0 || len(bucketInfo.Contents) != 0 {
 				s3DataT.SetInputCapture(func(event *tcell.EventKey) *tcell.EventKey { // Empty
@@ -452,7 +458,7 @@ func (a *App) inputCaptureS3(s3DataTable *tview.Table, flex *tview.Flex, folderN
 			indx++
 		}
 
-		flex.AddItem(s3DataT, 0, 1, false)
+		flex.AddItem(s3DataT, 0, 1, true)
 
 		s3DataT.SetInputCapture(func(event *tcell.EventKey) *tcell.EventKey { //Tiger
 			if event.Rune() == 100 {
@@ -461,9 +467,17 @@ func (a *App) inputCaptureS3(s3DataTable *tview.Table, flex *tview.Flex, folderN
 				foldN := cell.Text
 				a.inputCaptureS3(s3DataT, flex, folderName+foldN+"/", fileArrayInfoTemp, sess, bucketName)
 			}
+			if event.Key() == tcell.KeyESC {
+				slashed := strings.Split(folderName, "/")
+				passF := ""
+				for i := 0; i < len(slashed)-2; i++ {
+					passF = slashed[i] + "/"
+				}
+				println("passF is:", passF)
+				a.inputCaptureS3(s3DataT, flex, passF, fileArrayInfo, sess, bucketName)
+			}
 			return event
 		})
-
 		s3DataT.Select(1, 1).SetFixed(1, 1).SetDoneFunc(func(key tcell.Key) {
 			if key == tcell.KeyEnter {
 				s3DataT.SetSelectable(true, false)
@@ -471,7 +485,6 @@ func (a *App) inputCaptureS3(s3DataTable *tview.Table, flex *tview.Flex, folderN
 		}).SetSelectionChangedFunc(func(row int, column int) {
 			s3DataT.SetSelectable(true, false)
 		})
-
 		a.Main.AddAndSwitchToPage("s3dataView", flex, true)
 	}
 }
