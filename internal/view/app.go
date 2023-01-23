@@ -468,12 +468,21 @@ func (a *App) inputCaptureS3(s3DataTable *tview.Table, flex *tview.Flex, folderN
 				a.inputCaptureS3(s3DataT, flex, folderName+foldN+"/", fileArrayInfoTemp, sess, bucketName)
 			}
 			if event.Key() == tcell.KeyESC {
-				slashed := strings.Split(folderName, "/")
+				r, _ := s3DataT.GetSelection()
+				cell := s3DataT.GetCell(r, 1)
+				foldN := cell.Text
 				passF := ""
-				for i := 0; i < len(slashed)-2; i++ {
-					passF = slashed[i] + "/"
+				if foldN == "File" {
+					slashed := strings.Split(folderName, "/")
+					for i := 0; i < len(slashed)-2; i++ {
+						passF = passF + slashed[i] + "/"
+					}
+				} else {
+					slashed := strings.Split(folderName, "/")
+					for i := 0; i < len(slashed)-2; i++ {
+						passF = slashed[i] + "/"
+					}
 				}
-				println("passF is:", passF)
 				a.inputCaptureS3(s3DataT, flex, passF, fileArrayInfo, sess, bucketName)
 			}
 			return event
