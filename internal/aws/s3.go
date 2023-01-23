@@ -53,8 +53,8 @@ func ListBuckets(sess session.Session) ([]BucketResp, error) {
 }
 
 func GetInfoAboutBucket(sess session.Session, bucketName string, delimiter string, prefix string) *s3.ListObjectsV2Output {
+	// fmt.Println("Bucket Name: ", bucketName)
 	s3Serv := *s3.New(&sess)
-	//result, err := s3Serv.ListObjectsV2(&s3.ListObjectsV2Input{Bucket: aws.String(bucketName), StartAfter: aws.String("folder3")})
 	result, err := s3Serv.ListObjectsV2(&s3.ListObjectsV2Input{Bucket: aws.String(bucketName), Delimiter: aws.String(delimiter), Prefix: aws.String(prefix)})
 	if err != nil {
 		fmt.Println("Error is:", err)
@@ -68,8 +68,8 @@ func PutObjects(sess session.Session) {
 	body := strings.NewReader("Hello, I'm working on aws cli!")
 	s3Serv := *s3.New(&sess)
 	_, err := s3Serv.PutObject(&s3.PutObjectInput{
-		Bucket: aws.String("test-bucket37200794235010051"),
-		Key:    aws.String("Animal/Cheetah/CheetahBabyCub.txt"),
+		Bucket: aws.String("test-bucket12948611666145821"),
+		Key:    aws.String(""),
 		Body:   body,
 	})
 	if err != nil {
