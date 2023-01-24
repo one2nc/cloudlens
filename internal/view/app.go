@@ -119,7 +119,6 @@ func (a *App) layout() *tview.Flex {
 	servicePageContent = a.DisplayEc2Instances(ins, sess)
 	servicePageContent.SetBorderFocusColor(tcell.ColorSpringGreen)
 	a.Application.SetFocus(servicePageContent)
-	a.Application.SetFocus(servicePageContent)
 	servicePage.SetInputCapture(func(event *tcell.EventKey) *tcell.EventKey {
 		//sorting s3 Buckets
 		//66 - Key B
@@ -338,15 +337,9 @@ func (a *App) DisplayS3Buckets(sess *session.Session, buckets []aws.BucketResp) 
 		table.SetCell((i + 1), 1, tview.NewTableCell(fmt.Sprintf("%v", b.CreationTime)).SetAlign(tview.AlignCenter))
 	}
 	//r := 0
-	table.Select(1, 1).SetFixed(1, 1).SetDoneFunc(func(key tcell.Key) {
-		if key == tcell.KeyEnter {
-			table.SetSelectable(true, false)
-		}
-	}).SetSelectionChangedFunc(func(row int, column int) {
-		table.SetSelectable(true, false)
-		//	r = row - 1
-	})
-
+	a.Application.SetFocus(table)
+	table.SetSelectable(true, false)
+	table.Select(1, 1).SetFixed(1, 1)
 	s3DataT := tview.NewTable()
 	s3DataT.SetCell(0, 0, tview.NewTableCell("Name").SetTextColor(tcell.ColorOrangeRed).SetAlign(tview.AlignCenter))
 	s3DataT.SetCell(0, 1, tview.NewTableCell("Type").SetTextColor(tcell.ColorOrangeRed).SetAlign(tview.AlignCenter))
@@ -413,14 +406,9 @@ func (a *App) DisplayS3Buckets(sess *session.Session, buckets []aws.BucketResp) 
 					}
 					return event
 				})
-
-				s3DataT.Select(1, 1).SetFixed(1, 1).SetDoneFunc(func(key tcell.Key) {
-					if key == tcell.KeyEnter {
-						s3DataT.SetSelectable(true, false)
-					}
-				}).SetSelectionChangedFunc(func(row int, column int) {
-					s3DataT.SetSelectable(true, false)
-				})
+				a.Application.SetFocus(s3DataT)
+				s3DataT.SetSelectable(true, false)
+				s3DataT.Select(1, 1).SetFixed(1, 1)
 			}
 
 		}
@@ -492,13 +480,9 @@ func (a *App) inputCaptureS3(s3DataTable *tview.Table, flex *tview.Flex, folderN
 			}
 			return event
 		})
-		s3DataT.Select(1, 1).SetFixed(1, 1).SetDoneFunc(func(key tcell.Key) {
-			if key == tcell.KeyEnter {
-				s3DataT.SetSelectable(true, false)
-			}
-		}).SetSelectionChangedFunc(func(row int, column int) {
-			s3DataT.SetSelectable(true, false)
-		})
+		a.Application.SetFocus(s3DataT)
+		s3DataT.SetSelectable(true, false)
+		s3DataT.Select(1, 1).SetFixed(1, 1)
 		a.Main.AddAndSwitchToPage("s3dataView", flex, true)
 	}
 }
