@@ -74,8 +74,6 @@ func CreateEC2Instances(sess []*session.Session) error {
 		// }
 		// fmt.Println(v.VolumeId)
 
-		makeSubnetPublic(ec2Service, vpc.VpcId, sn.SubnetId)
-
 		for i := 0; i < 10; i++ {
 			ebs := ec2.EbsBlockDevice{
 				VolumeSize: aws.Int64(8),
@@ -103,7 +101,7 @@ func CreateEC2Instances(sess []*session.Session) error {
 				},
 			}
 
-			_, err := ec2Service.RunInstances(&ec2.RunInstancesInput{
+			ec2, err := ec2Service.RunInstances(&ec2.RunInstancesInput{
 				BlockDeviceMappings:     []*ec2.BlockDeviceMapping{&bdm},
 				ElasticGpuSpecification: []*ec2.ElasticGpuSpecification{},
 				ImageId:                 aws.String("ami-" + strconv.Itoa(gofakeit.Number(0, 9999999))),
@@ -114,10 +112,13 @@ func CreateEC2Instances(sess []*session.Session) error {
 				SubnetId:                aws.String(*sn.SubnetId),
 				TagSpecifications:       ec2Tag,
 			})
-
 			if err != nil {
 				fmt.Println(err)
 			}
+
+			ins := ec2.Instances
+			insId := ins[0].InstanceId
+			makeSubnetPublic(ec2Service, vpc.VpcId, sn.SubnetId, insId)
 
 			// fmt.Println("EC2 Instance: ", ec2)
 		}
@@ -242,7 +243,7 @@ func createVolume(service *ec2.EC2) (*ec2.Volume, error) {
 }
 
 // working on it
-func makeSubnetPublic(service *ec2.EC2, vpcId *string, snId *string) {
+func makeSubnetPublic(service *ec2.EC2, vpcId, snId, insId *string) {
 	igw, _ := service.CreateInternetGateway(&ec2.CreateInternetGatewayInput{
 		DryRun:            new(bool),
 		TagSpecifications: []*ec2.TagSpecification{},
@@ -257,13 +258,16 @@ func makeSubnetPublic(service *ec2.EC2, vpcId *string, snId *string) {
 		VpcId: vpcId,
 	})
 
-	_, _ = service.CreateRoute(&ec2.CreateRouteInput{
-		DestinationCidrBlock: aws.String("192.0.0.1/24"),
-		GatewayId:            igw.InternetGateway.InternetGatewayId,
-		RouteTableId:         rt.RouteTable.RouteTableId,
+	service.CreateRoute(&ec2.CreateRouteInput{
+		DestinationCidrBlock:   aws.String("192.0.0.1/24"),
+		GatewayId:              igw.InternetGateway.InternetGatewayId,
+		InstanceId:             insId,
+		RouteTableId:           rt.RouteTable.RouteTableId,
+		VpcEndpointId:          vpcId,
+		VpcPeeringConnectionId: vpcId,
 	})
 
-	_, _ = service.AssociateRouteTable(&ec2.AssociateRouteTableInput{
+	service.AssociateRouteTable(&ec2.AssociateRouteTableInput{
 		GatewayId:    igw.InternetGateway.InternetGatewayId,
 		RouteTableId: rt.RouteTable.RouteTableId,
 		SubnetId:     snId,
