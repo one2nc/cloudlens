@@ -84,7 +84,6 @@ func (a *App) layout() *tview.Flex {
 		})
 	profileDropdown.SetBorderFocusColor(tcell.ColorSpringGreen)
 	profileDropdown.SetCurrentOption(0)
-	//profileDropdown.SetTextOptions(" ▲ ", "", " ▼ ", " ", "-")
 	profileDropdown.SetBorderPadding(2, 0, 0, 0)
 	//profileDropdown.SetBorder(true)
 
@@ -105,7 +104,6 @@ func (a *App) layout() *tview.Flex {
 		})
 	regionDropdown.SetBorderFocusColor(tcell.ColorSpringGreen)
 	regionDropdown.SetCurrentOption(0)
-	//regionDropdown.SetTextOptions(" ▲ ", "", " ▼ ", " ", "-")
 	regionDropdown.SetBorderPadding(0, 0, 0, 0)
 	//regionDropdown.SetBorder(true)
 
@@ -119,7 +117,9 @@ func (a *App) layout() *tview.Flex {
 
 	servicePage = tview.NewFlex().SetDirection(tview.FlexRow)
 	servicePageContent = a.DisplayEc2Instances(ins, sess)
-	servicePageContent.SetBorderFocusColor(tcell.ColorDarkSeaGreen)
+	servicePageContent.SetBorderFocusColor(tcell.ColorSpringGreen)
+	a.Application.SetFocus(servicePageContent)
+	a.Application.SetFocus(servicePageContent)
 	servicePage.SetInputCapture(func(event *tcell.EventKey) *tcell.EventKey {
 		//sorting s3 Buckets
 		//66 - Key B
@@ -139,7 +139,7 @@ func (a *App) layout() *tview.Flex {
 			} else {
 				hc.SetText(hc.Text + "↓")
 			}
-			servicePageContent.SetBorderFocusColor(tcell.ColorDarkSeaGreen)
+			servicePageContent.SetBorderFocusColor(tcell.ColorSpringGreen)
 			servicePage.AddItem(servicePageContent, 0, 6, true)
 		}
 		//sorting ec2 instances
@@ -160,7 +160,7 @@ func (a *App) layout() *tview.Flex {
 			} else {
 				hc.SetText(hc.Text + "↓")
 			}
-			servicePageContent.SetBorderFocusColor(tcell.ColorDarkSeaGreen)
+			servicePageContent.SetBorderFocusColor(tcell.ColorSpringGreen)
 			servicePage.AddItem(servicePageContent, 0, 6, true)
 		}
 
@@ -181,7 +181,7 @@ func (a *App) layout() *tview.Flex {
 			} else {
 				hc.SetText(hc.Text + "↓")
 			}
-			servicePageContent.SetBorderFocusColor(tcell.ColorDarkSeaGreen)
+			servicePageContent.SetBorderFocusColor(tcell.ColorSpringGreen)
 			servicePage.AddItem(servicePageContent, 0, 6, true)
 		}
 
@@ -222,16 +222,16 @@ func (a *App) layout() *tview.Flex {
 			case "S3", "s3":
 				servicePage.RemoveItemAtIndex(0)
 				servicePageContent = a.DisplayS3Buckets(sess, buckets)
-				servicePageContent.SetBorderFocusColor(tcell.ColorDarkSeaGreen)
 				servicePage.AddItem(servicePageContent, 0, 6, true)
+				a.Application.SetFocus(servicePageContent)
 				inputField.SetText("")
 
 			case "EC2", "ec2", "Ec2", "eC2":
 				servicePage.RemoveItemAtIndex(0)
 				servicePageContent = a.DisplayEc2Instances(ins, sess)
-				servicePageContent.SetBorderFocusColor(tcell.ColorDarkSeaGreen)
 				// ec2Page.AddItem(menuColFlex, 0, 2, false)
 				servicePage.AddItem(servicePageContent, 0, 6, true)
+				a.Application.SetFocus(servicePageContent)
 				inputField.SetText("")
 
 			default:
@@ -242,11 +242,16 @@ func (a *App) layout() *tview.Flex {
 	})
 
 	inputField.SetBorder(true)
+	inputField.SetBorderFocusColor(tcell.ColorSpringGreen)
 
-	main.AddItem(menuColFlex, 0, 2, true)
+	a.Views()["pAndRMenu"] = menuColFlex
+	a.Views()["cmd"] = inputField
+	a.Views()["content"] = servicePage
+
+	main.AddItem(menuColFlex, 0, 2, false)
 	main.AddItem(inputField, 0, 1, false)
 	// main.AddItem(content, 0, 6, true)
-	main.AddItem(servicePage, 0, 6, false)
+	main.AddItem(servicePage, 0, 7, true)
 	main.AddItem(textv, 0, 2, false)
 	a.Main.AddPage("main", main, true, false)
 	a.Main.ShowPage("main")
@@ -254,7 +259,6 @@ func (a *App) layout() *tview.Flex {
 }
 
 func (a *App) DisplayEc2Instances(ins []aws.EC2Resp, sess *session.Session) *tview.Table {
-	flex := tview.NewFlex().SetDirection(tview.FlexRow)
 	table := tview.NewTable()
 	table.SetBorder(true)
 	table.SetBorderFocusColor(tcell.ColorSpringGreen)
@@ -279,40 +283,41 @@ func (a *App) DisplayEc2Instances(ins []aws.EC2Resp, sess *session.Session) *tvi
 		table.SetCell((i + 1), 6, tview.NewTableCell(in.MonitoringState).SetAlign(tview.AlignCenter))
 		table.SetCell((i + 1), 7, tview.NewTableCell(in.LaunchTime).SetAlign(tview.AlignCenter))
 	}
-	r := 0
 	table.Select(1, 1).SetFixed(1, 1).SetDoneFunc(func(key tcell.Key) {
 		if key == tcell.KeyEnter {
 			table.SetSelectable(true, false)
 		}
 	}).SetSelectionChangedFunc(func(row int, column int) {
 		table.SetSelectable(true, false)
-		r = row - 1
 	})
-	table.SetInputCapture(func(event *tcell.EventKey) *tcell.EventKey {
-		if event.Rune() == 100 {
-			insId := ins[r].InstanceId
-			newPage := tview.NewTextView()
-			newPage.SetBorder(true)
-			newPage.SetTitle(" JSON ")
-			newPage.SetText(aws.GetSingleInstance(*sess, insId).GoString())
-			desc := tview.NewTextView()
-			desc.SetText("<esc> shift to previous page")
-			flex.AddItem(desc, 0, 1, true)
-			flex.AddItem(newPage, 0, 10, true)
-			a.Main.AddAndSwitchToPage("json", flex, true)
-			flex.SetInputCapture(func(event *tcell.EventKey) *tcell.EventKey {
-				if event.Key() == tcell.KeyESC {
-					flex.RemoveItem(desc)
-					flex.RemoveItem(newPage)
-					a.Main.RemovePage("json")
-					a.Main.ShowPage("main")
-				}
-				return event
-			})
+
+	table.SetSelectedFunc(func(row, column int) {
+		insId := ins[row].InstanceId
+		a.DisplayEc2InstanceJson(sess, insId)
+	})
+
+	return table
+}
+
+func (a *App) DisplayEc2InstanceJson(sess *session.Session, instanceId string) {
+	flex := tview.NewFlex().SetDirection(tview.FlexRow)
+	tvForEc2Json := tview.NewTextView()
+	tvForEc2Json.SetBorder(true)
+	tvForEc2Json.SetBorderFocusColor(tcell.ColorSpringGreen)
+	tvForEc2Json.SetTitle(fmt.Sprintf(" EC2/%v/::[json] ", instanceId))
+	tvForEc2Json.SetTitleColor(tcell.ColorLightSkyBlue)
+	tvForEc2Json.SetText(aws.GetSingleInstance(*sess, instanceId).GoString())
+	flex.AddItem(a.Views()["pAndRMenu"], 0, 2, false)
+	flex.AddItem(a.Views()["cmd"], 0, 1, false)
+	flex.AddItem(tvForEc2Json, 0, 9, true)
+	a.Main.AddAndSwitchToPage("main:ece2-json", flex, true)
+	flex.SetInputCapture(func(event *tcell.EventKey) *tcell.EventKey {
+		if event.Key() == tcell.KeyESC {
+			a.Main.SwitchToPage("main")
+			a.Application.SetFocus(a.Views()["content"].(*tview.Flex).ItemAt(0))
 		}
 		return event
 	})
-	return table
 }
 
 func (a *App) DisplayS3Buckets(sess *session.Session, buckets []aws.BucketResp) *tview.Table {
