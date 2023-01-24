@@ -54,6 +54,11 @@ var lspop = &cobra.Command{
 		if errCEI != nil {
 			log.Fatal("err: ", errCEI)
 		}
+
+		errCKP := pop.CreateKeyPair(sessions)
+		if errCKP != nil {
+			log.Fatal("err: ", errCKP)
+		}
 	},
 }
 
