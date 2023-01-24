@@ -119,6 +119,8 @@ func (a *App) layout() *tview.Flex {
 	servicePageContent = a.DisplayEc2Instances(ins, sess)
 	servicePageContent.SetBorderFocusColor(tcell.ColorSpringGreen)
 	a.Application.SetFocus(servicePageContent)
+	servicePageContent.SetSelectable(true, false)
+	servicePageContent.Select(1, 1).SetFixed(1, 1)
 	servicePage.SetInputCapture(func(event *tcell.EventKey) *tcell.EventKey {
 		//sorting s3 Buckets
 		//66 - Key B
