@@ -354,68 +354,90 @@ func (a *App) DisplayS3Buckets(sess *session.Session, buckets []aws.BucketResp) 
 
 	table.SetInputCapture(func(event *tcell.EventKey) *tcell.EventKey { //Bucket979-0r
 		if event.Key() == tcell.KeyEnter {
+			flex.Clear()
 			flex.RemoveItem(table)
 			r, _ := table.GetSelection()
 			bucketName := buckets[r-1].BucketName
 			bucketInfo := aws.GetInfoAboutBucket(*sess, bucketName, "/", "")
 			folderArrayInfo, fileArrayInfo := getLevelInfo(bucketInfo)
 			indx := 0
-			for _, bi := range bucketInfo.CommonPrefixes {
-				keyA := strings.Split(*bi.Prefix, "/")
+			if len(folderArrayInfo) == 0 && len(fileArrayInfo) == 0 {
 				s3DataT.SetTitle(bucketName)
-				s3DataT.SetTitleColor(tcell.ColorYellow)
-				s3DataT.SetCell((indx + 2), 0, tview.NewTableCell(keyA[len(keyA)-2]+"/").SetTextColor(tcell.ColorYellow).SetAlign(tview.AlignCenter))
-				s3DataT.SetCell((indx + 2), 1, tview.NewTableCell("Folder").SetTextColor(tcell.ColorYellow).SetAlign(tview.AlignCenter))
-				s3DataT.SetCell((indx + 2), 2, tview.NewTableCell("-").SetTextColor(tcell.ColorYellow).SetAlign(tview.AlignCenter))
-				s3DataT.SetCell((indx + 2), 3, tview.NewTableCell("0").SetTextColor(tcell.ColorYellow).SetAlign(tview.AlignCenter))
-				s3DataT.SetCell((indx + 2), 4, tview.NewTableCell("-").SetTextColor(tcell.ColorYellow).SetAlign(tview.AlignCenter))
-				indx++
-			}
-
-			for _, fi := range bucketInfo.Contents {
-				keyA := strings.Split(*fi.Key, "/")
-				s3DataT.SetTitle(bucketName)
-				s3DataT.SetTitleColor(tcell.ColorYellow)
-				s3DataT.SetCell((indx + 2), 0, tview.NewTableCell(keyA[len(keyA)-1]).SetTextColor(tcell.ColorAntiqueWhite).SetAlign(tview.AlignCenter))
-				s3DataT.SetCell((indx + 2), 1, tview.NewTableCell("File").SetTextColor(tcell.ColorAntiqueWhite).SetAlign(tview.AlignCenter))
-				s3DataT.SetCell((indx + 2), 2, tview.NewTableCell(fi.LastModified.String()).SetTextColor(tcell.ColorAntiqueWhite).SetAlign(tview.AlignCenter))
-				s3DataT.SetCell((indx + 2), 3, tview.NewTableCell(strconv.Itoa(int(*fi.Size))).SetTextColor(tcell.ColorAntiqueWhite).SetAlign(tview.AlignCenter))
-				s3DataT.SetCell((indx + 2), 4, tview.NewTableCell(*fi.StorageClass).SetTextColor(tcell.ColorAntiqueWhite).SetAlign(tview.AlignCenter))
-				indx++
-			}
-			flex.AddItem(a.Views()["pAndRMenu"], 0, 2, false)
-			flex.AddItem(a.Views()["cmd"], 0, 1, false)
-			flex.AddItem(s3DataT, 0, 9, true)
-			s3DataT.SetBorderFocusColor(tcell.ColorSpringGreen)
-
-			a.Main.AddAndSwitchToPage("s3data", flex, true)
-
-			if len(bucketInfo.CommonPrefixes) != 0 || len(bucketInfo.Contents) != 0 {
+				s3DataT.SetCell((indx + 2), 0, tview.NewTableCell("No Data Found inside Bucket").SetTextColor(tcell.ColorYellow).SetAlign(tview.AlignCenter))
+				flex.AddItem(a.Views()["pAndRMenu"], 0, 2, false)
+				flex.AddItem(a.Views()["cmd"], 0, 1, false)
+				flex.AddItem(s3DataT, 0, 9, true)
+				s3DataT.SetBorderFocusColor(tcell.ColorSpringGreen)
+				a.Main.AddAndSwitchToPage("s3data", flex, true)
 				s3DataT.SetInputCapture(func(event *tcell.EventKey) *tcell.EventKey { // Empty
-					if event.Key() == tcell.KeyEnter { //d
-						a.Application.SetFocus(a.Views()["content"].(*tview.Flex).ItemAt(0))
-						flex.Clear()
-						r, _ := s3DataT.GetSelection()
-						cell := s3DataT.GetCell(r, 0)
-						a.DisplayS3Objects(s3DataT, flex, cell.Text, fileArrayInfo, *sess, bucketName)
-					} else if event.Key() == tcell.KeyESC {
-						if strings.Count(folderArrayInfo[0], "/") == 1 {
+				 if event.Key() == tcell.KeyESC {
 							a.Application.SetFocus(a.Views()["content"].(*tview.Flex).ItemAt(0))
 							flex.Clear()
 							s3DataT.Clear()
-							a.Main.RemovePage("s3dataView")
 							a.Main.RemovePage("s3data")
 							a.Main.SwitchToPage("main")
 							a.Application.SetFocus(table)
 						}
-					}
 					return event
 				})
-				a.Application.SetFocus(s3DataT)
-				s3DataT.SetSelectable(true, false)
-				s3DataT.Select(1, 1).SetFixed(1, 1)
-			}
+			} else {
+				for _, bi := range bucketInfo.CommonPrefixes {
+					keyA := strings.Split(*bi.Prefix, "/")
+					s3DataT.SetTitle(bucketName)
+					s3DataT.SetTitleColor(tcell.ColorYellow)
+					s3DataT.SetCell((indx + 2), 0, tview.NewTableCell(keyA[len(keyA)-2]+"/").SetTextColor(tcell.ColorYellow).SetAlign(tview.AlignCenter))
+					s3DataT.SetCell((indx + 2), 1, tview.NewTableCell("Folder").SetTextColor(tcell.ColorYellow).SetAlign(tview.AlignCenter))
+					s3DataT.SetCell((indx + 2), 2, tview.NewTableCell("-").SetTextColor(tcell.ColorYellow).SetAlign(tview.AlignCenter))
+					s3DataT.SetCell((indx + 2), 3, tview.NewTableCell("0").SetTextColor(tcell.ColorYellow).SetAlign(tview.AlignCenter))
+					s3DataT.SetCell((indx + 2), 4, tview.NewTableCell("-").SetTextColor(tcell.ColorYellow).SetAlign(tview.AlignCenter))
+					indx++
+				}
 
+				for _, fi := range bucketInfo.Contents {
+					keyA := strings.Split(*fi.Key, "/")
+					s3DataT.SetTitle(bucketName)
+					s3DataT.SetTitleColor(tcell.ColorYellow)
+					s3DataT.SetCell((indx + 2), 0, tview.NewTableCell(keyA[len(keyA)-1]).SetTextColor(tcell.ColorAntiqueWhite).SetAlign(tview.AlignCenter))
+					s3DataT.SetCell((indx + 2), 1, tview.NewTableCell("File").SetTextColor(tcell.ColorAntiqueWhite).SetAlign(tview.AlignCenter))
+					s3DataT.SetCell((indx + 2), 2, tview.NewTableCell(fi.LastModified.String()).SetTextColor(tcell.ColorAntiqueWhite).SetAlign(tview.AlignCenter))
+					s3DataT.SetCell((indx + 2), 3, tview.NewTableCell(strconv.Itoa(int(*fi.Size))).SetTextColor(tcell.ColorAntiqueWhite).SetAlign(tview.AlignCenter))
+					s3DataT.SetCell((indx + 2), 4, tview.NewTableCell(*fi.StorageClass).SetTextColor(tcell.ColorAntiqueWhite).SetAlign(tview.AlignCenter))
+					indx++
+				}
+
+				flex.AddItem(a.Views()["pAndRMenu"], 0, 2, false)
+				flex.AddItem(a.Views()["cmd"], 0, 1, false)
+				flex.AddItem(s3DataT, 0, 9, true)
+				s3DataT.SetBorderFocusColor(tcell.ColorSpringGreen)
+				a.Main.AddAndSwitchToPage("s3data", flex, true)
+
+				if len(bucketInfo.CommonPrefixes) != 0 || len(bucketInfo.Contents) != 0 {
+					s3DataT.SetInputCapture(func(event *tcell.EventKey) *tcell.EventKey { // Empty
+						if event.Key() == tcell.KeyEnter { //d
+							a.Application.SetFocus(a.Views()["content"].(*tview.Flex).ItemAt(0))
+							flex.Clear()
+							s3DataT.Clear()
+							a.Main.RemovePage("s3data")
+							r, _ := s3DataT.GetSelection()
+							cell := s3DataT.GetCell(r, 0)
+							a.DisplayS3Objects(s3DataT, flex, cell.Text, fileArrayInfo, *sess, bucketName)
+						} else if event.Key() == tcell.KeyESC {
+							if strings.Count(folderArrayInfo[0], "/") == 1 {
+								a.Application.SetFocus(a.Views()["content"].(*tview.Flex).ItemAt(0))
+								flex.Clear()
+								s3DataT.Clear()
+								a.Main.RemovePage("s3data")
+								a.Main.SwitchToPage("main")
+								a.Application.SetFocus(table)
+							}
+						}
+						return event
+					})
+					a.Application.SetFocus(s3DataT)
+					s3DataT.SetSelectable(true, false)
+					s3DataT.Select(1, 1).SetFixed(1, 1)
+				}
+			}
 		}
 		return event
 	})
@@ -428,6 +450,7 @@ func (a *App) DisplayS3Objects(s3DataTable *tview.Table, flex *tview.Flex, folde
 	s3DataT := tview.NewTable()
 	bucketInfo := aws.GetInfoAboutBucket(sess, bucketName, "/", folderName)
 	_, fileArrayInfoTemp := getLevelInfo(bucketInfo)
+
 	if len(bucketInfo.CommonPrefixes) != 0 || len(bucketInfo.Contents) != 0 {
 		a.Application.SetFocus(a.Views()["content"].(*tview.Flex).ItemAt(0))
 		flex.Clear()
@@ -473,24 +496,30 @@ func (a *App) DisplayS3Objects(s3DataTable *tview.Table, flex *tview.Flex, folde
 				foldN := cell.Text
 				a.DisplayS3Objects(s3DataT, flex, folderName+foldN+"/", fileArrayInfoTemp, sess, bucketName)
 			}
+
 			if event.Key() == tcell.KeyESC {
 				r, _ := s3DataT.GetSelection()
 				cell := s3DataT.GetCell(r, 1)
 				cellTxt := cell.Text
 				passF := ""
-				if cellTxt == "File" {
-					slashed := strings.Split(folderName, "/")
-					for i := 0; i < len(slashed)-2; i++ {
-						passF = passF + slashed[i] + "/"
-					}
+				if strings.Count(folderName, "/") < 1 {
+					a.Main.RemovePage("s3dataView")
+					a.Main.SwitchToPage("main")
 				} else {
-					slashed := strings.Split(folderName, "/")
-					for i := 0; i < len(slashed)-2; i++ {
-						passF = passF + slashed[i] + "/"
+					if cellTxt == "File" {
+						slashed := strings.Split(folderName, "/")
+						for i := 0; i < len(slashed)-2; i++ {
+							passF = passF + slashed[i] + "/"
+						}
+					} else {
+						slashed := strings.Split(folderName, "/")
+						for i := 0; i < len(slashed)-2; i++ {
+							passF = passF + slashed[i] + "/"
+						}
+
 					}
-					// print("pass F is ",passF)
+					a.DisplayS3Objects(s3DataT, flex, passF, fileArrayInfo, sess, bucketName)
 				}
-				a.DisplayS3Objects(s3DataT, flex, passF, fileArrayInfo, sess, bucketName)
 			}
 			return event
 		})
@@ -499,6 +528,7 @@ func (a *App) DisplayS3Objects(s3DataTable *tview.Table, flex *tview.Flex, folde
 		s3DataT.Select(1, 1).SetFixed(1, 1)
 		a.Main.AddAndSwitchToPage("s3dataView", flex, true)
 	}
+	
 }
 
 func getLevelInfo(bucketInfo *s3.ListObjectsV2Output) ([]string, []string) {
