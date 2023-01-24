@@ -69,8 +69,8 @@ func GetInstances(sess session.Session) ([]EC2Resp, error) {
 				InstanceType:     *instance.InstanceType,
 				AvailabilityZone: *instance.Placement.AvailabilityZone,
 				InstanceState:    *instance.State.Name,
-				PublicDNS:        *instance.PublicDnsName,
-				PublicIPv4:       *instance.PublicIpAddress,
+				PublicDNS:        *instance.PrivateDnsName,
+				PublicIPv4:       *instance.PrivateIpAddress,
 				MonitoringState:  *instance.Monitoring.State,
 				LaunchTime:       IST.Format("Mon Jan _2 15:04:05 2006")}
 			ec2Info = append(ec2Info, *ec2Resp)

@@ -25,20 +25,23 @@ var lspop = &cobra.Command{
 			log.Fatal("err: ", err)
 		}
 
+		// pop.ExploreAws(sess)
+
 		errCB := pop.CreateBuckets(sess)
 		if errCB != nil {
 			log.Fatal("err: ", errCB)
 		}
 
-		regions := []string{"us-east-1", "us-east-2", "us-west-1", "us-west-2", "af-south-1", "ap-east-1",
-			"ap-south-2", "ap-southeast-3", "ap-south-1", "ap-northeast-3", "ap-northeast-2",
+		regions := []string{
+			"us-east-1", "us-east-2", "us-west-1", "us-west-2", "af-south-1", "ap-east-1",
+			"ap-southeast-3", "ap-south-1", "ap-northeast-3", "ap-northeast-2",
 			"ap-southeast-1", "ap-southeast-2", "ap-northeast-1", "ca-central-1", "eu-central-1",
-			"eu-west-1", "eu-west-2", "eu-south-1", "eu-west-3", "eu-south-2", "eu-north-1",
-			"eu-central-2", "me-south-1", "me-central-1", "sa-east-1", "us-gov-east-1", "us-gov-west-1"}
+			"eu-west-1", "eu-west-2", "eu-south-1", "eu-west-3", "eu-north-1",
+			"me-south-1", "me-central-1", "sa-east-1", "us-gov-east-1", "us-gov-west-1"}
 
 		var sessions []*session.Session
 
-		for i := 0; i < 7; i++ {
+		for i := 0; i < 4; i++ {
 			gofakeit.Seed(0)
 			sess, err := config.GetSession("test", regions[gofakeit.Number(0, len(regions)-1)], cfg.AwsConfig)
 			if err != nil {
