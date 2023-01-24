@@ -362,6 +362,8 @@ func (a *App) DisplayS3Buckets(sess *session.Session, buckets []aws.BucketResp) 
 			indx := 0
 			for _, bi := range bucketInfo.CommonPrefixes {
 				keyA := strings.Split(*bi.Prefix, "/")
+				s3DataT.SetTitle(bucketName)
+				s3DataT.SetTitleColor(tcell.ColorYellow)
 				s3DataT.SetCell((indx + 2), 0, tview.NewTableCell(keyA[len(keyA)-2]+"/").SetTextColor(tcell.ColorYellow).SetAlign(tview.AlignCenter))
 				s3DataT.SetCell((indx + 2), 1, tview.NewTableCell("Folder").SetTextColor(tcell.ColorYellow).SetAlign(tview.AlignCenter))
 				s3DataT.SetCell((indx + 2), 2, tview.NewTableCell("-").SetTextColor(tcell.ColorYellow).SetAlign(tview.AlignCenter))
@@ -372,6 +374,8 @@ func (a *App) DisplayS3Buckets(sess *session.Session, buckets []aws.BucketResp) 
 
 			for _, fi := range bucketInfo.Contents {
 				keyA := strings.Split(*fi.Key, "/")
+				s3DataT.SetTitle(bucketName)
+				s3DataT.SetTitleColor(tcell.ColorYellow)
 				s3DataT.SetCell((indx + 2), 0, tview.NewTableCell(keyA[len(keyA)-1]).SetTextColor(tcell.ColorAntiqueWhite).SetAlign(tview.AlignCenter))
 				s3DataT.SetCell((indx + 2), 1, tview.NewTableCell("File").SetTextColor(tcell.ColorAntiqueWhite).SetAlign(tview.AlignCenter))
 				s3DataT.SetCell((indx + 2), 2, tview.NewTableCell(fi.LastModified.String()).SetTextColor(tcell.ColorAntiqueWhite).SetAlign(tview.AlignCenter))
@@ -381,7 +385,7 @@ func (a *App) DisplayS3Buckets(sess *session.Session, buckets []aws.BucketResp) 
 			}
 			flex.AddItem(a.Views()["pAndRMenu"], 0, 2, false)
 			flex.AddItem(a.Views()["cmd"], 0, 1, false)
-			flex.AddItem(s3DataT, 0, 8, true)
+			flex.AddItem(s3DataT, 0, 9, true)
 			s3DataT.SetBorderFocusColor(tcell.ColorSpringGreen)
 
 			a.Main.AddAndSwitchToPage("s3data", flex, true)
@@ -436,6 +440,8 @@ func (a *App) DisplayS3Objects(s3DataTable *tview.Table, flex *tview.Flex, folde
 		indx := 0
 		for _, bi := range bucketInfo.CommonPrefixes {
 			keyA := strings.Split(*bi.Prefix, "/")
+			s3DataT.SetTitle(bucketName + "/" + folderName)
+			s3DataT.SetTitleColor(tcell.ColorYellow)
 			s3DataT.SetCell((indx + 2), 0, tview.NewTableCell(keyA[len(keyA)-2]).SetTextColor(tcell.ColorYellow).SetAlign(tview.AlignCenter))
 			s3DataT.SetCell((indx + 2), 1, tview.NewTableCell("Folder").SetTextColor(tcell.ColorYellow).SetAlign(tview.AlignCenter))
 			s3DataT.SetCell((indx + 2), 2, tview.NewTableCell("_").SetTextColor(tcell.ColorYellow).SetAlign(tview.AlignCenter))
@@ -446,6 +452,8 @@ func (a *App) DisplayS3Objects(s3DataTable *tview.Table, flex *tview.Flex, folde
 
 		for _, fi := range bucketInfo.Contents {
 			keyA := strings.Split(*fi.Key, "/")
+			s3DataT.SetTitle(bucketName + "/" + folderName)
+			s3DataT.SetTitleColor(tcell.ColorYellow)
 			s3DataT.SetCell((indx + 2), 0, tview.NewTableCell(keyA[len(keyA)-1]).SetTextColor(tcell.ColorAntiqueWhite).SetAlign(tview.AlignCenter))
 			s3DataT.SetCell((indx + 2), 1, tview.NewTableCell("File").SetTextColor(tcell.ColorAntiqueWhite).SetAlign(tview.AlignCenter))
 			s3DataT.SetCell((indx + 2), 2, tview.NewTableCell(fi.LastModified.String()).SetTextColor(tcell.ColorAntiqueWhite).SetAlign(tview.AlignCenter))
@@ -455,7 +463,7 @@ func (a *App) DisplayS3Objects(s3DataTable *tview.Table, flex *tview.Flex, folde
 		}
 		flex.AddItem(a.Views()["pAndRMenu"], 0, 2, false)
 		flex.AddItem(a.Views()["cmd"], 0, 1, false)
-		flex.AddItem(s3DataT, 0, 8, true)
+		flex.AddItem(s3DataT, 0, 9, true)
 		s3DataT.SetBorderFocusColor(tcell.ColorSpringGreen)
 
 		s3DataT.SetInputCapture(func(event *tcell.EventKey) *tcell.EventKey { //Tiger
@@ -469,7 +477,6 @@ func (a *App) DisplayS3Objects(s3DataTable *tview.Table, flex *tview.Flex, folde
 				r, _ := s3DataT.GetSelection()
 				cell := s3DataT.GetCell(r, 1)
 				cellTxt := cell.Text
-				// print("folder name is ",folderName)
 				passF := ""
 				if cellTxt == "File" {
 					slashed := strings.Split(folderName, "/")
