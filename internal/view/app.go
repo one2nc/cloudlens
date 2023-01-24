@@ -356,7 +356,7 @@ func (a *App) DisplayS3Buckets(sess *session.Session, buckets []aws.BucketResp) 
 			r, _ := table.GetSelection()
 			bucketName := buckets[r-1].BucketName
 			bucketInfo := aws.GetInfoAboutBucket(*sess, bucketName, "/", "")
-			_, fileArrayInfo := getLevelInfo(bucketInfo)
+			folderArrayInfo, fileArrayInfo := getLevelInfo(bucketInfo)
 			indx := 0
 			for _, bi := range bucketInfo.CommonPrefixes {
 				keyA := strings.Split(*bi.Prefix, "/")
@@ -381,23 +381,6 @@ func (a *App) DisplayS3Buckets(sess *session.Session, buckets []aws.BucketResp) 
 			flex.AddItem(s3DataT, 0, 10, true)
 			a.Main.AddAndSwitchToPage("s3data", flex, true)
 
-			//ESCAPE
-			s3DataT.SetInputCapture(func(event *tcell.EventKey) *tcell.EventKey {
-				if event.Key() == tcell.KeyESC {
-					println("esc pressed")
-					//working-----
-					for i := 1; i < table.GetRowCount(); i++ {
-						s3DataT.RemoveRow(1)
-					}
-					flex.RemoveItem(s3DataT)
-					flex.AddItem(table, 0, 10, true)
-					a.Main.RemovePage("s3data")
-					a.Main.SwitchToPage("main")
-					//----------
-				}
-				return event
-			})
-
 			if len(bucketInfo.CommonPrefixes) != 0 || len(bucketInfo.Contents) != 0 {
 				s3DataT.SetInputCapture(func(event *tcell.EventKey) *tcell.EventKey { // Empty
 					if event.Key() == tcell.KeyEnter { //d
@@ -405,6 +388,15 @@ func (a *App) DisplayS3Buckets(sess *session.Session, buckets []aws.BucketResp) 
 						r, _ := s3DataT.GetSelection()
 						cell := s3DataT.GetCell(r, 0)
 						a.DisplayS3Objects(s3DataT, flex, cell.Text, fileArrayInfo, *sess, bucketName)
+					} else if event.Key() == tcell.KeyESC {
+						if strings.Count(folderArrayInfo[0], "/") == 1 {
+							flex.RemoveItem(s3DataT)
+							a.Main.RemovePage("s3dataView")
+							a.Main.RemovePage("s3data")
+							a.Main.SwitchToPage("main")
+							a.Application.SetFocus(table)
+						}
+
 					}
 					return event
 				})
@@ -463,11 +455,12 @@ func (a *App) DisplayS3Objects(s3DataTable *tview.Table, flex *tview.Flex, folde
 				a.DisplayS3Objects(s3DataT, flex, folderName+foldN+"/", fileArrayInfoTemp, sess, bucketName)
 			}
 			if event.Key() == tcell.KeyESC {
+				println("pressing ESC")
 				r, _ := s3DataT.GetSelection()
 				cell := s3DataT.GetCell(r, 1)
-				foldN := cell.Text
+				cellTxt := cell.Text
 				passF := ""
-				if foldN == "File" {
+				if cellTxt == "File" {
 					slashed := strings.Split(folderName, "/")
 					for i := 0; i < len(slashed)-2; i++ {
 						passF = passF + slashed[i] + "/"
