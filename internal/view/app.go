@@ -340,6 +340,8 @@ func (a *App) DisplayS3Buckets(sess *session.Session, buckets []aws.BucketResp) 
 	}
 	//r := 0
 	a.Application.SetFocus(table)
+	table.SetBorderFocusColor(tcell.ColorSpringGreen)
+
 	table.SetSelectable(true, false)
 	table.Select(1, 1).SetFixed(1, 1)
 	s3DataT := tview.NewTable()
@@ -379,7 +381,9 @@ func (a *App) DisplayS3Buckets(sess *session.Session, buckets []aws.BucketResp) 
 			}
 			flex.AddItem(a.Views()["pAndRMenu"], 0, 2, false)
 			flex.AddItem(a.Views()["cmd"], 0, 1, false)
-			flex.AddItem(s3DataT, 0, 10, true)
+			flex.AddItem(s3DataT, 0, 8, true)
+			s3DataT.SetBorderFocusColor(tcell.ColorSpringGreen)
+
 			a.Main.AddAndSwitchToPage("s3data", flex, true)
 
 			if len(bucketInfo.CommonPrefixes) != 0 || len(bucketInfo.Contents) != 0 {
@@ -451,7 +455,8 @@ func (a *App) DisplayS3Objects(s3DataTable *tview.Table, flex *tview.Flex, folde
 		}
 		flex.AddItem(a.Views()["pAndRMenu"], 0, 2, false)
 		flex.AddItem(a.Views()["cmd"], 0, 1, false)
-		flex.AddItem(s3DataT, 0, 10, true)
+		flex.AddItem(s3DataT, 0, 8, true)
+		s3DataT.SetBorderFocusColor(tcell.ColorSpringGreen)
 
 		s3DataT.SetInputCapture(func(event *tcell.EventKey) *tcell.EventKey { //Tiger
 			if event.Key() == tcell.KeyEnter {
@@ -467,13 +472,11 @@ func (a *App) DisplayS3Objects(s3DataTable *tview.Table, flex *tview.Flex, folde
 				// print("folder name is ",folderName)
 				passF := ""
 				if cellTxt == "File" {
-					print("Inside if")
 					slashed := strings.Split(folderName, "/")
 					for i := 0; i < len(slashed)-2; i++ {
 						passF = passF + slashed[i] + "/"
 					}
 				} else {
-					print("inside else")
 					slashed := strings.Split(folderName, "/")
 					for i := 0; i < len(slashed)-2; i++ {
 						passF = passF + slashed[i] + "/"
