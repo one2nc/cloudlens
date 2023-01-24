@@ -349,7 +349,7 @@ func (a *App) DisplayS3Buckets(sess *session.Session, buckets []aws.BucketResp) 
 	s3DataT.SetBorder(true)
 
 	table.SetInputCapture(func(event *tcell.EventKey) *tcell.EventKey { //Bucket979-0r
-		if event.Rune() == 100 {
+		if event.Key() == tcell.KeyEnter {
 			flex.RemoveItem(table)
 			r, _ := table.GetSelection()
 			bucketName := buckets[r-1].BucketName
@@ -398,7 +398,7 @@ func (a *App) DisplayS3Buckets(sess *session.Session, buckets []aws.BucketResp) 
 
 			if len(bucketInfo.CommonPrefixes) != 0 || len(bucketInfo.Contents) != 0 {
 				s3DataT.SetInputCapture(func(event *tcell.EventKey) *tcell.EventKey { // Empty
-					if event.Rune() == 100 { //d
+					if event.Key() == tcell.KeyEnter { //d
 						flex.RemoveItem(s3DataT)
 						r, _ := s3DataT.GetSelection()
 						cell := s3DataT.GetCell(r, 0)
@@ -454,7 +454,7 @@ func (a *App) inputCaptureS3(s3DataTable *tview.Table, flex *tview.Flex, folderN
 		flex.AddItem(s3DataT, 0, 1, true)
 
 		s3DataT.SetInputCapture(func(event *tcell.EventKey) *tcell.EventKey { //Tiger
-			if event.Rune() == 100 {
+			if event.Key() == tcell.KeyEnter {
 				r, _ := s3DataT.GetSelection()
 				cell := s3DataT.GetCell(r, 0)
 				foldN := cell.Text
