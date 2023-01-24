@@ -119,6 +119,8 @@ func (a *App) layout() *tview.Flex {
 	servicePageContent = a.DisplayEc2Instances(ins, sess)
 	servicePageContent.SetBorderFocusColor(tcell.ColorSpringGreen)
 	a.Application.SetFocus(servicePageContent)
+	servicePageContent.SetSelectable(true, false)
+	servicePageContent.Select(1, 1).SetFixed(1, 1)
 	servicePage.SetInputCapture(func(event *tcell.EventKey) *tcell.EventKey {
 		//sorting s3 Buckets
 		//66 - Key B
@@ -380,20 +382,21 @@ func (a *App) DisplayS3Buckets(sess *session.Session, buckets []aws.BucketResp) 
 			a.Main.AddAndSwitchToPage("s3data", flex, true)
 
 			//ESCAPE
-			// s3DataT.SetInputCapture(func(event *tcell.EventKey) *tcell.EventKey {
-			//  if event.Key() == tcell.KeyESC {
-			//      //working-----
-			//      for i := 1; i < table.GetRowCount(); i++ {
-			//          s3DataT.RemoveRow(1)
-			//      }
-			//      flex.RemoveItem(s3DataT)
-			//      flex.AddItem(table, 0, 10, true)
-			//      a.Main.RemovePage("s3data")
-			//      a.Main.SwitchToPage("main")
-			//      //----------
-			//  }
-			//  return event
-			// })
+			s3DataT.SetInputCapture(func(event *tcell.EventKey) *tcell.EventKey {
+				if event.Key() == tcell.KeyESC {
+					println("esc pressed")
+					//working-----
+					for i := 1; i < table.GetRowCount(); i++ {
+						s3DataT.RemoveRow(1)
+					}
+					flex.RemoveItem(s3DataT)
+					flex.AddItem(table, 0, 10, true)
+					a.Main.RemovePage("s3data")
+					a.Main.SwitchToPage("main")
+					//----------
+				}
+				return event
+			})
 
 			if len(bucketInfo.CommonPrefixes) != 0 || len(bucketInfo.Contents) != 0 {
 				s3DataT.SetInputCapture(func(event *tcell.EventKey) *tcell.EventKey { // Empty
@@ -401,7 +404,7 @@ func (a *App) DisplayS3Buckets(sess *session.Session, buckets []aws.BucketResp) 
 						flex.RemoveItem(s3DataT)
 						r, _ := s3DataT.GetSelection()
 						cell := s3DataT.GetCell(r, 0)
-						a.inputCaptureS3(s3DataT, flex, cell.Text, fileArrayInfo, *sess, bucketName)
+						a.DisplayS3Objects(s3DataT, flex, cell.Text, fileArrayInfo, *sess, bucketName)
 					}
 					return event
 				})
@@ -417,7 +420,7 @@ func (a *App) DisplayS3Buckets(sess *session.Session, buckets []aws.BucketResp) 
 	return table
 }
 
-func (a *App) inputCaptureS3(s3DataTable *tview.Table, flex *tview.Flex, folderName string, fileArrayInfo []string, sess session.Session, bucketName string) {
+func (a *App) DisplayS3Objects(s3DataTable *tview.Table, flex *tview.Flex, folderName string, fileArrayInfo []string, sess session.Session, bucketName string) {
 	s3DataT := tview.NewTable()
 	bucketInfo := aws.GetInfoAboutBucket(sess, bucketName, "/", folderName)
 	_, fileArrayInfoTemp := getLevelInfo(bucketInfo)
@@ -457,7 +460,7 @@ func (a *App) inputCaptureS3(s3DataTable *tview.Table, flex *tview.Flex, folderN
 				r, _ := s3DataT.GetSelection()
 				cell := s3DataT.GetCell(r, 0)
 				foldN := cell.Text
-				a.inputCaptureS3(s3DataT, flex, folderName+foldN+"/", fileArrayInfoTemp, sess, bucketName)
+				a.DisplayS3Objects(s3DataT, flex, folderName+foldN+"/", fileArrayInfoTemp, sess, bucketName)
 			}
 			if event.Key() == tcell.KeyESC {
 				r, _ := s3DataT.GetSelection()
@@ -470,16 +473,12 @@ func (a *App) inputCaptureS3(s3DataTable *tview.Table, flex *tview.Flex, folderN
 						passF = passF + slashed[i] + "/"
 					}
 				} else {
-					if folderName == "" {
-						println("esc pressed")
-					} else {
-						slashed := strings.Split(folderName, "/")
-						for i := 0; i < len(slashed)-2; i++ {
-							passF = slashed[i] + "/"
-						}
+					slashed := strings.Split(folderName, "/")
+					for i := 0; i < len(slashed)-2; i++ {
+						passF = slashed[i] + "/"
 					}
 				}
-				a.inputCaptureS3(s3DataT, flex, passF, fileArrayInfo, sess, bucketName)
+				a.DisplayS3Objects(s3DataT, flex, passF, fileArrayInfo, sess, bucketName)
 			}
 			return event
 		})
