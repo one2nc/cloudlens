@@ -125,6 +125,7 @@ func (a *App) layout(ctx context.Context) *tview.Flex {
 	a.Application.SetFocus(servicePageContent)
 	servicePageContent.SetSelectable(true, false)
 	servicePageContent.Select(1, 1).SetFixed(1, 1)
+
 	servicePage.SetInputCapture(func(event *tcell.EventKey) *tcell.EventKey {
 		if servicePageContent.GetCell(0, 0).Text == "Instance-Id" {
 			//sorting ec2 instances
@@ -228,9 +229,16 @@ func (a *App) layout(ctx context.Context) *tview.Flex {
 			return true // accept any input
 		})
 	inputField.SetFieldBackgroundColor(tcell.ColorBlack)
+	servicePage.SetInputCapture(func(event *tcell.EventKey) *tcell.EventKey {
+		if event.Key() == tcell.KeyTab {
+			a.Application.SetFocus(inputField)
+		}
+		return event
+	})
 	inputField.SetDoneFunc(func(key tcell.Key) {
 		if key == tcell.KeyEnter {
 			serviceName := inputField.GetText()
+
 			switch serviceName {
 			case "S3", "s3":
 				a.Flash().Info("Loading S3 Buckets...")
@@ -239,6 +247,7 @@ func (a *App) layout(ctx context.Context) *tview.Flex {
 				servicePage.AddItem(servicePageContent, 0, 6, true)
 				a.Application.SetFocus(servicePageContent)
 				inputField.SetText("")
+				
 
 			case "EC2", "ec2", "Ec2", "eC2":
 				a.Flash().Info("Loading EC2 instacnes...")
@@ -248,11 +257,19 @@ func (a *App) layout(ctx context.Context) *tview.Flex {
 				servicePage.AddItem(servicePageContent, 0, 6, true)
 				a.Application.SetFocus(servicePageContent)
 				inputField.SetText("")
+				
 
 			default:
 				inputField.SetText("")
 				a.Flash().Err(fmt.Errorf("NO SERVICE..."))
 			}
+			servicePage.SetInputCapture(func(event *tcell.EventKey) *tcell.EventKey {
+				if event.Key() == tcell.KeyTab {
+					a.Application.SetFocus(inputField)
+				}
+				return event
+			})
+			
 		}
 	})
 
@@ -322,7 +339,8 @@ func (a *App) DisplayEc2InstanceJson(sess *session.Session, instanceId string) {
 	tvForEc2Json.SetTitleColor(tcell.ColorLightSkyBlue)
 	tvForEc2Json.SetText(aws.GetSingleInstance(*sess, instanceId).GoString())
 	flex.AddItem(a.Views()["pAndRMenu"], 0, 2, false)
-	flex.AddItem(a.Views()["cmd"], 0, 1, false)
+	inputPrompt := a.Views()["cmd"]
+	flex.AddItem(inputPrompt, 0, 1, false)
 	flex.AddItem(tvForEc2Json, 0, 9, true)
 	a.Main.AddAndSwitchToPage("main:ece2-json", flex, true)
 	flex.SetInputCapture(func(event *tcell.EventKey) *tcell.EventKey {
@@ -330,6 +348,10 @@ func (a *App) DisplayEc2InstanceJson(sess *session.Session, instanceId string) {
 			a.Main.SwitchToPage("main")
 			a.Application.SetFocus(a.Views()["content"].(*tview.Flex).ItemAt(0))
 		}
+			if event.Key() == tcell.KeyTab {
+				a.Application.SetFocus(inputPrompt)
+			}
+			
 		return event
 	})
 }
@@ -344,8 +366,8 @@ func (a *App) DisplayS3Buckets(sess *session.Session, buckets []aws.BucketResp) 
 	flex.AddItem(table, 0, 1, true).SetDirection(tview.FlexRow)
 
 	//table data
-	table.SetCell(0, 0, tview.NewTableCell("Bucket-Name").SetTextColor(tcell.ColorOrangeRed).SetAlign(tview.AlignCenter))
-	table.SetCell(0, 1, tview.NewTableCell("Creation-Time").SetTextColor(tcell.ColorOrangeRed).SetAlign(tview.AlignCenter))
+	table.SetCell(0, 0, tview.NewTableCell("Bucket-Name").SetSelectable(false).SetTextColor(tcell.ColorOrangeRed).SetAlign(tview.AlignCenter))
+	table.SetCell(0, 1, tview.NewTableCell("Creation-Time").SetSelectable(false).SetTextColor(tcell.ColorOrangeRed).SetAlign(tview.AlignCenter))
 	for i, b := range buckets {
 		table.SetCell((i + 1), 0, tview.NewTableCell(b.BucketName).SetAlign(tview.AlignCenter))
 		table.SetCell((i + 1), 1, tview.NewTableCell(fmt.Sprintf("%v", b.CreationTime)).SetAlign(tview.AlignCenter))
@@ -371,14 +393,21 @@ func (a *App) DisplayS3Buckets(sess *session.Session, buckets []aws.BucketResp) 
 
 				a.DisplayS3ObjectForEmptyBuc(s3DataT, flex, bucketName)
 			} else {
-
 				a.setTableHeaderForS3(s3DataT, bucketName)
 				a.setTableContentForS3(s3DataT, bucketInfo.CommonPrefixes, bucketInfo.Contents)
 
 				flex.AddItem(a.Views()["pAndRMenu"], 0, 2, false)
-				flex.AddItem(a.Views()["cmd"], 0, 1, false)
+				inputPrompt := a.Views()["cmd"]
+				flex.AddItem(inputPrompt, 0, 1, false)
 				flex.AddItem(s3DataT, 0, 9, true)
 				a.Main.AddAndSwitchToPage("s3data", flex, true)
+
+				flex.SetInputCapture(func(event *tcell.EventKey) *tcell.EventKey {
+					if event.Key() == tcell.KeyTab {
+						a.Application.SetFocus(inputPrompt)
+					}
+					return event
+				})
 
 				if len(bucketInfo.CommonPrefixes) != 0 || len(bucketInfo.Contents) != 0 {
 					s3DataT.SetInputCapture(func(event *tcell.EventKey) *tcell.EventKey { // Empty
@@ -492,11 +521,11 @@ func (a *App) DisplayS3ObjectForEmptyBuc(s3DataT *tview.Table, flex *tview.Flex,
 func (a *App) setTableHeaderForS3(s3DataT *tview.Table, tableTitle string) *tview.Table {
 	s3DataT.SetTitle(tableTitle)
 	s3DataT.SetTitleColor(tcell.ColorYellow)
-	s3DataT.SetCell(0, 0, tview.NewTableCell("Name").SetTextColor(tcell.ColorOrangeRed).SetAlign(tview.AlignCenter))
-	s3DataT.SetCell(0, 1, tview.NewTableCell("Type").SetTextColor(tcell.ColorOrangeRed).SetAlign(tview.AlignCenter))
-	s3DataT.SetCell(0, 2, tview.NewTableCell("Last modified").SetTextColor(tcell.ColorOrangeRed).SetAlign(tview.AlignCenter))
-	s3DataT.SetCell(0, 3, tview.NewTableCell("Size").SetTextColor(tcell.ColorOrangeRed).SetAlign(tview.AlignCenter))
-	s3DataT.SetCell(0, 4, tview.NewTableCell("Storage class").SetTextColor(tcell.ColorOrangeRed).SetAlign(tview.AlignCenter))
+	s3DataT.SetCell(0, 0, tview.NewTableCell("Name").SetSelectable(false).SetTextColor(tcell.ColorOrangeRed).SetAlign(tview.AlignCenter))
+	s3DataT.SetCell(0, 1, tview.NewTableCell("Type").SetSelectable(false).SetTextColor(tcell.ColorOrangeRed).SetAlign(tview.AlignCenter))
+	s3DataT.SetCell(0, 2, tview.NewTableCell("Last modified").SetSelectable(false).SetTextColor(tcell.ColorOrangeRed).SetAlign(tview.AlignCenter))
+	s3DataT.SetCell(0, 3, tview.NewTableCell("Size").SetSelectable(false).SetTextColor(tcell.ColorOrangeRed).SetAlign(tview.AlignCenter))
+	s3DataT.SetCell(0, 4, tview.NewTableCell("Storage class").SetSelectable(false).SetTextColor(tcell.ColorOrangeRed).SetAlign(tview.AlignCenter))
 
 	return s3DataT
 }
