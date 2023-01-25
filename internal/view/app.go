@@ -126,92 +126,100 @@ func (a *App) layout(ctx context.Context) *tview.Flex {
 	servicePageContent.SetSelectable(true, false)
 	servicePageContent.Select(1, 1).SetFixed(1, 1)
 	servicePage.SetInputCapture(func(event *tcell.EventKey) *tcell.EventKey {
-		//sorting s3 Buckets
-		//66 - Key B
-		if event.Rune() == 66 {
-			servicePage.RemoveItemAtIndex(0)
-			if a.IsPageContentSorted {
-				sort.Sort(sort.Reverse(aws.ByBucketName(buckets)))
-				a.IsPageContentSorted = false
-			} else {
-				sort.Sort(aws.ByBucketName(buckets))
-				a.IsPageContentSorted = true
+		if servicePageContent.GetCell(0, 0).Text == "Instance-Id" {
+			//sorting ec2 instances
+			//73 - Key I
+			if event.Rune() == 73 {
+				servicePage.RemoveItemAtIndex(0)
+				if a.IsPageContentSorted {
+					sort.Sort(sort.Reverse(aws.ByInstanceId(ins)))
+					a.IsPageContentSorted = false
+				} else {
+					sort.Sort(aws.ByInstanceId(ins))
+					a.IsPageContentSorted = true
+				}
+				servicePageContent = a.DisplayEc2Instances(ins, sess)
+				hc := servicePageContent.GetCell(0, 0)
+				if a.IsPageContentSorted {
+					hc.SetText(hc.Text + "↑")
+				} else {
+					hc.SetText(hc.Text + "↓")
+				}
+				servicePageContent.SetBorderFocusColor(tcell.ColorSpringGreen)
+				servicePage.AddItem(servicePageContent, 0, 6, true)
 			}
-			servicePageContent = a.DisplayS3Buckets(sess, buckets)
-			hc := servicePageContent.GetCell(0, 0)
-			if a.IsPageContentSorted {
-				hc.SetText(hc.Text + "↑")
-			} else {
-				hc.SetText(hc.Text + "↓")
+
+			//84 - Key T
+			if event.Rune() == 84 {
+				servicePage.RemoveItemAtIndex(0)
+				if a.IsPageContentSorted {
+					sort.Sort(sort.Reverse(aws.ByInstanceType(ins)))
+					a.IsPageContentSorted = false
+				} else {
+					sort.Sort(aws.ByInstanceType(ins))
+					a.IsPageContentSorted = true
+				}
+				servicePageContent = a.DisplayEc2Instances(ins, sess)
+				hc := servicePageContent.GetCell(0, 2)
+				if a.IsPageContentSorted {
+					hc.SetText(hc.Text + "↑")
+				} else {
+					hc.SetText(hc.Text + "↓")
+				}
+				servicePageContent.SetBorderFocusColor(tcell.ColorSpringGreen)
+				servicePage.AddItem(servicePageContent, 0, 6, true)
 			}
-			servicePageContent.SetBorderFocusColor(tcell.ColorSpringGreen)
-			servicePage.AddItem(servicePageContent, 0, 6, true)
-		}
-		//sorting ec2 instances
-		//73 - Key I
-		if event.Rune() == 73 {
-			servicePage.RemoveItemAtIndex(0)
-			if a.IsPageContentSorted {
-				sort.Sort(sort.Reverse(aws.ByInstanceId(ins)))
-				a.IsPageContentSorted = false
-			} else {
-				sort.Sort(aws.ByInstanceId(ins))
-				a.IsPageContentSorted = true
+
+			//76 - Key L
+			if event.Rune() == 76 {
+				servicePage.RemoveItemAtIndex(0)
+				if a.IsPageContentSorted {
+					sort.Sort(sort.Reverse(aws.ByLaunchTime(ins)))
+					a.IsPageContentSorted = false
+				} else {
+					sort.Sort(aws.ByLaunchTime(ins))
+					a.IsPageContentSorted = true
+				}
+				servicePageContent = a.DisplayEc2Instances(ins, sess)
+				hc := servicePageContent.GetCell(0, 7)
+				if a.IsPageContentSorted {
+					hc.SetText(hc.Text + "↑")
+				} else {
+					hc.SetText(hc.Text + "↓")
+				}
+				servicePageContent.SetBorderFocusColor(tcell.ColorDarkSeaGreen)
+				servicePage.AddItem(servicePageContent, 0, 6, true)
 			}
-			servicePageContent = a.DisplayEc2Instances(ins, sess)
-			hc := servicePageContent.GetCell(0, 0)
-			if a.IsPageContentSorted {
-				hc.SetText(hc.Text + "↑")
-			} else {
-				hc.SetText(hc.Text + "↓")
-			}
-			servicePageContent.SetBorderFocusColor(tcell.ColorSpringGreen)
-			servicePage.AddItem(servicePageContent, 0, 6, true)
 		}
 
-		//84 - Key T
-		if event.Rune() == 84 {
-			servicePage.RemoveItemAtIndex(0)
-			if a.IsPageContentSorted {
-				sort.Sort(sort.Reverse(aws.ByInstanceType(ins)))
-				a.IsPageContentSorted = false
-			} else {
-				sort.Sort(aws.ByInstanceType(ins))
-				a.IsPageContentSorted = true
+		if servicePageContent.GetCell(0, 1).Text == "Creation-Time" {
+			//sorting s3 Buckets
+			//66 - Key B
+			if event.Rune() == 66 {
+				servicePage.RemoveItemAtIndex(0)
+				if a.IsPageContentSorted {
+					sort.Sort(sort.Reverse(aws.ByBucketName(buckets)))
+					a.IsPageContentSorted = false
+				} else {
+					sort.Sort(aws.ByBucketName(buckets))
+					a.IsPageContentSorted = true
+				}
+				servicePageContent = a.DisplayS3Buckets(sess, buckets)
+				hc := servicePageContent.GetCell(0, 0)
+				if a.IsPageContentSorted {
+					hc.SetText(hc.Text + "↑")
+				} else {
+					hc.SetText(hc.Text + "↓")
+				}
+				servicePageContent.SetBorderFocusColor(tcell.ColorSpringGreen)
+				servicePage.AddItem(servicePageContent, 0, 6, true)
 			}
-			servicePageContent = a.DisplayEc2Instances(ins, sess)
-			hc := servicePageContent.GetCell(0, 2)
-			if a.IsPageContentSorted {
-				hc.SetText(hc.Text + "↑")
-			} else {
-				hc.SetText(hc.Text + "↓")
-			}
-			servicePageContent.SetBorderFocusColor(tcell.ColorSpringGreen)
-			servicePage.AddItem(servicePageContent, 0, 6, true)
+
 		}
 
-		//76 - Key L
-		if event.Rune() == 76 {
-			servicePage.RemoveItemAtIndex(0)
-			if a.IsPageContentSorted {
-				sort.Sort(sort.Reverse(aws.ByLaunchTime(ins)))
-				a.IsPageContentSorted = false
-			} else {
-				sort.Sort(aws.ByLaunchTime(ins))
-				a.IsPageContentSorted = true
-			}
-			servicePageContent = a.DisplayEc2Instances(ins, sess)
-			hc := servicePageContent.GetCell(0, 7)
-			if a.IsPageContentSorted {
-				hc.SetText(hc.Text + "↑")
-			} else {
-				hc.SetText(hc.Text + "↓")
-			}
-			servicePageContent.SetBorderFocusColor(tcell.ColorDarkSeaGreen)
-			servicePage.AddItem(servicePageContent, 0, 6, true)
-		}
 		return event
 	})
+
 	servicePage.AddItem(servicePageContent, 0, 6, true)
 
 	inputField := tview.NewInputField().
