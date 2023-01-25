@@ -16,10 +16,13 @@ import (
 	"github.com/one2nc/cloud-lens/internal/config"
 
 	"github.com/one2nc/cloud-lens/internal/ui"
+	"github.com/rs/zerolog/log"
 )
 
 type App struct {
 	*ui.App
+	cancelFn            context.CancelFunc
+	showHeader          bool
 	IsPageContentSorted bool
 }
 
@@ -542,6 +545,70 @@ func getLevelInfo(bucketInfo *s3.ListObjectsV2Output) ([]string, []string) {
 		fileArrayInfo = append(fileArrayInfo, *bucketInfo.Contents[i].Key)
 	}
 	return folderArrayInfo, fileArrayInfo
+}
+
+func (a *App) tempLayout(ctx context.Context) {
+	flash := ui.NewFlash(a.App)
+	go flash.Watch(ctx, a.Flash().Channel())
+
+	main := tview.NewFlex().SetDirection(tview.FlexRow)
+	main.AddItem(a.statusIndicator(), 1, 1, false)
+	a.Main.AddPage("main", main, true, false)
+	main.AddItem(flash, 1, 1, false)
+	a.toggleHeader(true)
+}
+
+// QueueUpdateDraw queues up a ui action and redraw the ui.
+func (a *App) QueueUpdateDraw(f func()) {
+	if a.Application == nil {
+		return
+	}
+	go func() {
+		a.Application.QueueUpdateDraw(f)
+	}()
+}
+
+func (a *App) toggleHeader(header bool) {
+	a.showHeader = header
+
+	flex, ok := a.Main.GetPrimitive("main").(*tview.Flex)
+	if !ok {
+		log.Fatal().Msg("Expecting valid flex view")
+	}
+	if a.showHeader {
+		flex.RemoveItemAtIndex(0)
+		flex.AddItemAtIndex(0, a.buildHeader(), 7, 1, false)
+	} else {
+		flex.RemoveItemAtIndex(0)
+		flex.AddItemAtIndex(0, a.statusIndicator(), 1, 1, false)
+	}
+}
+
+func (a *App) buildHeader() tview.Primitive {
+	header := tview.NewFlex()
+	header.SetDirection(tview.FlexColumn)
+	if !a.showHeader {
+		return header
+	}
+	header.AddItem(a.Menu(), 0, 1, false)
+
+	return header
+}
+
+func (a *App) bindKeys() {
+	a.AddActions(ui.KeyActions{
+		tcell.KeyCtrlE: ui.NewKeyAction("ToggleHeader", a.toggleHeaderCmd, false),
+	})
+}
+
+func (a *App) toggleHeaderCmd(evt *tcell.EventKey) *tcell.EventKey {
+
+	a.QueueUpdateDraw(func() {
+		a.showHeader = !a.showHeader
+		a.toggleHeader(a.showHeader)
+	})
+
+	return nil
 }
 
 func (a *App) statusIndicator() *ui.StatusIndicator {

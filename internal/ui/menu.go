@@ -22,6 +22,8 @@ func NewMenu() *Menu {
 	m := Menu{
 		Table: tview.NewTable(),
 	}
+	m.SetBorder(true)
+	m.SetCell(0, 0, tview.NewTableCell("deafult menu"))
 	return &m
 }
 
