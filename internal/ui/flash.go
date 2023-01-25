@@ -32,7 +32,7 @@ func NewFlash(app *App) *Flash {
 	f.SetTextColor(tcell.ColorAqua)
 	f.SetDynamicColors(true)
 	f.SetTextAlign(tview.AlignCenter)
-	f.SetBorderPadding(0, 0, 1, 1)
+	f.SetBorderPadding(1, 1, 1, 1)
 
 	return &f
 }

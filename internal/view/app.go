@@ -38,27 +38,25 @@ func NewApp() *App {
 }
 
 func (a *App) Init() error {
-	_ = context.WithValue(context.Background(), internal.KeyApp, a)
+	ctx := context.WithValue(context.Background(), internal.KeyApp, a)
 
 	a.App.Init()
-	a.layout()
+	a.layout(ctx)
 	return nil
 }
 
-func (a *App) layout() *tview.Flex {
+func (a *App) layout(ctx context.Context) *tview.Flex {
 	cfg, _ := config.Get()
 
 	main := tview.NewFlex().SetDirection(tview.FlexRow)
-
+	//----Flash Mesages----
+	flash := ui.NewFlash(a.App)
+	go flash.Watch(ctx, a.Flash().Channel())
 	//------menu-----
 	menuColFlex := tview.NewFlex().SetDirection(tview.FlexColumn)
 	//menuColFlex.SetBorder(true)
 	ddRowFlex := tview.NewFlex().SetDirection(tview.FlexRow)
 	//ddRowFlex.SetBorder(true)
-
-	textv := tview.NewTextView()
-	textv.SetBackgroundColor(tcell.ColorBlack)
-	//textv.SetBorder(true)
 
 	var ins []aws.EC2Resp
 	var buckets []aws.BucketResp
@@ -81,7 +79,6 @@ func (a *App) layout() *tview.Flex {
 			sess, _ = config.GetSession(*currentProfile, *currentRegion, cfg.AwsConfig)
 			ins, _ = aws.GetInstances(*sess)
 			buckets, _ = aws.ListBuckets(*sess)
-			textv.SetText("🌈🌧️ cloudlens profile..." + fmt.Sprintf("%v", a.Main.Pages.CurrentPage()))
 			if servicePage.ItemAt(0) != nil {
 				servicePage.RemoveItemAtIndex(0)
 			}
@@ -101,7 +98,6 @@ func (a *App) layout() *tview.Flex {
 			sess, _ = config.GetSession(*currentProfile, *currentRegion, cfg.AwsConfig)
 			ins, _ = aws.GetInstances(*sess)
 			buckets, _ = aws.ListBuckets(*sess)
-			textv.SetText("🌈🌧️ cloudlens region... " + fmt.Sprintf("%v", ins))
 			if servicePage.ItemAt(0) != nil {
 				servicePage.RemoveItemAtIndex(0)
 			}
@@ -123,6 +119,7 @@ func (a *App) layout() *tview.Flex {
 	menuColFlex.AddItem(ddRowFlex, 0, 1, false)
 
 	servicePage = tview.NewFlex().SetDirection(tview.FlexRow)
+	a.Flash().Info("Loading EC2 instacnes...")
 	servicePageContent = a.DisplayEc2Instances(ins, sess)
 	servicePageContent.SetBorderFocusColor(tcell.ColorSpringGreen)
 	a.Application.SetFocus(servicePageContent)
@@ -228,6 +225,7 @@ func (a *App) layout() *tview.Flex {
 			serviceName := inputField.GetText()
 			switch serviceName {
 			case "S3", "s3":
+				a.Flash().Info("Loading S3 Buckets...")
 				servicePage.RemoveItemAtIndex(0)
 				servicePageContent = a.DisplayS3Buckets(sess, buckets)
 				servicePage.AddItem(servicePageContent, 0, 6, true)
@@ -235,6 +233,7 @@ func (a *App) layout() *tview.Flex {
 				inputField.SetText("")
 
 			case "EC2", "ec2", "Ec2", "eC2":
+				a.Flash().Info("Loading EC2 instacnes...")
 				servicePage.RemoveItemAtIndex(0)
 				servicePageContent = a.DisplayEc2Instances(ins, sess)
 				// ec2Page.AddItem(menuColFlex, 0, 2, false)
@@ -243,8 +242,8 @@ func (a *App) layout() *tview.Flex {
 				inputField.SetText("")
 
 			default:
-				textv.SetText("🌈🌧️ No service...")
 				inputField.SetText("")
+				a.Flash().Err(fmt.Errorf("NO SERVICE..."))
 			}
 		}
 	})
@@ -258,9 +257,8 @@ func (a *App) layout() *tview.Flex {
 
 	main.AddItem(menuColFlex, 0, 2, false)
 	main.AddItem(inputField, 0, 1, false)
-	// main.AddItem(content, 0, 6, true)
-	main.AddItem(servicePage, 0, 7, true)
-	main.AddItem(textv, 0, 2, false)
+	main.AddItem(servicePage, 0, 8, true)
+	main.AddItem(flash, 0, 1, false)
 	a.Main.AddPage("main", main, true, false)
 	a.Main.AddPage("splash", ui.NewSplash("0.0.1"), true, true)
 	return main
@@ -579,6 +577,7 @@ func (a *App) Run() error {
 		<-time.After(splashDelay)
 		a.QueueUpdateDraw(func() {
 			a.Main.SwitchToPage("main")
+			a.Application.SetFocus(a.Main.CurrentPage().Item)
 		})
 	}()
 
