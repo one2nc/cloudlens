@@ -1,6 +1,8 @@
 package cmd
 
 import (
+	"fmt"
+
 	"github.com/one2nc/cloud-lens/internal/view"
 	"github.com/spf13/cobra"
 )
@@ -11,11 +13,15 @@ var startCmd = &cobra.Command{
 	Long:  `start cli for aws services[s3, ec2]`,
 	Run: func(cmd *cobra.Command, args []string) {
 		app := view.NewApp()
-		app.Init()
+		if err := app.Init(); err != nil {
+			panic(fmt.Sprintf("app init failed -- %v", err))
+		}
+		if err := app.Run(); err != nil {
+			panic(fmt.Sprintf("app run failed %v", err))
+		}
 	},
 }
 
-
-func init(){
+func init() {
 	rootCmd.AddCommand(startCmd)
 }

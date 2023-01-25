@@ -6,6 +6,7 @@ import (
 	"sort"
 	"strconv"
 	"strings"
+	"time"
 
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/s3"
@@ -17,6 +18,10 @@ import (
 
 	"github.com/one2nc/cloud-lens/internal/ui"
 	"github.com/rs/zerolog/log"
+)
+
+const (
+	splashDelay = 1 * time.Second
 )
 
 type App struct {
@@ -37,7 +42,6 @@ func (a *App) Init() error {
 
 	a.App.Init()
 	a.layout()
-	a.App.Run()
 	return nil
 }
 
@@ -258,7 +262,7 @@ func (a *App) layout() *tview.Flex {
 	main.AddItem(servicePage, 0, 7, true)
 	main.AddItem(textv, 0, 2, false)
 	a.Main.AddPage("main", main, true, false)
-	a.Main.ShowPage("main")
+	a.Main.AddPage("splash", ui.NewSplash("0.0.1"), true, true)
 	return main
 }
 
@@ -373,14 +377,14 @@ func (a *App) DisplayS3Buckets(sess *session.Session, buckets []aws.BucketResp) 
 				s3DataT.SetBorderFocusColor(tcell.ColorSpringGreen)
 				a.Main.AddAndSwitchToPage("s3data", flex, true)
 				s3DataT.SetInputCapture(func(event *tcell.EventKey) *tcell.EventKey { // Empty
-				 if event.Key() == tcell.KeyESC {
-							a.Application.SetFocus(a.Views()["content"].(*tview.Flex).ItemAt(0))
-							flex.Clear()
-							s3DataT.Clear()
-							a.Main.RemovePage("s3data")
-							a.Main.SwitchToPage("main")
-							a.Application.SetFocus(table)
-						}
+					if event.Key() == tcell.KeyESC {
+						a.Application.SetFocus(a.Views()["content"].(*tview.Flex).ItemAt(0))
+						flex.Clear()
+						s3DataT.Clear()
+						a.Main.RemovePage("s3data")
+						a.Main.SwitchToPage("main")
+						a.Application.SetFocus(table)
+					}
 					return event
 				})
 			} else {
@@ -531,7 +535,7 @@ func (a *App) DisplayS3Objects(s3DataTable *tview.Table, flex *tview.Flex, folde
 		s3DataT.Select(1, 1).SetFixed(1, 1)
 		a.Main.AddAndSwitchToPage("s3dataView", flex, true)
 	}
-	
+
 }
 
 func getLevelInfo(bucketInfo *s3.ListObjectsV2Output) ([]string, []string) {
@@ -554,6 +558,7 @@ func (a *App) tempLayout(ctx context.Context) {
 	main := tview.NewFlex().SetDirection(tview.FlexRow)
 	main.AddItem(a.statusIndicator(), 1, 1, false)
 	a.Main.AddPage("main", main, true, false)
+	a.Main.AddPage("splash", ui.NewSplash("0.0.1"), true, true)
 	main.AddItem(flash, 1, 1, false)
 	a.toggleHeader(true)
 }
@@ -566,6 +571,22 @@ func (a *App) QueueUpdateDraw(f func()) {
 	go func() {
 		a.Application.QueueUpdateDraw(f)
 	}()
+}
+
+func (a *App) Run() error {
+	//a.Resume()
+	go func() {
+		<-time.After(splashDelay)
+		a.QueueUpdateDraw(func() {
+			a.Main.SwitchToPage("main")
+		})
+	}()
+
+	if err := a.Application.Run(); err != nil {
+		return err
+	}
+
+	return nil
 }
 
 func (a *App) toggleHeader(header bool) {
