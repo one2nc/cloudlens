@@ -328,7 +328,7 @@ func (a *App) DisplayEc2Instances(ins []aws.EC2Resp, sess *session.Session) *tvi
 	})
 
 	table.SetSelectedFunc(func(row, column int) {
-		insId := ins[row].InstanceId
+		insId := ins[row-1].InstanceId
 		a.DisplayEc2InstanceJson(sess, insId)
 	})
 
@@ -591,7 +591,7 @@ func (a *App) SearchUtility(inputField *tview.InputField, sess *session.Session,
 				servicePageContent = a.DisplayS3Buckets(sess, buckets)
 				servicePage.AddItem(a.Views()["pAndRMenu"], 0, 2, false)
 				servicePage.AddItem(inputField, 0, 1, false)
-				servicePage.AddItem(servicePageContent, 0, 6, true)
+				servicePage.AddItem(servicePageContent, 0, 8, true)
 				a.Application.SetFocus(servicePageContent)
 				inputField.SetText("")
 
@@ -601,7 +601,7 @@ func (a *App) SearchUtility(inputField *tview.InputField, sess *session.Session,
 				servicePageContent = a.DisplayEc2Instances(ins, sess)
 				servicePage.AddItem(a.Views()["pAndRMenu"], 0, 2, false)
 				servicePage.AddItem(inputField, 0, 1, false)
-				servicePage.AddItem(servicePageContent, 0, 6, true)
+				servicePage.AddItem(servicePageContent, 0, 8, true)
 				a.Application.SetFocus(servicePageContent)
 				inputField.SetText("")
 
