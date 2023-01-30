@@ -130,7 +130,7 @@ func (a *App) layout(ctx context.Context) *tview.Flex {
 	servicePageContent.SetSelectable(true, false)
 	servicePageContent.Select(1, 1).SetFixed(1, 1)
 
-	servicePage.SetInputCapture(func(event *tcell.EventKey) *tcell.EventKey {
+	main.SetInputCapture(func(event *tcell.EventKey) *tcell.EventKey {
 		if servicePageContent.GetCell(0, 0).Text == "Instance-Id" {
 			//sorting ec2 instances
 			//73 - Key I
@@ -152,6 +152,7 @@ func (a *App) layout(ctx context.Context) *tview.Flex {
 				}
 				servicePageContent.SetBorderFocusColor(tcell.ColorSpringGreen)
 				servicePage.AddItem(servicePageContent, 0, 6, true)
+				a.Application.SetFocus(servicePageContent)
 			}
 
 			//84 - Key T
@@ -173,6 +174,7 @@ func (a *App) layout(ctx context.Context) *tview.Flex {
 				}
 				servicePageContent.SetBorderFocusColor(tcell.ColorSpringGreen)
 				servicePage.AddItem(servicePageContent, 0, 6, true)
+				a.Application.SetFocus(servicePageContent)
 			}
 
 			//76 - Key L
@@ -194,6 +196,7 @@ func (a *App) layout(ctx context.Context) *tview.Flex {
 				}
 				servicePageContent.SetBorderFocusColor(tcell.ColorDarkSeaGreen)
 				servicePage.AddItem(servicePageContent, 0, 6, true)
+				a.Application.SetFocus(servicePageContent)
 			}
 		}
 
@@ -218,6 +221,7 @@ func (a *App) layout(ctx context.Context) *tview.Flex {
 				}
 				servicePageContent.SetBorderFocusColor(tcell.ColorSpringGreen)
 				servicePage.AddItem(servicePageContent, 0, 6, true)
+				a.Application.SetFocus(servicePageContent)
 			}
 		}
 		return event
