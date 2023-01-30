@@ -294,14 +294,14 @@ func (a *App) DisplayEc2Instances(ins []aws.EC2Resp, sess *session.Session) *tvi
 	table.SetBorderFocusColor(tcell.ColorSpringGreen)
 	// flex.AddItem(table, 0, 1, true).SetDirection(tview.FlexRow)
 	//table data
-	table.SetCell(0, 0, tview.NewTableCell("Instance-Id").SetTextColor(tcell.ColorOrangeRed).SetAlign(tview.AlignCenter))
-	table.SetCell(0, 1, tview.NewTableCell("Instance-State").SetTextColor(tcell.ColorOrangeRed).SetAlign(tview.AlignCenter))
-	table.SetCell(0, 2, tview.NewTableCell("Instance-Type").SetTextColor(tcell.ColorOrangeRed).SetAlign(tview.AlignCenter))
-	table.SetCell(0, 3, tview.NewTableCell("Availability-zone").SetTextColor(tcell.ColorOrangeRed).SetAlign(tview.AlignCenter))
-	table.SetCell(0, 4, tview.NewTableCell("Public-DNS").SetTextColor(tcell.ColorOrangeRed).SetAlign(tview.AlignCenter))
-	table.SetCell(0, 5, tview.NewTableCell("Public-IPV4").SetTextColor(tcell.ColorOrangeRed).SetAlign(tview.AlignCenter))
-	table.SetCell(0, 6, tview.NewTableCell("Monitoring-State").SetTextColor(tcell.ColorOrangeRed).SetAlign(tview.AlignCenter))
-	table.SetCell(0, 7, tview.NewTableCell("Launch-Time").SetTextColor(tcell.ColorOrangeRed).SetAlign(tview.AlignCenter))
+	table.SetCell(0, 0, tview.NewTableCell("Instance-Id").SetSelectable(false).SetTextColor(tcell.ColorOrangeRed).SetAlign(tview.AlignCenter))
+	table.SetCell(0, 1, tview.NewTableCell("Instance-State").SetSelectable(false).SetTextColor(tcell.ColorOrangeRed).SetAlign(tview.AlignCenter))
+	table.SetCell(0, 2, tview.NewTableCell("Instance-Type").SetSelectable(false).SetTextColor(tcell.ColorOrangeRed).SetAlign(tview.AlignCenter))
+	table.SetCell(0, 3, tview.NewTableCell("Availability-zone").SetSelectable(false).SetTextColor(tcell.ColorOrangeRed).SetAlign(tview.AlignCenter))
+	table.SetCell(0, 4, tview.NewTableCell("Public-DNS").SetSelectable(false).SetTextColor(tcell.ColorOrangeRed).SetAlign(tview.AlignCenter))
+	table.SetCell(0, 5, tview.NewTableCell("Public-IPV4").SetSelectable(false).SetTextColor(tcell.ColorOrangeRed).SetAlign(tview.AlignCenter))
+	table.SetCell(0, 6, tview.NewTableCell("Monitoring-State").SetSelectable(false).SetTextColor(tcell.ColorOrangeRed).SetAlign(tview.AlignCenter))
+	table.SetCell(0, 7, tview.NewTableCell("Launch-Time").SetSelectable(false).SetTextColor(tcell.ColorOrangeRed).SetAlign(tview.AlignCenter))
 
 	for i, in := range ins {
 		table.SetCell((i + 1), 0, tview.NewTableCell(in.InstanceId).SetAlign(tview.AlignCenter))
@@ -314,8 +314,10 @@ func (a *App) DisplayEc2Instances(ins []aws.EC2Resp, sess *session.Session) *tvi
 		table.SetCell((i + 1), 7, tview.NewTableCell(in.LaunchTime).SetAlign(tview.AlignCenter))
 	}
 	table.Select(1, 1).SetFixed(1, 1).SetDoneFunc(func(key tcell.Key) {
-		if key == tcell.KeyEnter {
-			table.SetSelectable(true, false)
+		if table.GetCell(1, 1).Text != "" {
+			if key == tcell.KeyEnter {
+				table.SetSelectable(true, false)
+			}
 		}
 	}).SetSelectionChangedFunc(func(row int, column int) {
 		table.SetSelectable(true, false)
@@ -374,68 +376,66 @@ func (a *App) DisplayS3Buckets(sess *session.Session, buckets []aws.BucketResp) 
 	//r := 0
 	a.Application.SetFocus(table)
 	table.SetBorderFocusColor(tcell.ColorSpringGreen)
-
-	table.SetSelectable(true, false)
-	table.Select(1, 1).SetFixed(1, 1)
 	s3DataT := tview.NewTable()
 	s3DataT.SetBorder(true)
 
-	table.SetInputCapture(func(event *tcell.EventKey) *tcell.EventKey { //Bucket979-0r
-		if event.Key() == tcell.KeyEnter {
-			flex.Clear()
-			flex.RemoveItem(table)
-			r, _ := table.GetSelection()
-			bucketName := buckets[r-1].BucketName
-			bucketInfo := aws.GetInfoAboutBucket(*sess, bucketName, "/", "")
-			folderArrayInfo, fileArrayInfo := getBucLevelInfo(bucketInfo)
-			if len(folderArrayInfo) == 0 && len(fileArrayInfo) == 0 {
+	if table.GetCell(1, 1).Text != "" {
+		table.SetInputCapture(func(event *tcell.EventKey) *tcell.EventKey { //Bucket979-0r
+			if event.Key() == tcell.KeyEnter {
+				flex.Clear()
+				flex.RemoveItem(table)
+				r, _ := table.GetSelection()
+				bucketName := buckets[r-1].BucketName
+				bucketInfo := aws.GetInfoAboutBucket(*sess, bucketName, "/", "")
+				folderArrayInfo, fileArrayInfo := getBucLevelInfo(bucketInfo)
+				if len(folderArrayInfo) == 0 && len(fileArrayInfo) == 0 {
+					a.DisplayS3ObjectForEmptyBuc(s3DataT, flex, bucketName)
+				} else {
+					a.setTableHeaderForS3(s3DataT, bucketName)
+					a.setTableContentForS3(s3DataT, bucketInfo.CommonPrefixes, bucketInfo.Contents)
 
-				a.DisplayS3ObjectForEmptyBuc(s3DataT, flex, bucketName)
-			} else {
-				a.setTableHeaderForS3(s3DataT, bucketName)
-				a.setTableContentForS3(s3DataT, bucketInfo.CommonPrefixes, bucketInfo.Contents)
+					flex.AddItem(a.Views()["pAndRMenu"], 0, 2, false)
+					inputPrompt := a.Views()["cmd"]
+					flex.AddItem(inputPrompt, 0, 1, false)
+					flex.AddItem(s3DataT, 0, 9, true)
+					a.Main.AddAndSwitchToPage("s3data", flex, true)
 
-				flex.AddItem(a.Views()["pAndRMenu"], 0, 2, false)
-				inputPrompt := a.Views()["cmd"]
-				flex.AddItem(inputPrompt, 0, 1, false)
-				flex.AddItem(s3DataT, 0, 9, true)
-				a.Main.AddAndSwitchToPage("s3data", flex, true)
-
-				flex.SetInputCapture(func(event *tcell.EventKey) *tcell.EventKey {
-					if event.Key() == tcell.KeyTab {
-						a.Application.SetFocus(inputPrompt)
-					}
-					return event
-				})
-
-				if len(bucketInfo.CommonPrefixes) != 0 || len(bucketInfo.Contents) != 0 {
-					s3DataT.SetInputCapture(func(event *tcell.EventKey) *tcell.EventKey { // Empty
-						if event.Key() == tcell.KeyEnter { //d
-							r, _ := s3DataT.GetSelection()
-							cell := s3DataT.GetCell(r, 0)
-							flex.Clear()
-							s3DataT.Clear()
-							a.Main.RemovePage("s3data")
-							a.DisplayS3Objects(s3DataT, flex, cell.Text+"/", fileArrayInfo, *sess, bucketName)
-						} else if event.Key() == tcell.KeyESC {
-							if strings.Count(folderArrayInfo[0], "/") == 1 {
-								flex.Clear()
-								s3DataT.Clear()
-								a.Main.RemovePage("s3data")
-								a.Main.SwitchToPage("main")
-								a.Application.SetFocus(table)
-							}
+					flex.SetInputCapture(func(event *tcell.EventKey) *tcell.EventKey {
+						if event.Key() == tcell.KeyTab {
+							a.Application.SetFocus(inputPrompt)
 						}
 						return event
 					})
-					a.Application.SetFocus(s3DataT)
-					s3DataT.SetSelectable(true, false)
-					s3DataT.Select(1, 1).SetFixed(1, 1)
+
+					if len(bucketInfo.CommonPrefixes) != 0 || len(bucketInfo.Contents) != 0 {
+						s3DataT.SetInputCapture(func(event *tcell.EventKey) *tcell.EventKey { // Empty
+							if event.Key() == tcell.KeyEnter { //d
+								r, _ := s3DataT.GetSelection()
+								cell := s3DataT.GetCell(r, 0)
+								flex.Clear()
+								s3DataT.Clear()
+								a.Main.RemovePage("s3data")
+								a.DisplayS3Objects(s3DataT, flex, cell.Text+"/", fileArrayInfo, *sess, bucketName)
+							} else if event.Key() == tcell.KeyESC {
+								if strings.Count(folderArrayInfo[0], "/") == 1 {
+									flex.Clear()
+									s3DataT.Clear()
+									a.Main.RemovePage("s3data")
+									a.Main.SwitchToPage("main")
+									a.Application.SetFocus(table)
+								}
+							}
+							return event
+						})
+						a.Application.SetFocus(s3DataT)
+						s3DataT.SetSelectable(true, false)
+						s3DataT.Select(1, 1).SetFixed(1, 1)
+					}
 				}
 			}
-		}
-		return event
-	})
+			return event
+		})
+	}
 
 	return table
 }
