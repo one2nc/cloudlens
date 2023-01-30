@@ -101,7 +101,11 @@ func (a *App) layout(ctx context.Context) *tview.Flex {
 			if servicePage.ItemAt(0) != nil {
 				servicePage.RemoveItemAtIndex(0)
 			}
-			servicePageContent = a.DisplayEc2Instances(ins, sess)
+			if servicePageContent.GetCell(0, 1).Text == "Creation-Time" {
+				servicePageContent = a.DisplayS3Buckets(sess, buckets)
+			} else {
+				servicePageContent = a.DisplayEc2Instances(ins, sess)
+			}
 			servicePageContent.SetBorderFocusColor(tcell.ColorDarkSeaGreen)
 			servicePage.AddItem(servicePageContent, 0, 6, true)
 		})
@@ -215,9 +219,7 @@ func (a *App) layout(ctx context.Context) *tview.Flex {
 				servicePageContent.SetBorderFocusColor(tcell.ColorSpringGreen)
 				servicePage.AddItem(servicePageContent, 0, 6, true)
 			}
-
 		}
-
 		return event
 	})
 
@@ -238,7 +240,6 @@ func (a *App) layout(ctx context.Context) *tview.Flex {
 	inputField.SetDoneFunc(func(key tcell.Key) {
 		if key == tcell.KeyEnter {
 			serviceName := inputField.GetText()
-
 			switch serviceName {
 			case "S3", "s3":
 				a.Flash().Info("Loading S3 Buckets...")
@@ -247,7 +248,6 @@ func (a *App) layout(ctx context.Context) *tview.Flex {
 				servicePage.AddItem(servicePageContent, 0, 6, true)
 				a.Application.SetFocus(servicePageContent)
 				inputField.SetText("")
-				
 
 			case "EC2", "ec2", "Ec2", "eC2":
 				a.Flash().Info("Loading EC2 instacnes...")
@@ -257,7 +257,6 @@ func (a *App) layout(ctx context.Context) *tview.Flex {
 				servicePage.AddItem(servicePageContent, 0, 6, true)
 				a.Application.SetFocus(servicePageContent)
 				inputField.SetText("")
-				
 
 			default:
 				inputField.SetText("")
@@ -269,7 +268,7 @@ func (a *App) layout(ctx context.Context) *tview.Flex {
 				}
 				return event
 			})
-			
+
 		}
 	})
 
@@ -348,10 +347,10 @@ func (a *App) DisplayEc2InstanceJson(sess *session.Session, instanceId string) {
 			a.Main.SwitchToPage("main")
 			a.Application.SetFocus(a.Views()["content"].(*tview.Flex).ItemAt(0))
 		}
-			if event.Key() == tcell.KeyTab {
-				a.Application.SetFocus(inputPrompt)
-			}
-			
+		if event.Key() == tcell.KeyTab {
+			a.Application.SetFocus(inputPrompt)
+		}
+
 		return event
 	})
 }
@@ -463,7 +462,6 @@ func (a *App) DisplayS3Objects(s3DataTable *tview.Table, flex *tview.Flex, folde
 				foldN := cell.Text
 				a.DisplayS3Objects(s3DataT, flex, folderName+foldN+"/", fileArrayInfoTemp, sess, bucketName)
 			}
-
 			if event.Key() == tcell.KeyESC {
 				r, _ := s3DataT.GetSelection()
 				cell := s3DataT.GetCell(r, 1)
