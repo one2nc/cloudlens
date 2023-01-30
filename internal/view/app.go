@@ -344,8 +344,18 @@ func (a *App) DisplayEc2InstanceJson(sess *session.Session, instanceId string) {
 	tvForEc2Json.SetTitleColor(tcell.ColorLightSkyBlue)
 	tvForEc2Json.SetText(aws.GetSingleInstance(*sess, instanceId).GoString())
 	flex.AddItem(a.Views()["pAndRMenu"], 0, 2, false)
-	inputPrompt := a.Views()["cmd"]
+	inputPrompt := tview.NewInputField().
+		SetLabel("🐶>").
+		SetAcceptanceFunc(func(textToCheck string, lastChar rune) bool {
+			return true // accept any input
+		})
+	inputPrompt.SetFieldBackgroundColor(tcell.ColorBlack)
+	inputPrompt.SetBorder(true)
+
 	flex.AddItem(inputPrompt, 0, 1, false)
+	buckets, _ := aws.ListBuckets(*sess)
+	ins, _ := aws.GetInstances(*sess)
+	a.SearchUtility(inputPrompt, sess, buckets, flex, nil, ins)
 	flex.AddItem(tvForEc2Json, 0, 9, true)
 	a.Main.AddAndSwitchToPage("main:ece2-json", flex, true)
 	flex.SetInputCapture(func(event *tcell.EventKey) *tcell.EventKey {
@@ -395,23 +405,36 @@ func (a *App) DisplayS3Buckets(sess *session.Session, buckets []aws.BucketResp) 
 				bucketInfo := aws.GetInfoAboutBucket(*sess, bucketName, "/", "")
 				folderArrayInfo, fileArrayInfo := getBucLevelInfo(bucketInfo)
 				if len(folderArrayInfo) == 0 && len(fileArrayInfo) == 0 {
-					a.DisplayS3ObjectForEmptyBuc(s3DataT, flex, bucketName)
+					a.DisplayS3ObjectForEmptyBuc(s3DataT, flex, bucketName, *sess)
 				} else {
 					a.setTableHeaderForS3(s3DataT, bucketName)
 					a.setTableContentForS3(s3DataT, bucketInfo.CommonPrefixes, bucketInfo.Contents)
 
 					flex.AddItem(a.Views()["pAndRMenu"], 0, 2, false)
-					inputPrompt := a.Views()["cmd"]
+
+					//extract to method
+					inputPrompt := tview.NewInputField().
+						SetLabel("🐶>").
+						SetAcceptanceFunc(func(textToCheck string, lastChar rune) bool {
+							return true // accept any input
+						})
+					inputPrompt.SetFieldBackgroundColor(tcell.ColorBlack)
+					inputPrompt.SetBorder(true)
+
 					flex.AddItem(inputPrompt, 0, 1, false)
 					flex.AddItem(s3DataT, 0, 9, true)
 					a.Main.AddAndSwitchToPage("s3data", flex, true)
 
+					//extract to method
 					flex.SetInputCapture(func(event *tcell.EventKey) *tcell.EventKey {
 						if event.Key() == tcell.KeyTab {
 							a.Application.SetFocus(inputPrompt)
 						}
 						return event
 					})
+
+					ins, _ := aws.GetInstances(*sess)
+					a.SearchUtility(inputPrompt, sess, buckets, flex, table, ins)
 
 					if len(bucketInfo.CommonPrefixes) != 0 || len(bucketInfo.Contents) != 0 {
 						s3DataT.SetInputCapture(func(event *tcell.EventKey) *tcell.EventKey { // Empty
@@ -458,9 +481,25 @@ func (a *App) DisplayS3Objects(s3DataTable *tview.Table, flex *tview.Flex, folde
 		a.setTableContentForS3(s3DataT, bucketInfo.CommonPrefixes, bucketInfo.Contents)
 
 		flex.AddItem(a.Views()["pAndRMenu"], 0, 2, false)
-		flex.AddItem(a.Views()["cmd"], 0, 1, false)
-		flex.AddItem(s3DataT, 0, 9, true)
+		inputPrompt := tview.NewInputField().
+			SetLabel("🐶>").
+			SetAcceptanceFunc(func(textToCheck string, lastChar rune) bool {
+				return true // accept any input
+			})
+		inputPrompt.SetFieldBackgroundColor(tcell.ColorBlack)
+		inputPrompt.SetBorder(true)
 
+		flex.AddItem(inputPrompt, 0, 1, false)
+		flex.AddItem(s3DataT, 0, 9, true)
+		buckets, _ := aws.ListBuckets(sess)
+
+		a.SearchUtility(inputPrompt, &sess, buckets, flex, s3DataT, nil)
+		flex.SetInputCapture(func(event *tcell.EventKey) *tcell.EventKey {
+			if event.Key() == tcell.KeyTab {
+				a.Application.SetFocus(inputPrompt)
+			}
+			return event
+		})
 		s3DataT.SetInputCapture(func(event *tcell.EventKey) *tcell.EventKey { //Tiger
 			if event.Key() == tcell.KeyEnter {
 				r, _ := s3DataT.GetSelection()
@@ -501,14 +540,32 @@ func (a *App) DisplayS3Objects(s3DataTable *tview.Table, flex *tview.Flex, folde
 	}
 }
 
-func (a *App) DisplayS3ObjectForEmptyBuc(s3DataT *tview.Table, flex *tview.Flex, bucketName string) {
+func (a *App) DisplayS3ObjectForEmptyBuc(s3DataT *tview.Table, flex *tview.Flex, bucketName string, sess session.Session) {
 	s3DataT.SetTitle(bucketName)
 	s3DataT.SetTitleColor(tcell.ColorYellow)
 	s3DataT.SetCell(1, 0, tview.NewTableCell("No Data Found inside the  Bucket").SetTextColor(tcell.ColorPeachPuff).SetAlign(tview.AlignCenter))
 	flex.AddItem(a.Views()["pAndRMenu"], 0, 2, false)
-	flex.AddItem(a.Views()["cmd"], 0, 1, false)
+	flex.AddItem(a.Views()["pAndRMenu"], 0, 2, false)
+	inputPrompt := tview.NewInputField().
+		SetLabel("🐶>").
+		SetAcceptanceFunc(func(textToCheck string, lastChar rune) bool {
+			return true // accept any input
+		})
+	inputPrompt.SetFieldBackgroundColor(tcell.ColorBlack)
+	inputPrompt.SetBorder(true)
+
+	flex.AddItem(inputPrompt, 0, 1, false)
 	flex.AddItem(s3DataT, 0, 9, true)
 	s3DataT.SetBorderFocusColor(tcell.ColorSpringGreen)
+	buckets, _ := aws.ListBuckets(sess)
+	ins, _ := aws.GetInstances(sess)
+	a.SearchUtility(inputPrompt, &sess, buckets, flex, s3DataT, ins)
+	flex.SetInputCapture(func(event *tcell.EventKey) *tcell.EventKey {
+		if event.Key() == tcell.KeyTab {
+			a.Application.SetFocus(inputPrompt)
+		}
+		return event
+	})
 	a.Main.AddAndSwitchToPage("s3data", flex, true)
 	s3DataT.SetInputCapture(func(event *tcell.EventKey) *tcell.EventKey { // Empty
 		if event.Key() == tcell.KeyESC {
@@ -519,6 +576,46 @@ func (a *App) DisplayS3ObjectForEmptyBuc(s3DataT *tview.Table, flex *tview.Flex,
 			a.Main.SwitchToPage("main")
 		}
 		return event
+	})
+}
+
+func (a *App) SearchUtility(inputField *tview.InputField, sess *session.Session, buckets []aws.BucketResp, servicePage *tview.Flex, servicePageContent *tview.Table, ins []aws.EC2Resp) {
+	inputField.SetDoneFunc(func(key tcell.Key) {
+		if key == tcell.KeyEnter {
+			serviceName := inputField.GetText()
+
+			switch serviceName {
+			case "S3", "s3":
+				a.Flash().Info("Loading S3 Buckets...")
+				servicePage.Clear()
+				servicePageContent = a.DisplayS3Buckets(sess, buckets)
+				servicePage.AddItem(a.Views()["pAndRMenu"], 0, 2, false)
+				servicePage.AddItem(inputField, 0, 1, false)
+				servicePage.AddItem(servicePageContent, 0, 6, true)
+				a.Application.SetFocus(servicePageContent)
+				inputField.SetText("")
+
+			case "EC2", "ec2", "Ec2", "eC2":
+				a.Flash().Info("Loading EC2 instacnes...")
+				servicePage.Clear()
+				servicePageContent = a.DisplayEc2Instances(ins, sess)
+				servicePage.AddItem(a.Views()["pAndRMenu"], 0, 2, false)
+				servicePage.AddItem(inputField, 0, 1, false)
+				servicePage.AddItem(servicePageContent, 0, 6, true)
+				a.Application.SetFocus(servicePageContent)
+				inputField.SetText("")
+
+			default:
+				inputField.SetText("")
+				a.Flash().Err(fmt.Errorf("NO SERVICE..."))
+			}
+		}
+		servicePage.SetInputCapture(func(event *tcell.EventKey) *tcell.EventKey {
+			if event.Key() == tcell.KeyTab {
+				a.Application.SetFocus(inputField)
+			}
+			return event
+		})
 	})
 }
 
