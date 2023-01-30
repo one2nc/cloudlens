@@ -317,6 +317,8 @@ func (a *App) DisplayEc2Instances(ins []aws.EC2Resp, sess *session.Session) *tvi
 		table.SetCell((i + 1), 6, tview.NewTableCell(in.MonitoringState).SetAlign(tview.AlignCenter))
 		table.SetCell((i + 1), 7, tview.NewTableCell(in.LaunchTime).SetAlign(tview.AlignCenter))
 	}
+	table.SetSelectable(true, false)
+	table.Select(1, 1).SetFixed(1, 1)
 	table.Select(1, 1).SetFixed(1, 1).SetDoneFunc(func(key tcell.Key) {
 		if table.GetCell(1, 1).Text != "" {
 			if key == tcell.KeyEnter {
@@ -492,7 +494,6 @@ func (a *App) DisplayS3Objects(s3DataTable *tview.Table, flex *tview.Flex, folde
 		flex.AddItem(inputPrompt, 0, 1, false)
 		flex.AddItem(s3DataT, 0, 9, true)
 		buckets, _ := aws.ListBuckets(sess)
-
 		a.SearchUtility(inputPrompt, &sess, buckets, flex, s3DataT, nil)
 		flex.SetInputCapture(func(event *tcell.EventKey) *tcell.EventKey {
 			if event.Key() == tcell.KeyTab {
@@ -583,7 +584,6 @@ func (a *App) SearchUtility(inputField *tview.InputField, sess *session.Session,
 	inputField.SetDoneFunc(func(key tcell.Key) {
 		if key == tcell.KeyEnter {
 			serviceName := inputField.GetText()
-
 			switch serviceName {
 			case "S3", "s3":
 				a.Flash().Info("Loading S3 Buckets...")
