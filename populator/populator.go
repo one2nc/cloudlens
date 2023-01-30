@@ -9,27 +9,61 @@ import (
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/ec2"
+	"github.com/aws/aws-sdk-go/service/iam"
 	"github.com/aws/aws-sdk-go/service/s3"
 	"github.com/brianvoe/gofakeit"
 )
 
+/*
+	- While creating s3 buckets and ec2 instances, Create policy there itself and add policy to a common slice
+	- Use Interface so that we can create Iam policies for any service as needed.
+	- In IAM service create users then user-group
+	- Add random users to the group
+	- Attach policies to the users and user group
+	- Create roles
+
+*/
+
+type IamPolicy interface {
+	createIamPolicy(iamService *iam.IAM) (*iam.Policy, error)
+}
+
+type s3IamPolicy struct {
+	bName *string
+}
+
+type insIamPolicy struct {
+	region, iId *string
+}
+
+var iamPolicies []*iam.Policy
+
 func CreateBuckets(sess *session.Session) error {
 	s3Service := s3.New(sess)
-	for i := 0; i < 20; i++ {
+	iamService := iam.New(sess)
+	for i := 0; i < 10; i++ {
 		gofakeit.Seed(0)
 		rWord := gofakeit.Password(true, false, true, false, false, 5)
-		bName := aws.String(rWord + "-bucket" + strconv.Itoa(gofakeit.Number(0, 999999999999999999)))
+		bName := aws.String("test-" + rWord + "-bucket" + strconv.Itoa(gofakeit.Number(0, 999999999999999999)))
 		_, err := s3Service.CreateBucket(&s3.CreateBucketInput{
-			Bucket:                    bName,
-			CreateBucketConfiguration: &s3.CreateBucketConfiguration{LocationConstraint: aws.String("ap-south-1")},
+			Bucket:                     bName,
+			ObjectLockEnabledForBucket: aws.Bool(true),
 		})
 		if err != nil {
-			log.Println("S3 err here: ", rWord, err)
+			log.Println("s3 create bucket error: ", rWord, err)
 			return err
 		}
+		sip := s3IamPolicy{
+			bName: bName,
+		}
+		iamPolicy, err := sip.createIamPolicy(iamService)
+		if err != nil {
+			return err
+		}
+		iamPolicies = append(iamPolicies, iamPolicy)
 
 		key := []string{"Delhi", "Asia/Japan", "Asia/China/Beijing", "Jakarta", "Africa/Ghana", "North-America/Canada/Toronto",
-			"Africa", "Africa/Jamaice", "Europe/England/London", "Vietnam", "Asia/South-Korea", "Asia/India/Kolkata",
+			"Africa", "Africa/Jamaica", "Europe/England/London", "Vietnam", "Asia/South-Korea", "Asia/India/Kolkata",
 			"Australia/Sydney", "Paris", "India/Kerala/Kochi", "Asia/Sri-Lanka", "Asia/Indonesia", "Europe/France", "Europe/Sweden",
 			"Africa/West-Indies/City1", "North-America/USA/New-York", "Asia/India/Bangalore", "Asia/Nepal", "Asia/Burma"}
 		for i := 0; i < len(key); i++ {
@@ -41,6 +75,11 @@ func CreateBuckets(sess *session.Session) error {
 				Body:   bytes.NewReader(body),
 			})
 		}
+
+		addBucketEncryption(s3Service, bName)
+		addBucketLifecycle(s3Service, bName)
+		addBucketTag(s3Service, bName)
+		addObjectLockConf(s3Service, bName)
 	}
 	return nil
 }
@@ -54,9 +93,21 @@ func CreateEC2Instances(sess []*session.Session) error {
 	// Consider 3-5 sessions
 	// Create VPC, Subnets, SG, Volumes
 	// Create 5-10 EC Instances for each Sessions.
+
 	for _, s := range sess {
+
 		ec2Service := ec2.New(s)
+		iamService := iam.New(s)
 		gofakeit.Seed(0)
+		vl, err := createVolume(ec2Service)
+		if err != nil {
+			fmt.Println(err)
+		}
+		ec2Service.CreateSnapshot(&ec2.CreateSnapshotInput{
+			Description: aws.String("backup"),
+			VolumeId:    vl.VolumeId,
+		})
+
 		vpc, err := createVpc(ec2Service)
 		if err != nil {
 			fmt.Println(err)
@@ -73,7 +124,7 @@ func CreateEC2Instances(sess []*session.Session) error {
 		}
 
 		blockDeviceMapping := createEbsMapping()
-
+		// var lastEc2Policy *iam.Policy
 		for i := 0; i < 10; i++ {
 
 			ec2Tag := []*ec2.TagSpecification{
@@ -91,22 +142,37 @@ func CreateEC2Instances(sess []*session.Session) error {
 					},
 				},
 			}
-
-			_, err := ec2Service.RunInstances(&ec2.RunInstancesInput{
+			ec2, err := ec2Service.RunInstances(&ec2.RunInstancesInput{
 				BlockDeviceMappings: blockDeviceMapping,
-				ImageId:             aws.String("ami-" + strconv.Itoa(gofakeit.Number(0, 9999999))),
-				InstanceType:        aws.String(gofakeit.RandString(insType)),
-				MaxCount:            aws.Int64(2),
-				MinCount:            aws.Int64(1),
-				SecurityGroupIds:    []*string{sg.GroupId},
-				SubnetId:            aws.String(*sn.SubnetId),
-				TagSpecifications:   ec2Tag,
+				// ImageId:             aws.String("ami-" + strconv.Itoa(gofakeit.Number(0, 9999999))),
+				InstanceType:      aws.String(gofakeit.RandString(insType)),
+				MaxCount:          aws.Int64(2),
+				MinCount:          aws.Int64(1),
+				SecurityGroupIds:  []*string{sg.GroupId},
+				SubnetId:          aws.String(*sn.SubnetId),
+				TagSpecifications: ec2Tag,
 			})
 			if err != nil {
 				fmt.Println(fmt.Errorf("error in creating EC2 instance: %v", err))
 			}
+
+			for _, in := range ec2.Instances {
+				log.Println("Ec2 instanced created: ", *in.InstanceId)
+				iip := insIamPolicy{
+					region: s.Config.Region,
+					iId:    in.InstanceId,
+				}
+				iamPolicy, err := iip.createIamPolicy(iamService)
+				if err != nil {
+					return err
+				}
+				iamPolicies = append(iamPolicies, iamPolicy)
+				// lastEc2Policy = iamPolicy.Policy
+			}
+
 		}
 	}
+
 	return nil
 }
 
@@ -124,6 +190,80 @@ func CreateKeyPair(sess []*session.Session) error {
 		}
 	}
 	return nil
+}
+
+func addBucketEncryption(service *s3.S3, bName *string) {
+	service.PutBucketEncryption(&s3.PutBucketEncryptionInput{
+		Bucket: bName,
+		ServerSideEncryptionConfiguration: &s3.ServerSideEncryptionConfiguration{
+
+			Rules: []*s3.ServerSideEncryptionRule{
+				{
+					ApplyServerSideEncryptionByDefault: &s3.ServerSideEncryptionByDefault{
+						SSEAlgorithm: aws.String("AES256"), // another algo: "aws:kms"
+					},
+				},
+			},
+		},
+	})
+	log.Println("Encryption added to the bucket: ", *bName)
+}
+
+func addBucketLifecycle(service *s3.S3, bName *string) {
+	service.PutBucketLifecycleConfiguration(&s3.PutBucketLifecycleConfigurationInput{
+		Bucket: bName,
+		LifecycleConfiguration: &s3.BucketLifecycleConfiguration{
+			Rules: []*s3.LifecycleRule{{
+				Expiration: &s3.LifecycleExpiration{
+					Days: aws.Int64(3650),
+				},
+				ID:     aws.String("Lifecycle Rule"),
+				Prefix: aws.String("test"),
+				Status: aws.String("Enabled"),
+				Transitions: []*s3.Transition{
+					{
+						Days:         aws.Int64(365),
+						StorageClass: aws.String("S3 Glacier Flexible Retrieval"),
+					},
+				},
+			}},
+		},
+	})
+
+	log.Println("Lifecycle added to the bucket: ", *bName)
+}
+
+func addBucketTag(service *s3.S3, bName *string) {
+	gofakeit.Seed(0)
+	service.PutBucketTagging(&s3.PutBucketTaggingInput{
+		Bucket: bName,
+		Tagging: &s3.Tagging{
+			TagSet: []*s3.Tag{
+				{
+					Key:   aws.String("Company"),
+					Value: aws.String(gofakeit.Company()),
+				},
+			},
+		},
+	})
+
+	log.Println("Tags added to the bucket: ", *bName)
+}
+
+func addObjectLockConf(service *s3.S3, bName *string) {
+	service.PutObjectLockConfiguration(&s3.PutObjectLockConfigurationInput{
+		Bucket: bName,
+		ObjectLockConfiguration: &s3.ObjectLockConfiguration{
+			ObjectLockEnabled: aws.String("Enable"),
+			Rule: &s3.ObjectLockRule{
+				DefaultRetention: &s3.DefaultRetention{
+					Mode: aws.String("COMPLIANCE"),
+					Days: aws.Int64(30),
+				},
+			},
+		},
+	})
+	log.Println("Object Lock added to the bucket: ", *bName)
 }
 
 func createVpc(service *ec2.EC2) (*ec2.Vpc, error) {
@@ -149,6 +289,7 @@ func createVpc(service *ec2.EC2) (*ec2.Vpc, error) {
 	if err != nil {
 		return nil, fmt.Errorf("error in creating VPC: %v", err)
 	}
+	log.Println("VPC created: ", *vpc.Vpc.VpcId)
 	return vpc.Vpc, nil
 }
 
@@ -178,6 +319,7 @@ func createSubnet(service *ec2.EC2, vpcId *string) (*ec2.Subnet, error) {
 		return nil, fmt.Errorf("error in creating Subnet: %v", err)
 	}
 
+	log.Println("Subnet created: ", *subnet.Subnet.SubnetId)
 	return subnet.Subnet, nil
 }
 
@@ -198,8 +340,8 @@ func createSecGrp(service *ec2.EC2, vpcId *string) (*ec2.CreateSecurityGroupOutp
 		},
 	}
 	sg, err := service.CreateSecurityGroup(&ec2.CreateSecurityGroupInput{
-		Description:       aws.String("desc"),
 		GroupName:         aws.String("name"),
+		Description:       aws.String("desc"),
 		TagSpecifications: sgTag,
 		VpcId:             vpcId,
 	})
@@ -207,7 +349,43 @@ func createSecGrp(service *ec2.EC2, vpcId *string) (*ec2.CreateSecurityGroupOutp
 		return nil, fmt.Errorf("error in creating Security Group: %v", err)
 	}
 
+	log.Println("Security Group created: ", *sg.GroupId)
+
+	addSecGrpRules(service, sg.GroupId)
 	return sg, nil
+}
+
+func addSecGrpRules(service *ec2.EC2, sgId *string) {
+	var sgRule = &ec2.IpPermission{
+		FromPort:   aws.Int64(22),
+		ToPort:     aws.Int64(22),
+		IpProtocol: aws.String("tcp"),
+		IpRanges: []*ec2.IpRange{
+			{
+				CidrIp:      aws.String("192.1.0.0/24"),
+				Description: aws.String("Allow login (SSH) port"),
+			},
+		},
+	}
+
+	service.AuthorizeSecurityGroupIngress(&ec2.AuthorizeSecurityGroupIngressInput{
+		CidrIp:        aws.String("192.1.0.0/24"),
+		FromPort:      aws.Int64(22),
+		GroupId:       sgId,
+		IpPermissions: []*ec2.IpPermission{sgRule},
+		IpProtocol:    aws.String("tcp"),
+		ToPort:        aws.Int64(22),
+	})
+
+	service.AuthorizeSecurityGroupEgress(&ec2.AuthorizeSecurityGroupEgressInput{
+		CidrIp:        aws.String("192.1.0.0/24"),
+		FromPort:      aws.Int64(22),
+		GroupId:       sgId,
+		IpPermissions: []*ec2.IpPermission{sgRule},
+		IpProtocol:    aws.String("tcp"),
+		ToPort:        aws.Int64(22),
+	})
+	log.Println("Security Group Rules added to ", *sgId)
 }
 
 func createEbsMapping() []*ec2.BlockDeviceMapping {
@@ -258,6 +436,7 @@ func createVolume(service *ec2.EC2) (*ec2.Volume, error) {
 	if err != nil {
 		return nil, fmt.Errorf("error in creating Volume: %v", err)
 	}
+	log.Println("Volume Created: ", *v.VolumeId)
 	return v, nil
 }
 
@@ -288,4 +467,127 @@ func makeSubnetPublic(service *ec2.EC2, vpcId, snId, insId *string) {
 		RouteTableId: rt.RouteTable.RouteTableId,
 		SubnetId:     snId,
 	})
+}
+
+func (sip s3IamPolicy) createIamPolicy(iamService *iam.IAM) (*iam.Policy, error) {
+	pd := `{
+		"Version": "2012-10-17",
+		"Statement": [
+			{
+				"Effect": "Allow",
+				"Action": "s3:*",
+				"Resource": "arn:aws:s3:::` + *sip.bName + `/*"
+			}
+		]
+	}`
+	iamPolicy, err := iamService.CreatePolicy(&iam.CreatePolicyInput{
+		Description:    aws.String("Grant access to all objects of this bucket" + *sip.bName),
+		PolicyDocument: aws.String(pd),
+		PolicyName:     aws.String(gofakeit.FirstName() + "-s3-policy"),
+	})
+	if err != nil {
+		return nil, fmt.Errorf("create iam policy for s3 bucket error: %v", err)
+	}
+	log.Println("Iam policy created for the S3 bucket: ", *sip.bName)
+	return iamPolicy.Policy, nil
+}
+
+func (iip insIamPolicy) createIamPolicy(iamService *iam.IAM) (*iam.Policy, error) {
+	pd := `{
+		"Version": "2012-10-17",
+		"Statement": [
+			{
+				"Effect": "Allow",
+				"Action": [
+					"ec2:*"
+				],
+				"Resource": "arn:aws:ec2:` + *iip.region + `:000000000000:instance/` + *iip.iId + `"
+			}
+		]
+	}`
+	iamPolicy, err := iamService.CreatePolicy(&iam.CreatePolicyInput{
+		Description:    aws.String("Grant all types of access to this instance: " + *iip.iId),
+		PolicyDocument: aws.String(pd),
+		PolicyName:     aws.String(gofakeit.FirstName() + "-ec2-policy"),
+	})
+	if err != nil {
+		return nil, fmt.Errorf("create iam policy for instance error: %v", err)
+	}
+	log.Println("Iam policy created for the EC2 Instance: ", *iip.iId)
+	return iamPolicy.Policy, nil
+}
+
+func IamAwsSrv(sess *session.Session) error {
+	srv := iam.New(sess)
+	gofakeit.Seed(0)
+
+	var users []*iam.User
+
+	//Creating 10 users
+	for i := 0; i < 10; i++ {
+		gofakeit.Seed(0)
+		cuo, err := srv.CreateUser(&iam.CreateUserInput{
+			UserName: aws.String(gofakeit.LastName()),
+		})
+		if err != nil {
+			return fmt.Errorf("error creating user: %v", err)
+		}
+		log.Println("user created: ", *cuo.User.UserName)
+		users = append(users, cuo.User)
+	}
+
+	//Creating User Group
+	cgo, _ := srv.CreateGroup(&iam.CreateGroupInput{
+		GroupName: aws.String(fmt.Sprintf("one2n-engineers-%d", gofakeit.Number(1, 2000))),
+	})
+	log.Println("user-group created: ", *cgo.Group.GroupName)
+	for i := 0; i < 5; i++ {
+		srv.AddUserToGroup(&iam.AddUserToGroupInput{
+			GroupName: cgo.Group.GroupName,
+			UserName:  users[i].UserName,
+		})
+		log.Println("user: ", *users[i].UserName, "added to the group: ", *cgo.Group.GroupName)
+
+		srv.AttachUserPolicy(&iam.AttachUserPolicyInput{
+			PolicyArn: iamPolicies[gofakeit.Number(0, len(iamPolicies)-1)].Arn,
+			UserName:  users[i+5].UserName,
+		})
+
+		srv.AttachGroupPolicy(&iam.AttachGroupPolicyInput{
+			GroupName: cgo.Group.GroupName,
+			PolicyArn: aws.String(*iamPolicies[i].Arn),
+		})
+	}
+	for i := 0; i < 4; i++ {
+		err := createIamRole(srv)
+		if err != nil {
+			return fmt.Errorf("error creating role: %v", err)
+		}
+	}
+
+	return nil
+}
+
+func createIamRole(srv *iam.IAM) error {
+	// Have to add more actions in future
+	rpd := `{
+		"Version":"2012-10-17",
+		"Statement":[
+			{
+				"Effect":"Allow",
+				"Principal":{"Service":["ec2.amazonaws.com"]},
+				"Action":["s3:*", "ec2:*"]
+			}
+		]
+	}`
+
+	cr, err := srv.CreateRole(&iam.CreateRoleInput{
+		AssumeRolePolicyDocument: aws.String(rpd),
+		RoleName:                 aws.String(gofakeit.FirstName()),
+	})
+	if err != nil {
+		return fmt.Errorf("error creating role: %v", err)
+	}
+	log.Println("Iam Role Created: ", *cr.Role.RoleId)
+	return nil
 }

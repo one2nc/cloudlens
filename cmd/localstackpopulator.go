@@ -25,8 +25,6 @@ var lspop = &cobra.Command{
 			log.Fatal("err: ", err)
 		}
 
-		// pop.ExploreAws(sess)
-
 		errCB := pop.CreateBuckets(sess)
 		if errCB != nil {
 			log.Fatal("err: ", errCB)
@@ -58,6 +56,11 @@ var lspop = &cobra.Command{
 		errCKP := pop.CreateKeyPair(sessions)
 		if errCKP != nil {
 			log.Fatal("err: ", errCKP)
+		}
+
+		errIAM := pop.IamAwsSrv(sess)
+		if errIAM != nil {
+			log.Fatal("err: ", errIAM)
 		}
 	},
 }
