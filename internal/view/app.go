@@ -378,6 +378,8 @@ func (a *App) DisplayS3Buckets(sess *session.Session, buckets []aws.BucketResp) 
 		table.SetCell((i + 1), 1, tview.NewTableCell(fmt.Sprintf("%v", b.CreationTime)).SetAlign(tview.AlignCenter))
 	}
 	//r := 0
+	table.SetSelectable(true, false)
+	table.Select(1, 1).SetFixed(1, 1)
 	a.Application.SetFocus(table)
 	table.SetBorderFocusColor(tcell.ColorSpringGreen)
 	s3DataT := tview.NewTable()
