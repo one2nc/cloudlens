@@ -50,7 +50,9 @@ func (a *App) Init() error {
 	}
 	a.Content.Stack.AddListener(a.Menu())
 	a.App.Init()
-	a.layout(ctx)
+	a.SetInputCapture(a.keyboard)
+	a.bindKeys()
+	//a.layout(ctx)
 	//a.tempLayout(ctx)
 	return nil
 }
@@ -687,6 +689,7 @@ func (a *App) tempLayout(ctx context.Context) {
 
 	main := tview.NewFlex().SetDirection(tview.FlexRow)
 	main.SetBorder(true)
+
 	main.AddItem(a.statusIndicator(), 1, 1, false)
 	main.AddItem(a.Content, 0, 10, true)
 	main.AddItem(flash, 1, 1, false)
@@ -753,6 +756,14 @@ func (a *App) buildHeader() tview.Primitive {
 	header.AddItem(tview.NewBox(), 0, 1, false)
 
 	return header
+}
+
+func (a *App) keyboard(evt *tcell.EventKey) *tcell.EventKey {
+	if k, ok := a.HasAction(ui.AsKey(evt)); ok && !a.Content.IsTopDialog() {
+		return k.Action(evt)
+	}
+
+	return evt
 }
 
 func (a *App) bindKeys() {
