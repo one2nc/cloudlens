@@ -310,24 +310,24 @@ func (a *App) DisplayEc2Instances(ins []aws.EC2Resp, sess *session.Session) *tvi
 	table.SetBorderFocusColor(tcell.ColorSpringGreen)
 	// flex.AddItem(table, 0, 1, true).SetDirection(tview.FlexRow)
 	//table data
-	table.SetCell(0, 0, tview.NewTableCell("Instance-Id").SetSelectable(false).SetTextColor(tcell.ColorOrangeRed).SetAlign(tview.AlignCenter))
-	table.SetCell(0, 1, tview.NewTableCell("Instance-State").SetSelectable(false).SetTextColor(tcell.ColorOrangeRed).SetAlign(tview.AlignCenter))
-	table.SetCell(0, 2, tview.NewTableCell("Instance-Type").SetSelectable(false).SetTextColor(tcell.ColorOrangeRed).SetAlign(tview.AlignCenter))
-	table.SetCell(0, 3, tview.NewTableCell("Availability-zone").SetSelectable(false).SetTextColor(tcell.ColorOrangeRed).SetAlign(tview.AlignCenter))
-	table.SetCell(0, 4, tview.NewTableCell("Public-DNS").SetSelectable(false).SetTextColor(tcell.ColorOrangeRed).SetAlign(tview.AlignCenter))
-	table.SetCell(0, 5, tview.NewTableCell("Public-IPV4").SetSelectable(false).SetTextColor(tcell.ColorOrangeRed).SetAlign(tview.AlignCenter))
-	table.SetCell(0, 6, tview.NewTableCell("Monitoring-State").SetSelectable(false).SetTextColor(tcell.ColorOrangeRed).SetAlign(tview.AlignCenter))
-	table.SetCell(0, 7, tview.NewTableCell("Launch-Time").SetSelectable(false).SetTextColor(tcell.ColorOrangeRed).SetAlign(tview.AlignCenter))
+	table.SetCell(0, 0, tview.NewTableCell("Instance-Id").SetExpansion(1).SetSelectable(false).SetTextColor(tcell.ColorOrangeRed).SetAlign(tview.AlignCenter))
+	table.SetCell(0, 1, tview.NewTableCell("Instance-State").SetExpansion(1).SetSelectable(false).SetTextColor(tcell.ColorOrangeRed).SetAlign(tview.AlignCenter))
+	table.SetCell(0, 2, tview.NewTableCell("Instance-Type").SetExpansion(1).SetSelectable(false).SetTextColor(tcell.ColorOrangeRed).SetAlign(tview.AlignCenter))
+	table.SetCell(0, 3, tview.NewTableCell("Availability-zone").SetExpansion(1).SetSelectable(false).SetTextColor(tcell.ColorOrangeRed).SetAlign(tview.AlignCenter))
+	table.SetCell(0, 4, tview.NewTableCell("Public-DNS").SetExpansion(1).SetSelectable(false).SetTextColor(tcell.ColorOrangeRed).SetAlign(tview.AlignCenter))
+	table.SetCell(0, 5, tview.NewTableCell("Public-IPV4").SetExpansion(1).SetSelectable(false).SetTextColor(tcell.ColorOrangeRed).SetAlign(tview.AlignCenter))
+	table.SetCell(0, 6, tview.NewTableCell("Monitoring-State").SetExpansion(1).SetSelectable(false).SetTextColor(tcell.ColorOrangeRed).SetAlign(tview.AlignCenter))
+	table.SetCell(0, 7, tview.NewTableCell("Launch-Time").SetExpansion(1).SetSelectable(false).SetTextColor(tcell.ColorOrangeRed).SetAlign(tview.AlignCenter))
 
 	for i, in := range ins {
-		table.SetCell((i + 1), 0, tview.NewTableCell(in.InstanceId).SetAlign(tview.AlignCenter))
-		table.SetCell((i + 1), 1, tview.NewTableCell(in.InstanceState).SetAlign(tview.AlignCenter))
-		table.SetCell((i + 1), 2, tview.NewTableCell(in.InstanceType).SetAlign(tview.AlignCenter))
-		table.SetCell((i + 1), 3, tview.NewTableCell(in.AvailabilityZone).SetAlign(tview.AlignCenter))
-		table.SetCell((i + 1), 4, tview.NewTableCell(in.PublicDNS).SetAlign(tview.AlignCenter))
-		table.SetCell((i + 1), 5, tview.NewTableCell(in.PublicIPv4).SetAlign(tview.AlignCenter))
-		table.SetCell((i + 1), 6, tview.NewTableCell(in.MonitoringState).SetAlign(tview.AlignCenter))
-		table.SetCell((i + 1), 7, tview.NewTableCell(in.LaunchTime).SetAlign(tview.AlignCenter))
+		table.SetCell((i + 1), 0, tview.NewTableCell(in.InstanceId).SetExpansion(1).SetAlign(tview.AlignCenter))
+		table.SetCell((i + 1), 1, tview.NewTableCell(in.InstanceState).SetExpansion(1).SetAlign(tview.AlignCenter))
+		table.SetCell((i + 1), 2, tview.NewTableCell(in.InstanceType).SetExpansion(1).SetAlign(tview.AlignCenter))
+		table.SetCell((i + 1), 3, tview.NewTableCell(in.AvailabilityZone).SetExpansion(1).SetAlign(tview.AlignCenter))
+		table.SetCell((i + 1), 4, tview.NewTableCell(in.PublicDNS).SetExpansion(1).SetAlign(tview.AlignCenter))
+		table.SetCell((i + 1), 5, tview.NewTableCell(in.PublicIPv4).SetExpansion(1).SetAlign(tview.AlignCenter))
+		table.SetCell((i + 1), 6, tview.NewTableCell(in.MonitoringState).SetExpansion(1).SetAlign(tview.AlignCenter))
+		table.SetCell((i + 1), 7, tview.NewTableCell(in.LaunchTime).SetExpansion(1).SetAlign(tview.AlignCenter))
 	}
 	table.SetSelectable(true, false)
 	a.Application.SetFocus(table)
@@ -476,13 +476,20 @@ func (a *App) DisplayS3Buckets(sess *session.Session, buckets []aws.BucketResp) 
 						s3DataT.Select(1, 1).SetFixed(1, 1)
 					}
 				}
-			} else if event.Key() == tcell.KeyCtrlA {
+			} else if event.Rune() == 76 { // press L
 				r, _ := table.GetSelection()
 				cell := table.GetCell(r, 0)
 				flex.Clear()
 				s3DataT.Clear()
 				a.Main.RemovePage("s3data")
 				a.DisplayLifecycleRules(table, flex, cell.Text, *sess)
+			} else if event.Rune() == 69 { // press E
+				r, _ := table.GetSelection()
+				cell := table.GetCell(r, 0)
+				flex.Clear()
+				s3DataT.Clear()
+				a.Main.RemovePage("s3data")
+				a.DisplayBucketEncryption(table, flex, cell.Text, *sess)
 			}
 			return event
 		})
@@ -595,11 +602,11 @@ func (a *App) DisplayLifecycleRules(table *tview.Table, flex *tview.Flex, bucket
 func (a *App) setTableHeaderForLifecycle(lifeCycleTable *tview.Table, bucketName string) *tview.Table {
 	lifeCycleTable.SetTitle(bucketName)
 	lifeCycleTable.SetTitleColor(tcell.ColorYellow)
-	lifeCycleTable.SetCell(0, 0, tview.NewTableCell("Lifecycle-Id").SetSelectable(false).SetTextColor(tcell.ColorOrangeRed).SetAlign(tview.AlignCenter))
-	lifeCycleTable.SetCell(0, 1, tview.NewTableCell("Status").SetSelectable(false).SetTextColor(tcell.ColorOrangeRed).SetAlign(tview.AlignCenter))
-	lifeCycleTable.SetCell(0, 2, tview.NewTableCell("Expiration-Days").SetSelectable(false).SetTextColor(tcell.ColorOrangeRed).SetAlign(tview.AlignCenter))
-	lifeCycleTable.SetCell(0, 3, tview.NewTableCell("Transition-Days").SetSelectable(false).SetTextColor(tcell.ColorOrangeRed).SetAlign(tview.AlignCenter))
-	lifeCycleTable.SetCell(0, 4, tview.NewTableCell("Transition-StorageClass").SetSelectable(false).SetTextColor(tcell.ColorOrangeRed).SetAlign(tview.AlignCenter))
+	lifeCycleTable.SetCell(0, 0, tview.NewTableCell("Lifecycle-Id").SetExpansion(1).SetSelectable(false).SetTextColor(tcell.ColorOrangeRed).SetAlign(tview.AlignCenter))
+	lifeCycleTable.SetCell(0, 1, tview.NewTableCell("Status").SetExpansion(1).SetSelectable(false).SetTextColor(tcell.ColorOrangeRed).SetAlign(tview.AlignCenter))
+	lifeCycleTable.SetCell(0, 2, tview.NewTableCell("Expiration-Days").SetExpansion(1).SetSelectable(false).SetTextColor(tcell.ColorOrangeRed).SetAlign(tview.AlignCenter))
+	lifeCycleTable.SetCell(0, 3, tview.NewTableCell("Transition-Days").SetExpansion(1).SetSelectable(false).SetTextColor(tcell.ColorOrangeRed).SetAlign(tview.AlignCenter))
+	lifeCycleTable.SetCell(0, 4, tview.NewTableCell("Transition-StorageClass").SetExpansion(1).SetSelectable(false).SetTextColor(tcell.ColorOrangeRed).SetAlign(tview.AlignCenter))
 
 	return lifeCycleTable
 }
@@ -612,15 +619,65 @@ func (a *App) setTableContentorLifecycle(table *tview.Table, rules []*s3.Lifecyc
 		if *rule.Status == "Enabled" {
 			statusColor = tcell.ColorDarkGreen
 		}
-		table.SetCell((indx + 2), 1, tview.NewTableCell(*rule.Status).SetTextColor(statusColor).SetAlign(tview.AlignCenter))
-		table.SetCell((indx + 2), 2, tview.NewTableCell(fmt.Sprintf("%v", *rule.Expiration.Days)).SetTextColor(tcell.ColorYellow).SetAlign(tview.AlignCenter))
-		table.SetCell((indx + 2), 3, tview.NewTableCell(strconv.Itoa(int(*rule.Transitions[0].Days))).SetTextColor(tcell.ColorYellow).SetAlign(tview.AlignCenter))
-		table.SetCell((indx + 2), 4, tview.NewTableCell(*rule.Transitions[0].StorageClass).SetTextColor(tcell.ColorYellow).SetAlign(tview.AlignCenter))
+		table.SetCell((indx + 2), 1, tview.NewTableCell(*rule.Status).SetExpansion(1).SetTextColor(statusColor).SetAlign(tview.AlignCenter))
+		table.SetCell((indx + 2), 2, tview.NewTableCell(fmt.Sprintf("%v", *rule.Expiration.Days)).SetExpansion(1).SetTextColor(tcell.ColorYellow).SetAlign(tview.AlignCenter))
+		table.SetCell((indx + 2), 3, tview.NewTableCell(strconv.Itoa(int(*rule.Transitions[0].Days))).SetExpansion(1).SetTextColor(tcell.ColorYellow).SetAlign(tview.AlignCenter))
+		table.SetCell((indx + 2), 4, tview.NewTableCell(*rule.Transitions[0].StorageClass).SetExpansion(1).SetTextColor(tcell.ColorYellow).SetAlign(tview.AlignCenter))
 		indx++
 	}
 
 	table.SetBorderFocusColor(tcell.ColorSpringGreen)
 
+	return table
+}
+func (a *App) DisplayBucketEncryption(table *tview.Table, flex *tview.Flex, bucketName string, sess session.Session) {
+	encryptionTable := tview.NewTable()
+	encryptionTable.SetBorder(true)
+	encryption := aws.GetBuckEncryption(sess, bucketName)
+	rules := encryption.Rules
+	a.setTableHeaderForEncryption(encryptionTable, bucketName)
+	a.setTableContentForEncryption(encryptionTable, rules)
+	flex.AddItem(a.Views()["pAndRMenu"], 0, 2, false)
+	inputPrompt := tview.NewInputField().
+		SetLabel("🐶>").
+		SetAcceptanceFunc(func(textToCheck string, lastChar rune) bool {
+			return true // accept any input
+		})
+	inputPrompt.SetFieldBackgroundColor(tcell.ColorBlack)
+	inputPrompt.SetBorder(true)
+	flex.AddItem(inputPrompt, 0, 1, false)
+	flex.AddItem(encryptionTable, 0, 9, true)
+	encryptionTable.SetInputCapture(func(event *tcell.EventKey) *tcell.EventKey { //Tiger
+		if event.Key() == tcell.KeyESC {
+			flex.Clear()
+			a.Main.RemovePage("encryptionDataView")
+			a.Main.SwitchToPage("main")
+			a.Application.SetFocus(table)
+		}
+		return event
+	})
+
+	a.Application.SetFocus(encryptionTable)
+	encryptionTable.SetSelectable(false, false)
+	a.Main.AddAndSwitchToPage("encryptionDataView", flex, true)
+}
+
+func (a *App) setTableHeaderForEncryption(encryptionTable *tview.Table, bucketName string) *tview.Table {
+	encryptionTable.SetTitle(bucketName)
+	encryptionTable.SetTitleColor(tcell.ColorYellow)
+	encryptionTable.SetCell(0, 0, tview.NewTableCell("SSEAlgorithm").SetExpansion(1).SetSelectable(false).SetTextColor(tcell.ColorOrangeRed).SetAlign(tview.AlignCenter))
+	encryptionTable.SetCell(0, 1, tview.NewTableCell("BucketKeyEnabled").SetExpansion(1).SetSelectable(false).SetTextColor(tcell.ColorOrangeRed).SetAlign(tview.AlignCenter))
+	return encryptionTable
+}
+
+func (a *App) setTableContentForEncryption(table *tview.Table, sse []*s3.ServerSideEncryptionRule) *tview.Table {
+	indx := 0
+	for _, rule := range sse {
+		table.SetCell((indx + 2), 0, tview.NewTableCell(*rule.ApplyServerSideEncryptionByDefault.SSEAlgorithm).SetTextColor(tcell.ColorYellow).SetAlign(tview.AlignCenter))
+		table.SetCell((indx + 2), 1, tview.NewTableCell(strconv.FormatBool(*rule.BucketKeyEnabled)).SetExpansion(1).SetAlign(tview.AlignCenter))
+		indx++
+	}
+	table.SetBorderFocusColor(tcell.ColorSpringGreen)
 	return table
 }
 
