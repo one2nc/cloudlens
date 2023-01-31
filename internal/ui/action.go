@@ -81,3 +81,10 @@ func (a KeyActions) Hints() model.MenuHints {
 	}
 	return hh
 }
+
+// Delete deletes actions by the given keys.
+func (a KeyActions) Delete(kk ...tcell.Key) {
+	for _, k := range kk {
+		delete(a, k)
+	}
+}

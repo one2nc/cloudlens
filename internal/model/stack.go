@@ -88,7 +88,7 @@ func (s *Stack) AddListener(l StackListener) {
 // Push adds a new item.
 func (s *Stack) Push(c Component) {
 	if top := s.Top(); top != nil {
-		//top.Stop()
+		top.Stop()
 	}
 
 	s.mx.Lock()

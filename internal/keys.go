@@ -5,5 +5,6 @@ type ContextKey string
 
 // A collection of context keys.
 const (
-	KeyApp ContextKey = "app"
+	KeyApp     ContextKey = "app"
+	KeySession ContextKey = "session"
 )

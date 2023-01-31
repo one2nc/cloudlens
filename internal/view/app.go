@@ -15,6 +15,7 @@ import (
 	"github.com/one2nc/cloud-lens/internal"
 	"github.com/one2nc/cloud-lens/internal/aws"
 	"github.com/one2nc/cloud-lens/internal/config"
+	"github.com/one2nc/cloud-lens/internal/model"
 
 	"github.com/one2nc/cloud-lens/internal/ui"
 	"github.com/rs/zerolog/log"
@@ -26,22 +27,31 @@ const (
 
 type App struct {
 	*ui.App
+	Content             *PageStack
 	cancelFn            context.CancelFunc
 	showHeader          bool
 	IsPageContentSorted bool
 }
 
 func NewApp() *App {
-	a := App{App: ui.NewApp(), IsPageContentSorted: false}
+	a := App{
+		App:                 ui.NewApp(),
+		Content:             NewPageStack(),
+		IsPageContentSorted: false,
+	}
 	a.Views()["statusIndicator"] = ui.NewStatusIndicator(a.App)
 	return &a
 }
 
 func (a *App) Init() error {
 	ctx := context.WithValue(context.Background(), internal.KeyApp, a)
-
+	if err := a.Content.Init(ctx); err != nil {
+		return err
+	}
+	a.Content.Stack.AddListener(a.Menu())
 	a.App.Init()
 	a.layout(ctx)
+	//a.tempLayout(ctx)
 	return nil
 }
 
@@ -675,11 +685,17 @@ func (a *App) tempLayout(ctx context.Context) {
 	go flash.Watch(ctx, a.Flash().Channel())
 
 	main := tview.NewFlex().SetDirection(tview.FlexRow)
+	main.SetBorder(true)
 	main.AddItem(a.statusIndicator(), 1, 1, false)
+	main.AddItem(a.Content, 0, 10, true)
+	main.AddItem(flash, 1, 1, false)
+
 	a.Main.AddPage("main", main, true, false)
 	a.Main.AddPage("splash", ui.NewSplash("0.0.1"), true, true)
-	main.AddItem(flash, 1, 1, false)
 	a.toggleHeader(true)
+
+	//Testing only
+	a.inject(NewHelp(a))
 }
 
 // QueueUpdateDraw queues up a ui action and redraw the ui.
@@ -731,7 +747,9 @@ func (a *App) buildHeader() tview.Primitive {
 	if !a.showHeader {
 		return header
 	}
-	header.AddItem(a.Menu(), 0, 1, false)
+	header.AddItem(tview.NewBox(), 0, 1, false)
+	header.AddItem(a.Menu(), 0, 2, false)
+	header.AddItem(tview.NewBox(), 0, 1, false)
 
 	return header
 }
@@ -748,6 +766,42 @@ func (a *App) toggleHeaderCmd(evt *tcell.EventKey) *tcell.EventKey {
 		a.showHeader = !a.showHeader
 		a.toggleHeader(a.showHeader)
 	})
+
+	return nil
+}
+
+func (a *App) helpCmd(evt *tcell.EventKey) *tcell.EventKey {
+	log.Info().Msg("hellp ? pressed")
+	top := a.Content.Top()
+
+	if top != nil && top.Name() == "help" {
+		a.Content.Pop()
+		return nil
+	}
+
+	if err := a.inject(NewHelp(a)); err != nil {
+		a.Flash().Err(err)
+	}
+
+	return nil
+}
+
+func (a *App) inject(c model.Component) error {
+	ctx := context.WithValue(context.Background(), internal.KeyApp, a)
+	if err := c.Init(ctx); err != nil {
+		log.Error().Err(err).Msgf("component init failed for %q", c.Name())
+		//dialog.ShowError(a.Styles.Dialog(), a.Content.Pages, err.Error())
+	}
+	a.Content.Push(c)
+
+	return nil
+}
+
+// PrevCmd pops the command stack.
+func (a *App) PrevCmd(evt *tcell.EventKey) *tcell.EventKey {
+	if !a.Content.IsLast() {
+		a.Content.Pop()
+	}
 
 	return nil
 }
