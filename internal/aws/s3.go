@@ -53,14 +53,12 @@ func ListBuckets(sess session.Session) ([]BucketResp, error) {
 }
 
 func GetInfoAboutBucket(sess session.Session, bucketName string, delimiter string, prefix string) *s3.ListObjectsV2Output {
-	// fmt.Println("Bucket Name: ", bucketName)
 	s3Serv := *s3.New(&sess)
 	result, err := s3Serv.ListObjectsV2(&s3.ListObjectsV2Input{Bucket: aws.String(bucketName), Delimiter: aws.String(delimiter), Prefix: aws.String(prefix)})
 	if err != nil {
 		fmt.Println("Error is:", err)
 		return nil
 	}
-	//fmt.Println(result)
 	return result
 }
 
@@ -76,4 +74,20 @@ func PutObjects(sess session.Session) {
 		fmt.Println(err)
 	}
 	fmt.Println("uploaded object")
+}
+
+func GetBuckEncryption(sess session.Session, bucketName *string) *s3.ServerSideEncryptionConfiguration {
+	s3Serv := *s3.New(&sess)
+	sse, _ := s3Serv.GetBucketEncryption(&s3.GetBucketEncryptionInput{
+		Bucket: bucketName,
+	})
+	return sse.ServerSideEncryptionConfiguration
+}
+
+func GetBuckLifecycle(sess session.Session, bucketName string) *s3.GetBucketLifecycleConfigurationOutput {
+	s3Serv := *s3.New(&sess)
+	blc, _ := s3Serv.GetBucketLifecycleConfiguration(&s3.GetBucketLifecycleConfigurationInput{
+		Bucket: aws.String(bucketName),
+	})
+	return blc
 }

@@ -330,6 +330,7 @@ func (a *App) DisplayEc2Instances(ins []aws.EC2Resp, sess *session.Session) *tvi
 		table.SetCell((i + 1), 7, tview.NewTableCell(in.LaunchTime).SetAlign(tview.AlignCenter))
 	}
 	table.SetSelectable(true, false)
+	a.Application.SetFocus(table)
 	table.Select(1, 1).SetFixed(1, 1)
 	table.Select(1, 1).SetFixed(1, 1).SetDoneFunc(func(key tcell.Key) {
 		if table.GetCell(1, 1).Text != "" {
@@ -475,6 +476,13 @@ func (a *App) DisplayS3Buckets(sess *session.Session, buckets []aws.BucketResp) 
 						s3DataT.Select(1, 1).SetFixed(1, 1)
 					}
 				}
+			} else if event.Key() == tcell.KeyCtrlA {
+				r, _ := table.GetSelection()
+				cell := table.GetCell(r, 0)
+				flex.Clear()
+				s3DataT.Clear()
+				a.Main.RemovePage("s3data")
+				a.DisplayLifecycleRules(table, flex, cell.Text, *sess)
 			}
 			return event
 		})
@@ -551,6 +559,65 @@ func (a *App) DisplayS3Objects(s3DataTable *tview.Table, flex *tview.Flex, folde
 		s3DataT.Select(1, 1).SetFixed(1, 1)
 		a.Main.AddAndSwitchToPage("s3dataView", flex, true)
 	}
+}
+func (a *App) DisplayLifecycleRules(table *tview.Table, flex *tview.Flex, bucketName string, sess session.Session) {
+	lifeCycleTable := tview.NewTable()
+	lifeCycleTable.SetBorder(true)
+	lifeCycle := aws.GetBuckLifecycle(sess, bucketName)
+	rules := lifeCycle.Rules
+	a.setTableHeaderForLifecycle(lifeCycleTable, bucketName)
+	a.setTableContentorLifecycle(lifeCycleTable, rules)
+	flex.AddItem(a.Views()["pAndRMenu"], 0, 2, false)
+	inputPrompt := tview.NewInputField().
+		SetLabel("🐶>").
+		SetAcceptanceFunc(func(textToCheck string, lastChar rune) bool {
+			return true // accept any input
+		})
+	inputPrompt.SetFieldBackgroundColor(tcell.ColorBlack)
+	inputPrompt.SetBorder(true)
+	flex.AddItem(inputPrompt, 0, 1, false)
+	flex.AddItem(lifeCycleTable, 0, 9, true)
+	lifeCycleTable.SetInputCapture(func(event *tcell.EventKey) *tcell.EventKey { //Tiger
+		if event.Key() == tcell.KeyESC {
+			flex.Clear()
+			a.Main.RemovePage("lifeCycleDataView")
+			a.Main.SwitchToPage("main")
+			a.Application.SetFocus(table)
+		}
+		return event
+	})
+
+	a.Application.SetFocus(lifeCycleTable)
+	lifeCycleTable.SetSelectable(false, false)
+	a.Main.AddAndSwitchToPage("lifeCycleDataView", flex, true)
+}
+
+func (a *App) setTableHeaderForLifecycle(lifeCycleTable *tview.Table, bucketName string) *tview.Table {
+	lifeCycleTable.SetTitle(bucketName)
+	lifeCycleTable.SetTitleColor(tcell.ColorYellow)
+	lifeCycleTable.SetCell(0, 0, tview.NewTableCell("Lifecycle-Id").SetSelectable(false).SetTextColor(tcell.ColorOrangeRed).SetAlign(tview.AlignCenter))
+	lifeCycleTable.SetCell(0, 1, tview.NewTableCell("Status").SetSelectable(false).SetTextColor(tcell.ColorOrangeRed).SetAlign(tview.AlignCenter))
+	lifeCycleTable.SetCell(0, 2, tview.NewTableCell("Expiration-Days").SetSelectable(false).SetTextColor(tcell.ColorOrangeRed).SetAlign(tview.AlignCenter))
+	lifeCycleTable.SetCell(0, 3, tview.NewTableCell("Transition-Days").SetSelectable(false).SetTextColor(tcell.ColorOrangeRed).SetAlign(tview.AlignCenter))
+	lifeCycleTable.SetCell(0, 4, tview.NewTableCell("Transition-StorageClass").SetSelectable(false).SetTextColor(tcell.ColorOrangeRed).SetAlign(tview.AlignCenter))
+
+	return lifeCycleTable
+}
+
+func (a *App) setTableContentorLifecycle(table *tview.Table, rules []*s3.LifecycleRule) *tview.Table {
+	indx := 0
+	for _, rule := range rules {
+		table.SetCell((indx + 2), 0, tview.NewTableCell(*rule.ID).SetTextColor(tcell.ColorYellow).SetAlign(tview.AlignCenter))
+		table.SetCell((indx + 2), 1, tview.NewTableCell(*rule.Status).SetTextColor(tcell.ColorYellow).SetAlign(tview.AlignCenter))
+		table.SetCell((indx + 2), 2, tview.NewTableCell(fmt.Sprintf("%v", *rule.Expiration.Days)).SetTextColor(tcell.ColorYellow).SetAlign(tview.AlignCenter))
+		table.SetCell((indx + 2), 3, tview.NewTableCell(strconv.Itoa(int(*rule.Transitions[0].Days))).SetTextColor(tcell.ColorYellow).SetAlign(tview.AlignCenter))
+		table.SetCell((indx + 2), 4, tview.NewTableCell(*rule.Transitions[0].StorageClass).SetTextColor(tcell.ColorYellow).SetAlign(tview.AlignCenter))
+		indx++
+	}
+
+	table.SetBorderFocusColor(tcell.ColorSpringGreen)
+
+	return table
 }
 
 func (a *App) DisplayS3ObjectForEmptyBuc(s3DataT *tview.Table, flex *tview.Flex, bucketName string, sess session.Session) {
