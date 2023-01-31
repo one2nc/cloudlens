@@ -528,7 +528,7 @@ func (a *App) DisplayS3Objects(s3DataTable *tview.Table, flex *tview.Flex, folde
 			}
 			return event
 		})
-		s3DataT.SetInputCapture(func(event *tcell.EventKey) *tcell.EventKey { //Tiger
+		s3DataT.SetInputCapture(func(event *tcell.EventKey) *tcell.EventKey {
 			if event.Key() == tcell.KeyEnter {
 				r, _ := s3DataT.GetSelection()
 				cell := s3DataT.GetCell(r, 0)
@@ -584,7 +584,7 @@ func (a *App) DisplayLifecycleRules(table *tview.Table, flex *tview.Flex, bucket
 	inputPrompt.SetBorder(true)
 	flex.AddItem(inputPrompt, 0, 1, false)
 	flex.AddItem(lifeCycleTable, 0, 9, true)
-	lifeCycleTable.SetInputCapture(func(event *tcell.EventKey) *tcell.EventKey { //Tiger
+	lifeCycleTable.SetInputCapture(func(event *tcell.EventKey) *tcell.EventKey {
 		if event.Key() == tcell.KeyESC {
 			flex.Clear()
 			a.Main.RemovePage("lifeCycleDataView")
@@ -647,7 +647,7 @@ func (a *App) DisplayBucketEncryption(table *tview.Table, flex *tview.Flex, buck
 	inputPrompt.SetBorder(true)
 	flex.AddItem(inputPrompt, 0, 1, false)
 	flex.AddItem(encryptionTable, 0, 9, true)
-	encryptionTable.SetInputCapture(func(event *tcell.EventKey) *tcell.EventKey { //Tiger
+	encryptionTable.SetInputCapture(func(event *tcell.EventKey) *tcell.EventKey {
 		if event.Key() == tcell.KeyESC {
 			flex.Clear()
 			a.Main.RemovePage("encryptionDataView")
