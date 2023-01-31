@@ -657,7 +657,8 @@ func (a *App) setTableContentForS3(table *tview.Table, Folder []*s3.CommonPrefix
 		keyA := strings.Split(*fi.Key, "/")
 		table.SetCell((indx + 2), 0, tview.NewTableCell(keyA[len(keyA)-1]).SetTextColor(tcell.ColorAntiqueWhite).SetAlign(tview.AlignCenter))
 		table.SetCell((indx + 2), 1, tview.NewTableCell("File").SetTextColor(tcell.ColorAntiqueWhite).SetAlign(tview.AlignCenter))
-		table.SetCell((indx + 2), 2, tview.NewTableCell(fi.LastModified.String()).SetTextColor(tcell.ColorAntiqueWhite).SetAlign(tview.AlignCenter))
+		IST := getIST(fi.LastModified)
+		table.SetCell((indx + 2), 2, tview.NewTableCell(IST).SetTextColor(tcell.ColorAntiqueWhite).SetAlign(tview.AlignCenter))
 		table.SetCell((indx + 2), 3, tview.NewTableCell(strconv.Itoa(int(*fi.Size))).SetTextColor(tcell.ColorAntiqueWhite).SetAlign(tview.AlignCenter))
 		table.SetCell((indx + 2), 4, tview.NewTableCell(*fi.StorageClass).SetTextColor(tcell.ColorAntiqueWhite).SetAlign(tview.AlignCenter))
 		indx++
@@ -808,4 +809,10 @@ func (a *App) PrevCmd(evt *tcell.EventKey) *tcell.EventKey {
 
 func (a *App) statusIndicator() *ui.StatusIndicator {
 	return a.Views()["statusIndicator"].(*ui.StatusIndicator)
+}
+
+func getIST(launchTime *time.Time) string {
+	loc, _ := time.LoadLocation("Asia/Kolkata")
+	IST := launchTime.In(loc)
+	return IST.Format("Mon Jan _2 15:04:05 2006")
 }
