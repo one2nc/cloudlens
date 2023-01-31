@@ -83,3 +83,13 @@ func GetSingleInstance(sess session.Session, insId string) *ec2.DescribeInstance
 	}
 	return result
 }
+
+func GetSecGrps(sess session.Session) []*ec2.SecurityGroup {
+	ec2Serv := *ec2.New(&sess)
+	result, err := ec2Serv.DescribeSecurityGroups(&ec2.DescribeSecurityGroupsInput{})
+	if err != nil {
+		fmt.Println("Error in fetching Security Groups: ", " err: ", err)
+		return nil
+	}
+	return result.SecurityGroups
+}
