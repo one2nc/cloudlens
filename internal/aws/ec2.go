@@ -93,3 +93,66 @@ func GetSecGrps(sess session.Session) []*ec2.SecurityGroup {
 	}
 	return result.SecurityGroups
 }
+
+/*
+Volumes(ebs) are region specific
+Localstack doesn't have default volumes, so at some regions, there won't be any volumes.
+*/
+func GetVolumes(sess session.Session) []*ec2.Volume {
+	ec2Serv := *ec2.New(&sess)
+	result, err := ec2Serv.DescribeVolumes(&ec2.DescribeVolumesInput{})
+	if err != nil {
+		fmt.Println("Error in fetching Volumes: ", " err: ", err)
+		return nil
+	}
+	return result.Volumes
+}
+
+/*
+Snapshots are region specific
+Localstack does have default snapshots, so we can see some of the snapshots that we never created
+*/
+func GetSnapshots(sess session.Session) []*ec2.Snapshot {
+	ec2Serv := *ec2.New(&sess)
+	result, err := ec2Serv.DescribeSnapshots(&ec2.DescribeSnapshotsInput{})
+	if err != nil {
+		fmt.Println("Error in fetching Volumes: ", " err: ", err)
+		return nil
+	}
+	return result.Snapshots
+}
+
+/*
+	AMIs are region specific
+	Localstack does have default some AMIs, so we can see some of the AMIs that we never created
+*/
+
+func GetAMIs(sess session.Session) []*ec2.Image {
+	ec2Serv := *ec2.New(&sess)
+	result, err := ec2Serv.DescribeImages(&ec2.DescribeImagesInput{})
+	if err != nil {
+		fmt.Println("Error in fetching AMIs: ", " err: ", err)
+		return nil
+	}
+	return result.Images
+}
+
+func GetVPCs(sess session.Session) []*ec2.Vpc {
+	ec2Serv := *ec2.New(&sess)
+	result, err := ec2Serv.DescribeVpcs(&ec2.DescribeVpcsInput{})
+	if err != nil {
+		fmt.Println("Error in fetching VPCs: ", " err: ", err)
+		return nil
+	}
+	return result.Vpcs
+}
+
+func GetSubnets(sess session.Session) []*ec2.Subnet {
+	ec2Serv := *ec2.New(&sess)
+	result, err := ec2Serv.DescribeSubnets(&ec2.DescribeSubnetsInput{})
+	if err != nil {
+		fmt.Println("Error in fetching Subnets: ", " err: ", err)
+		return nil
+	}
+	return result.Subnets
+}
