@@ -608,7 +608,11 @@ func (a *App) setTableContentorLifecycle(table *tview.Table, rules []*s3.Lifecyc
 	indx := 0
 	for _, rule := range rules {
 		table.SetCell((indx + 2), 0, tview.NewTableCell(*rule.ID).SetTextColor(tcell.ColorYellow).SetAlign(tview.AlignCenter))
-		table.SetCell((indx + 2), 1, tview.NewTableCell(*rule.Status).SetTextColor(tcell.ColorYellow).SetAlign(tview.AlignCenter))
+		statusColor := tcell.ColorRed
+		if *rule.Status == "Enabled" {
+			statusColor = tcell.ColorDarkGreen
+		}
+		table.SetCell((indx + 2), 1, tview.NewTableCell(*rule.Status).SetTextColor(statusColor).SetAlign(tview.AlignCenter))
 		table.SetCell((indx + 2), 2, tview.NewTableCell(fmt.Sprintf("%v", *rule.Expiration.Days)).SetTextColor(tcell.ColorYellow).SetAlign(tview.AlignCenter))
 		table.SetCell((indx + 2), 3, tview.NewTableCell(strconv.Itoa(int(*rule.Transitions[0].Days))).SetTextColor(tcell.ColorYellow).SetAlign(tview.AlignCenter))
 		table.SetCell((indx + 2), 4, tview.NewTableCell(*rule.Transitions[0].StorageClass).SetTextColor(tcell.ColorYellow).SetAlign(tview.AlignCenter))
