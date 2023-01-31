@@ -76,11 +76,12 @@ func PutObjects(sess session.Session) {
 	fmt.Println("uploaded object")
 }
 
-func GetBuckEncryption(sess session.Session, bucketName *string) *s3.ServerSideEncryptionConfiguration {
+func GetBuckEncryption(sess session.Session, bucketName string) *s3.ServerSideEncryptionConfiguration {
 	s3Serv := *s3.New(&sess)
 	sse, _ := s3Serv.GetBucketEncryption(&s3.GetBucketEncryptionInput{
-		Bucket: bucketName,
+		Bucket: &bucketName,
 	})
+	//fmt.Println("sse string is :", sse.GoString())
 	return sse.ServerSideEncryptionConfiguration
 }
 
