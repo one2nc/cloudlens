@@ -661,15 +661,15 @@ func (a *App) setTableHeaderForLifecycle(lifeCycleTable *tview.Table, bucketName
 func (a *App) setTableContentorLifecycle(table *tview.Table, rules []*s3.LifecycleRule) *tview.Table {
 	indx := 0
 	for _, rule := range rules {
-		table.SetCell((indx + 2), 0, tview.NewTableCell(*rule.ID).SetTextColor(tcell.ColorYellow).SetAlign(tview.AlignCenter))
+		table.SetCell((indx + 2), 0, tview.NewTableCell(*rule.ID).SetAlign(tview.AlignCenter))
 		statusColor := tcell.ColorRed
 		if *rule.Status == "Enabled" {
 			statusColor = tcell.ColorDarkGreen
 		}
 		table.SetCell((indx + 2), 1, tview.NewTableCell(*rule.Status).SetExpansion(1).SetTextColor(statusColor).SetAlign(tview.AlignCenter))
-		table.SetCell((indx + 2), 2, tview.NewTableCell(fmt.Sprintf("%v", *rule.Expiration.Days)).SetExpansion(1).SetTextColor(tcell.ColorYellow).SetAlign(tview.AlignCenter))
-		table.SetCell((indx + 2), 3, tview.NewTableCell(strconv.Itoa(int(*rule.Transitions[0].Days))).SetExpansion(1).SetTextColor(tcell.ColorYellow).SetAlign(tview.AlignCenter))
-		table.SetCell((indx + 2), 4, tview.NewTableCell(*rule.Transitions[0].StorageClass).SetExpansion(1).SetTextColor(tcell.ColorYellow).SetAlign(tview.AlignCenter))
+		table.SetCell((indx + 2), 2, tview.NewTableCell(fmt.Sprintf("%v", *rule.Expiration.Days)).SetExpansion(1).SetAlign(tview.AlignCenter))
+		table.SetCell((indx + 2), 3, tview.NewTableCell(strconv.Itoa(int(*rule.Transitions[0].Days))).SetExpansion(1).SetAlign(tview.AlignCenter))
+		table.SetCell((indx + 2), 4, tview.NewTableCell(*rule.Transitions[0].StorageClass).SetExpansion(1).SetAlign(tview.AlignCenter))
 		indx++
 	}
 
@@ -720,7 +720,7 @@ func (a *App) setTableHeaderForEncryption(encryptionTable *tview.Table, bucketNa
 func (a *App) setTableContentForEncryption(table *tview.Table, sse []*s3.ServerSideEncryptionRule) *tview.Table {
 	indx := 0
 	for _, rule := range sse {
-		table.SetCell((indx + 2), 0, tview.NewTableCell(*rule.ApplyServerSideEncryptionByDefault.SSEAlgorithm).SetTextColor(tcell.ColorYellow).SetAlign(tview.AlignCenter))
+		table.SetCell((indx + 2), 0, tview.NewTableCell(*rule.ApplyServerSideEncryptionByDefault.SSEAlgorithm).SetAlign(tview.AlignCenter))
 		table.SetCell((indx + 2), 1, tview.NewTableCell(strconv.FormatBool(*rule.BucketKeyEnabled)).SetExpansion(1).SetAlign(tview.AlignCenter))
 		indx++
 	}
