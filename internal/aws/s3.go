@@ -23,12 +23,6 @@ func (b ByBucketName) Len() int           { return len(b) }
 func (b ByBucketName) Swap(i, j int)      { b[i], b[j] = b[j], b[i] }
 func (b ByBucketName) Less(i, j int) bool { return b[i].BucketName < b[j].BucketName }
 
-type S3Service interface {
-	ListBuckets(sess session.Session) ([]BucketResp, error)
-	GetInfoAboutBucket(sess session.Session)
-	PutObjects(sess session.Session)
-}
-
 func ListBuckets(sess session.Session) ([]BucketResp, error) {
 	var bucketInfo []BucketResp
 	s3Serv := *s3.New(&sess)
