@@ -2,9 +2,9 @@ package view
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 	"sort"
-	"strconv"
 	"strings"
 	"time"
 
@@ -33,6 +33,11 @@ type App struct {
 	cancelFn            context.CancelFunc
 	showHeader          bool
 	IsPageContentSorted bool
+}
+
+type BucketInfoJson struct {
+	LifeCycleJson  *s3.ServerSideEncryptionConfiguration
+	EncryptionJson []*s3.LifecycleRule
 }
 
 func NewApp() *App {
@@ -112,16 +117,16 @@ func (a *App) layout(ctx context.Context) *tview.Flex {
 			sess, _ = config.GetSession(*currentProfile, *currentRegion, cfg.AwsConfig)
 			ins, _ = aws.GetInstances(*sess)
 			buckets, _ = aws.ListBuckets(*sess)
-			secGrp =aws.GetSecGrps(*sess)
+			secGrp = aws.GetSecGrps(*sess)
 			if servicePage.ItemAt(0) != nil {
 				servicePage.RemoveItemAtIndex(0)
 			}
 
 			if servicePageContent.GetCell(0, 1).Text == "Creation-Time" {
 				servicePageContent = a.DisplayS3Buckets(sess, buckets)
-			} else if servicePageContent.GetCell(0, 0).Text == "Group-Id"{
-				servicePageContent = a.DisplaySecurityGroup(sess,secGrp)
-			}else {
+			} else if servicePageContent.GetCell(0, 0).Text == "Group-Id" {
+				servicePageContent = a.DisplaySecurityGroup(sess, secGrp)
+			} else {
 				servicePageContent = a.DisplayEc2Instances(ins, sess)
 			}
 			servicePageContent.SetBorderFocusColor(tcell.ColorDarkSeaGreen)
@@ -331,7 +336,7 @@ func (a *App) DisplaySecurityGroup(sess *session.Session, secGrp []*ec2.Security
 	table.Select(1, 1).SetFixed(1, 1)
 	table.SetSelectedFunc(func(row, column int) {
 		grpId := secGrp[row-2].GroupId
-		a.DisplaySecGrpJson(sess,*grpId)
+		a.DisplaySecGrpJson(sess, *grpId)
 	})
 	return table
 }
@@ -397,7 +402,6 @@ func (a *App) setTableContentForSecGrp(table *tview.Table, secGrp []*ec2.Securit
 	table.SetBorderFocusColor(tcell.ColorSpringGreen)
 	return table
 }
-
 
 func (a *App) DisplayEc2Instances(ins []aws.EC2Resp, sess *session.Session) *tview.Table {
 
@@ -570,26 +574,57 @@ func (a *App) DisplayS3Buckets(sess *session.Session, buckets []aws.BucketResp) 
 						s3DataT.Select(1, 1).SetFixed(1, 1)
 					}
 				}
-			} else if event.Rune() == 76 { // press L
+			} else if event.Rune() == 68 { // press D
 				r, _ := table.GetSelection()
 				cell := table.GetCell(r, 0)
 				flex.Clear()
 				s3DataT.Clear()
 				a.Main.RemovePage("s3data")
-				a.DisplayLifecycleRules(table, flex, cell.Text, *sess)
-			} else if event.Rune() == 69 { // press E
-				r, _ := table.GetSelection()
-				cell := table.GetCell(r, 0)
-				flex.Clear()
-				s3DataT.Clear()
-				a.Main.RemovePage("s3data")
-				a.DisplayBucketEncryption(table, flex, cell.Text, *sess)
+				a.DisplayS3Json(sess, cell.Text)
 			}
 			return event
 		})
 	}
 
 	return table
+}
+
+func (a *App) DisplayS3Json(sess *session.Session, bucketName string) {
+	json1 := aws.GetBuckEncryption(*sess, bucketName)
+	json2 := aws.GetBuckLifecycle(*sess, bucketName)
+	res := concatJson(json1, json2.Rules)
+	flex := tview.NewFlex().SetDirection(tview.FlexRow)
+	tvForEc2Json := tview.NewTextView()
+	tvForEc2Json.SetBorder(true)
+	tvForEc2Json.SetBorderFocusColor(tcell.ColorSpringGreen)
+	tvForEc2Json.SetTitle(bucketName)
+	tvForEc2Json.SetTitleColor(tcell.ColorLightSkyBlue)
+	tvForEc2Json.SetText(res)
+	flex.AddItem(a.Views()["pAndRMenu"], 0, 2, false)
+	inputPrompt := tview.NewInputField().
+		SetLabel("🐶>").
+		SetAcceptanceFunc(func(textToCheck string, lastChar rune) bool {
+			return true
+		})
+	inputPrompt.SetFieldBackgroundColor(tcell.ColorBlack)
+	inputPrompt.SetBorder(true)
+
+	flex.AddItem(inputPrompt, 0, 1, false)
+	buckets, _ := aws.ListBuckets(*sess)
+	ins, _ := aws.GetInstances(*sess)
+	a.SearchUtility(inputPrompt, sess, buckets, flex, nil, ins)
+	flex.AddItem(tvForEc2Json, 0, 9, true)
+	a.Main.AddAndSwitchToPage("s3Json", flex, true)
+	flex.SetInputCapture(func(event *tcell.EventKey) *tcell.EventKey {
+		if event.Key() == tcell.KeyESC {
+			a.Main.SwitchToPage("main")
+			a.Application.SetFocus(a.Views()["content"].(*tview.Flex).ItemAt(0))
+		}
+		if event.Key() == tcell.KeyTab {
+			a.Application.SetFocus(inputPrompt)
+		}
+		return event
+	})
 }
 
 func (a *App) DisplayS3Objects(s3DataTable *tview.Table, flex *tview.Flex, folderName string, fileArrayInfo []string, sess session.Session, bucketName string) {
@@ -660,119 +695,6 @@ func (a *App) DisplayS3Objects(s3DataTable *tview.Table, flex *tview.Flex, folde
 		s3DataT.Select(1, 1).SetFixed(1, 1)
 		a.Main.AddAndSwitchToPage("s3dataView", flex, true)
 	}
-}
-func (a *App) DisplayLifecycleRules(table *tview.Table, flex *tview.Flex, bucketName string, sess session.Session) {
-	lifeCycleTable := tview.NewTable()
-	lifeCycleTable.SetBorder(true)
-	lifeCycle := aws.GetBuckLifecycle(sess, bucketName)
-	rules := lifeCycle.Rules
-	a.setTableHeaderForLifecycle(lifeCycleTable, bucketName)
-	a.setTableContentorLifecycle(lifeCycleTable, rules)
-	flex.AddItem(a.Views()["pAndRMenu"], 0, 2, false)
-	inputPrompt := tview.NewInputField().
-		SetLabel("🐶>").
-		SetAcceptanceFunc(func(textToCheck string, lastChar rune) bool {
-			return true // accept any input
-		})
-	inputPrompt.SetFieldBackgroundColor(tcell.ColorBlack)
-	inputPrompt.SetBorder(true)
-	flex.AddItem(inputPrompt, 0, 1, false)
-	flex.AddItem(lifeCycleTable, 0, 9, true)
-	lifeCycleTable.SetInputCapture(func(event *tcell.EventKey) *tcell.EventKey {
-		if event.Key() == tcell.KeyESC {
-			flex.Clear()
-			a.Main.RemovePage("lifeCycleDataView")
-			a.Main.SwitchToPage("main")
-			a.Application.SetFocus(table)
-		}
-		return event
-	})
-
-	a.Application.SetFocus(lifeCycleTable)
-	lifeCycleTable.SetSelectable(false, false)
-	a.Main.AddAndSwitchToPage("lifeCycleDataView", flex, true)
-}
-
-func (a *App) setTableHeaderForLifecycle(lifeCycleTable *tview.Table, bucketName string) *tview.Table {
-	lifeCycleTable.SetTitle(bucketName)
-	lifeCycleTable.SetTitleColor(tcell.ColorYellow)
-	lifeCycleTable.SetCell(0, 0, tview.NewTableCell("Lifecycle-Id").SetExpansion(1).SetSelectable(false).SetTextColor(tcell.ColorOrangeRed).SetAlign(tview.AlignCenter))
-	lifeCycleTable.SetCell(0, 1, tview.NewTableCell("Status").SetExpansion(1).SetSelectable(false).SetTextColor(tcell.ColorOrangeRed).SetAlign(tview.AlignCenter))
-	lifeCycleTable.SetCell(0, 2, tview.NewTableCell("Expiration-Days").SetExpansion(1).SetSelectable(false).SetTextColor(tcell.ColorOrangeRed).SetAlign(tview.AlignCenter))
-	lifeCycleTable.SetCell(0, 3, tview.NewTableCell("Transition-Days").SetExpansion(1).SetSelectable(false).SetTextColor(tcell.ColorOrangeRed).SetAlign(tview.AlignCenter))
-	lifeCycleTable.SetCell(0, 4, tview.NewTableCell("Transition-StorageClass").SetExpansion(1).SetSelectable(false).SetTextColor(tcell.ColorOrangeRed).SetAlign(tview.AlignCenter))
-
-	return lifeCycleTable
-}
-
-func (a *App) setTableContentorLifecycle(table *tview.Table, rules []*s3.LifecycleRule) *tview.Table {
-	indx := 0
-	for _, rule := range rules {
-		table.SetCell((indx + 2), 0, tview.NewTableCell(*rule.ID).SetAlign(tview.AlignCenter))
-		statusColor := tcell.ColorRed
-		if *rule.Status == "Enabled" {
-			statusColor = tcell.ColorDarkGreen
-		}
-		table.SetCell((indx + 2), 1, tview.NewTableCell(*rule.Status).SetExpansion(1).SetTextColor(statusColor).SetAlign(tview.AlignCenter))
-		table.SetCell((indx + 2), 2, tview.NewTableCell(fmt.Sprintf("%v", *rule.Expiration.Days)).SetExpansion(1).SetAlign(tview.AlignCenter))
-		table.SetCell((indx + 2), 3, tview.NewTableCell(strconv.Itoa(int(*rule.Transitions[0].Days))).SetExpansion(1).SetAlign(tview.AlignCenter))
-		table.SetCell((indx + 2), 4, tview.NewTableCell(*rule.Transitions[0].StorageClass).SetExpansion(1).SetAlign(tview.AlignCenter))
-		indx++
-	}
-
-	table.SetBorderFocusColor(tcell.ColorSpringGreen)
-
-	return table
-}
-func (a *App) DisplayBucketEncryption(table *tview.Table, flex *tview.Flex, bucketName string, sess session.Session) {
-	encryptionTable := tview.NewTable()
-	encryptionTable.SetBorder(true)
-	encryption := aws.GetBuckEncryption(sess, bucketName)
-	rules := encryption.Rules
-	a.setTableHeaderForEncryption(encryptionTable, bucketName)
-	a.setTableContentForEncryption(encryptionTable, rules)
-	flex.AddItem(a.Views()["pAndRMenu"], 0, 2, false)
-	inputPrompt := tview.NewInputField().
-		SetLabel("🐶>").
-		SetAcceptanceFunc(func(textToCheck string, lastChar rune) bool {
-			return true // accept any input
-		})
-	inputPrompt.SetFieldBackgroundColor(tcell.ColorBlack)
-	inputPrompt.SetBorder(true)
-	flex.AddItem(inputPrompt, 0, 1, false)
-	flex.AddItem(encryptionTable, 0, 9, true)
-	encryptionTable.SetInputCapture(func(event *tcell.EventKey) *tcell.EventKey {
-		if event.Key() == tcell.KeyESC {
-			flex.Clear()
-			a.Main.RemovePage("encryptionDataView")
-			a.Main.SwitchToPage("main")
-			a.Application.SetFocus(table)
-		}
-		return event
-	})
-
-	a.Application.SetFocus(encryptionTable)
-	encryptionTable.SetSelectable(false, false)
-	a.Main.AddAndSwitchToPage("encryptionDataView", flex, true)
-}
-
-func (a *App) setTableHeaderForEncryption(encryptionTable *tview.Table, bucketName string) *tview.Table {
-	encryptionTable.SetTitle(bucketName)
-	encryptionTable.SetTitleColor(tcell.ColorYellow)
-	encryptionTable.SetCell(0, 0, tview.NewTableCell("SSEAlgorithm").SetExpansion(1).SetSelectable(false).SetTextColor(tcell.ColorOrangeRed).SetAlign(tview.AlignCenter))
-	encryptionTable.SetCell(0, 1, tview.NewTableCell("BucketKeyEnabled").SetExpansion(1).SetSelectable(false).SetTextColor(tcell.ColorOrangeRed).SetAlign(tview.AlignCenter))
-	return encryptionTable
-}
-
-func (a *App) setTableContentForEncryption(table *tview.Table, sse []*s3.ServerSideEncryptionRule) *tview.Table {
-	indx := 0
-	for _, rule := range sse {
-		table.SetCell((indx + 2), 0, tview.NewTableCell(*rule.ApplyServerSideEncryptionByDefault.SSEAlgorithm).SetAlign(tview.AlignCenter))
-		table.SetCell((indx + 2), 1, tview.NewTableCell(strconv.FormatBool(*rule.BucketKeyEnabled)).SetExpansion(1).SetAlign(tview.AlignCenter))
-		indx++
-	}
-	table.SetBorderFocusColor(tcell.ColorSpringGreen)
-	return table
 }
 
 func (a *App) DisplayS3ObjectForEmptyBuc(s3DataT *tview.Table, flex *tview.Flex, bucketName string, sess session.Session) {
@@ -1048,4 +970,10 @@ func getIST(launchTime *time.Time) string {
 	loc, _ := time.LoadLocation("Asia/Kolkata")
 	IST := launchTime.In(loc)
 	return IST.Format("Mon Jan _2 15:04:05 2006")
+}
+
+func concatJson(json1 *s3.ServerSideEncryptionConfiguration, json2 []*s3.LifecycleRule) string {
+	res := BucketInfoJson{LifeCycleJson: json1, EncryptionJson: json2}
+	tempRes2, _ := json.MarshalIndent(res, "", " ")
+	return string(tempRes2)
 }
