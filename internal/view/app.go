@@ -84,7 +84,6 @@ func (a *App) layout(ctx context.Context) *tview.Flex {
 	sess, _ := config.GetSession(*currentProfile, *currentRegion, cfg.AwsConfig)
 	servicePage := tview.NewFlex().SetDirection(tview.FlexRow)
 	servicePageContent := a.DisplayEc2Instances(ins, sess)
-	secGrp := aws.GetSecGrps(*sess)
 
 	profileDropdown := tview.NewDropDown().
 		SetLabel("Profile ▼ ").
@@ -278,6 +277,7 @@ func (a *App) layout(ctx context.Context) *tview.Flex {
 			case "Security Group", "sg":
 				a.Flash().Info("Loading Security Groups...")
 				servicePage.RemoveItemAtIndex(0)
+				secGrp := aws.GetSecGrps(*sess)
 				servicePageContent = a.DisplaySecurityGroup(sess, secGrp)
 				// ec2Page.AddItem(menuColFlex, 0, 2, false)
 				servicePage.AddItem(servicePageContent, 0, 6, true)
