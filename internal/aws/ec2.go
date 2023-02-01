@@ -94,6 +94,18 @@ func GetSecGrps(sess session.Session) []*ec2.SecurityGroup {
 	return result.SecurityGroups
 }
 
+func GetSingleSecGrp(sess session.Session, sgId string) *ec2.DescribeSecurityGroupsOutput {
+	ec2Serv := *ec2.New(&sess)
+	result, err := ec2Serv.DescribeSecurityGroups(&ec2.DescribeSecurityGroupsInput{
+		GroupIds: []*string{&sgId},
+	})
+	if err != nil {
+		fmt.Println("Error in fetching Security Group: ", sgId, " err: ", err)
+		return nil
+	}
+	return result
+}
+
 /*
 Volumes(ebs) are region specific
 Localstack doesn't have default volumes, so at some regions, there won't be any volumes.
