@@ -594,12 +594,12 @@ func (a *App) DisplayS3Json(sess *session.Session, bucketName string) {
 	json2 := aws.GetBuckLifecycle(*sess, bucketName)
 	res := concatJson(json1, json2.Rules)
 	flex := tview.NewFlex().SetDirection(tview.FlexRow)
-	tvForEc2Json := tview.NewTextView()
-	tvForEc2Json.SetBorder(true)
-	tvForEc2Json.SetBorderFocusColor(tcell.ColorSpringGreen)
-	tvForEc2Json.SetTitle(bucketName)
-	tvForEc2Json.SetTitleColor(tcell.ColorLightSkyBlue)
-	tvForEc2Json.SetText(res)
+	tvForS3Json := tview.NewTextView()
+	tvForS3Json.SetBorder(true)
+	tvForS3Json.SetBorderFocusColor(tcell.ColorSpringGreen)
+	tvForS3Json.SetTitle(bucketName)
+	tvForS3Json.SetTitleColor(tcell.ColorLightSkyBlue)
+	tvForS3Json.SetText(res)
 	flex.AddItem(a.Views()["pAndRMenu"], 0, 2, false)
 	inputPrompt := tview.NewInputField().
 		SetLabel("🐶>").
@@ -613,7 +613,7 @@ func (a *App) DisplayS3Json(sess *session.Session, bucketName string) {
 	buckets, _ := aws.ListBuckets(*sess)
 	ins, _ := aws.GetInstances(*sess)
 	a.SearchUtility(inputPrompt, sess, buckets, flex, nil, ins)
-	flex.AddItem(tvForEc2Json, 0, 9, true)
+	flex.AddItem(tvForS3Json, 0, 9, true)
 	a.Main.AddAndSwitchToPage("s3Json", flex, true)
 	flex.SetInputCapture(func(event *tcell.EventKey) *tcell.EventKey {
 		if event.Key() == tcell.KeyESC {
