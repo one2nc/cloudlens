@@ -8,6 +8,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/atotto/clipboard"
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/ec2"
 	"github.com/aws/aws-sdk-go/service/s3"
@@ -617,6 +618,7 @@ func (a *App) DisplayS3Json(sess *session.Session, bucketName string) {
 	a.Main.AddAndSwitchToPage("s3Json", flex, true)
 	flex.SetInputCapture(func(event *tcell.EventKey) *tcell.EventKey {
 		if event.Key() == tcell.KeyESC {
+			tvForS3Json.SetTextColor(tcell.ColorWhite)
 			a.Main.SwitchToPage("main")
 			a.Application.SetFocus(a.Views()["content"].(*tview.Flex).ItemAt(0))
 		}
@@ -625,6 +627,15 @@ func (a *App) DisplayS3Json(sess *session.Session, bucketName string) {
 		}
 		return event
 	})
+	tvForS3Json.SetInputCapture(func(event *tcell.EventKey) *tcell.EventKey {
+		if event.Rune() == 67 {
+			tvForS3Json.SetTextColor(tcell.ColorYellowGreen)
+			text := tvForS3Json.GetText(true)
+			clipboard.WriteAll(text)
+		}
+		return event
+	})
+
 }
 
 func (a *App) DisplayS3Objects(s3DataTable *tview.Table, flex *tview.Flex, folderName string, fileArrayInfo []string, sess session.Session, bucketName string) {
