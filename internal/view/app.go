@@ -956,7 +956,6 @@ func (a *App) toggleHeaderCmd(evt *tcell.EventKey) *tcell.EventKey {
 }
 
 func (a *App) helpCmd(evt *tcell.EventKey) *tcell.EventKey {
-	log.Info().Msg("hellp ? pressed")
 	top := a.Content.Top()
 
 	if top != nil && top.Name() == "help" {

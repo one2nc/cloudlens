@@ -7,6 +7,7 @@ require (
 	github.com/aws/aws-sdk-go-v2 v1.17.3
 	github.com/aws/aws-sdk-go-v2/config v1.18.8
 	github.com/brianvoe/gofakeit v3.18.0+incompatible
+	github.com/cenkalti/backoff v2.2.1+incompatible
 	github.com/derailed/tview v0.7.2
 	github.com/gdamore/tcell/v2 v2.5.2
 	github.com/rs/zerolog v1.28.0
