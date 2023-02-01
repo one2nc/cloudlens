@@ -861,7 +861,6 @@ func (a *App) tempLayout(ctx context.Context) {
 	go flash.Watch(ctx, a.Flash().Channel())
 
 	main := tview.NewFlex().SetDirection(tview.FlexRow)
-	main.SetBorder(true)
 
 	main.AddItem(a.statusIndicator(), 1, 1, false)
 	main.AddItem(a.Content, 0, 10, true)
@@ -873,6 +872,7 @@ func (a *App) tempLayout(ctx context.Context) {
 
 	//Testing only
 	a.inject(NewHelp(a))
+	a.inject(NewEC2("ec2"))
 }
 
 // QueueUpdateDraw queues up a ui action and redraw the ui.

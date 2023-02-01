@@ -11,7 +11,6 @@ import (
 	"github.com/gdamore/tcell/v2"
 	"github.com/one2nc/cloud-lens/internal/model"
 	"github.com/one2nc/cloud-lens/internal/ui"
-	"github.com/rs/zerolog/log"
 )
 
 const (
@@ -46,7 +45,6 @@ func NewHelp(app *App) *Help {
 
 // Init initializes the component.
 func (h *Help) Init(ctx context.Context) error {
-	log.Info().Msg("Init called: help")
 	if err := h.Table.Init(ctx); err != nil {
 		return err
 	}
@@ -69,7 +67,7 @@ func (h *Help) bindKeys() {
 func (h *Help) build() {
 	h.Clear()
 
-	sections := []string{"RESOURCE", "GENERAL" ,"NAVIGATION"}
+	sections := []string{"RESOURCE", "GENERAL", "NAVIGATION"}
 	h.maxRows = len(h.showGeneral())
 	ff := []HelpFunc{
 		h.hints,

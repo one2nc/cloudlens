@@ -92,7 +92,7 @@ func (t *Table) Watch(ctx context.Context) error {
 	if err := t.refresh(ctx); err != nil {
 		return err
 	}
-	go t.updater(ctx)
+	//go t.updater(ctx)
 
 	return nil
 }

@@ -76,7 +76,8 @@ func (t *Table) keyboard(evt *tcell.EventKey) *tcell.EventKey {
 
 func (t *Table) bindKeys() {
 	t.Actions().Add(ui.KeyActions{
-		ui.KeyHelp: ui.NewKeyAction("Help", t.App().helpCmd, true),
+		tcell.KeyCtrlW: ui.NewKeyAction("Toggle Wide", t.toggleWideCmd, true),
+		ui.KeyHelp:     ui.NewKeyAction("Help", t.App().helpCmd, true),
 	})
 }
 
@@ -86,4 +87,9 @@ func (t *Table) Name() string { return t.Table.Resource() }
 // AddBindKeysFn adds additional key bindings.
 func (t *Table) AddBindKeysFn(f BindKeysFunc) {
 	t.bindKeysFn = append(t.bindKeysFn, f)
+}
+
+func (t *Table) toggleWideCmd(evt *tcell.EventKey) *tcell.EventKey {
+	t.ToggleWide()
+	return nil
 }

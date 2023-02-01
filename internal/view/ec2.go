@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 
+	"github.com/gdamore/tcell/v2"
 	"github.com/one2nc/cloud-lens/internal"
 	"github.com/one2nc/cloud-lens/internal/config"
 	"github.com/one2nc/cloud-lens/internal/ui"
@@ -19,7 +20,7 @@ func NewEC2(resource string) ResourceViewer {
 	cfg, _ := config.Get()
 	session, _ := config.GetSession(cfg.Profiles[0], "ap-south-1", cfg.AwsConfig)
 	ctx := context.WithValue(context.Background(), internal.KeySession, session)
-	
+
 	var e EC2
 	e.ResourceViewer = NewBrowser(resource, ctx)
 	e.AddBindKeysFn(e.bindKeys)
@@ -30,8 +31,9 @@ func NewEC2(resource string) ResourceViewer {
 func (e *EC2) bindKeys(aa ui.KeyActions) {
 	aa.Add(ui.KeyActions{
 		//ui.KeyShiftT: ui.NewKeyAction("Sort Restart", e.GetTable().SortColCmd("RESTARTS", false), false),
-		ui.KeyShiftT: ui.NewKeyAction("Sort Type", nil, true),
-		ui.KeyShiftL: ui.NewKeyAction("Sort Launch-Time", nil, true),
+		ui.KeyShiftT:    ui.NewKeyAction("Sort Type", nil, false),
+		ui.KeyShiftL:    ui.NewKeyAction("Sort Launch-Time", nil, false),
+		tcell.KeyEscape: ui.NewKeyAction("Back", e.App().PrevCmd, true),
 	})
 }
 

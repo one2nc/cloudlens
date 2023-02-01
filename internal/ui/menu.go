@@ -27,7 +27,6 @@ func NewMenu() *Menu {
 	m := Menu{
 		Table: tview.NewTable(),
 	}
-	m.SetBorder(true)
 	return &m
 }
 

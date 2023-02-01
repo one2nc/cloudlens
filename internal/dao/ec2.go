@@ -21,11 +21,11 @@ func (e *EC2) List(ctx context.Context) ([]Object, error) {
 	//TODO: make dynamic
 	//session := ctx.Value(internal.KeySession).(*session.Session)
 	ins, err := aws.GetInstances(*session)
-	log.Info().Msg(fmt.Sprintf("ins: %+v", ins))
+	log.Info().Msg(fmt.Sprintf("ins: %d", len(ins)))
 
 	objs := make([]Object, len(ins))
 	for i, obj := range ins {
-		ins[i] = obj
+		objs[i] = obj
 	}
 	return objs, err
 }

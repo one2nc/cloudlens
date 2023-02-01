@@ -2,13 +2,10 @@ package view
 
 import (
 	"context"
-	"fmt"
 	"sync"
 
 	"github.com/gdamore/tcell/v2"
-	"github.com/one2nc/cloud-lens/internal"
 	"github.com/one2nc/cloud-lens/internal/ui"
-	"github.com/rs/zerolog/log"
 )
 
 // Browser represents a generic resource browser.
@@ -16,13 +13,13 @@ type Browser struct {
 	*Table
 	context  context.Context
 	cancelFn context.CancelFunc
-	mx       sync.RWMutex
+	mx       sync.RWMutex``
 }
 
 // NewBrowser returns a new browser.
 func NewBrowser(resource string, ctx context.Context) ResourceViewer {
 	return &Browser{
-		Table: NewTable(resource),
+		Table:   NewTable(resource),
 		context: ctx,
 	}
 }
@@ -49,21 +46,21 @@ func (b *Browser) Init(ctx context.Context) error {
 
 func (b *Browser) bindKeys(aa ui.KeyActions) {
 	aa.Add(ui.KeyActions{
-		tcell.KeyEscape: ui.NewSharedKeyAction("Filter Reset", b.resetCmd, false),
-		tcell.KeyHelp:   ui.NewSharedKeyAction("Help", b.helpCmd, false),
+		ui.KeyR:       ui.NewSharedKeyAction("Filter Reset", b.resetCmd, false),
+		tcell.KeyHelp: ui.NewSharedKeyAction("Help", b.helpCmd, false),
 	})
 }
 
 // Start initializes browser updates.
 func (b *Browser) Start() {
-	log.Info().Msg(fmt.Sprintf("59b:watch ctx type: %T", b.context.Value(internal.KeySession)))
-
 	b.Stop()
 	//b.GetModel().AddListener(b)
 	b.Table.Start()
-	if err := b.GetModel().Watch(b.context); err != nil {
-		b.App().Flash().Err(fmt.Errorf("Watcher failed for %s -- %w", b.Resource(), err))
-	}
+	b.Table.GetModel().Refresh(b.context)
+	b.Refresh()
+	// if err := b.GetModel().Watch(b.context); err != nil {
+	// 	b.App().Flash().Err(fmt.Errorf("Watcher failed for %s -- %w", b.Resource(), err))
+	// }
 }
 
 // Stop terminates browser updates.
@@ -85,7 +82,6 @@ func (b *Browser) Name() string { return b.Table.Resource() }
 
 // SetContextFn populates a custom context.
 func (b *Browser) SetContext(ctx context.Context) {
-	log.Info().Msg(fmt.Sprintf("set ctx type: %T", ctx.Value(internal.KeySession)))
 	b.context = ctx
 }
 
@@ -98,7 +94,6 @@ func (b *Browser) helpCmd(evt *tcell.EventKey) *tcell.EventKey {
 }
 
 func (b *Browser) resetCmd(evt *tcell.EventKey) *tcell.EventKey {
-	b.Table.GetModel().Refresh(b.context)
 	b.Refresh()
-	return nil
+	return evt
 }
