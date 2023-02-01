@@ -390,8 +390,10 @@ func (a *App) DisplayEc2Instances(ins []aws.EC2Resp, sess *session.Session) *tvi
 	})
 
 	table.SetSelectedFunc(func(row, column int) {
-		insId := ins[row-1].InstanceId
-		a.DisplayEc2InstanceJson(sess, insId)
+		if table.GetCell(1, 1).Text != "" {
+			insId := ins[row-1].InstanceId
+			a.DisplayEc2InstanceJson(sess, insId)
+		}
 	})
 
 	return table
