@@ -28,11 +28,6 @@ func (e ByLaunchTime) Less(i, j int) bool {
 	return e[i].Instance.LaunchTime.Before(*e[j].Instance.LaunchTime)
 }
 
-type Ec2Service interface {
-	GetInstances(sess session.Session) ([]EC2Resp, error)
-	GetSingleInstance() *ec2.DescribeInstancesOutput
-}
-
 func GetAllRegions() []string {
 	return []string{
 		"us-east-1", "us-east-2", "us-west-1", "us-west-2", "af-south-1", "ap-east-1",
@@ -120,6 +115,18 @@ func GetVolumes(sess session.Session) []*ec2.Volume {
 	return result.Volumes
 }
 
+func GetSingleVolume(sess session.Session, vId string) *ec2.Volume {
+	ec2Serv := *ec2.New(&sess)
+	result, err := ec2Serv.DescribeVolumes(&ec2.DescribeVolumesInput{
+		VolumeIds: []*string{&vId},
+	})
+	if err != nil {
+		fmt.Println("Error in fetching Volume: ", vId, " err: ", err)
+		return nil
+	}
+	return result.Volumes[0]
+}
+
 /*
 Snapshots are region specific
 Localstack does have default snapshots, so we can see some of the snapshots that we never created
@@ -128,10 +135,22 @@ func GetSnapshots(sess session.Session) []*ec2.Snapshot {
 	ec2Serv := *ec2.New(&sess)
 	result, err := ec2Serv.DescribeSnapshots(&ec2.DescribeSnapshotsInput{})
 	if err != nil {
-		fmt.Println("Error in fetching Volumes: ", " err: ", err)
+		fmt.Println("Error in fetching Snapshots: ", " err: ", err)
 		return nil
 	}
 	return result.Snapshots
+}
+
+func GetSingleSnapshot(sess session.Session, sId string) *ec2.Snapshot {
+	ec2Serv := *ec2.New(&sess)
+	result, err := ec2Serv.DescribeSnapshots(&ec2.DescribeSnapshotsInput{
+		SnapshotIds: []*string{&sId},
+	})
+	if err != nil {
+		fmt.Println("Error in fetching Snapshot: ", sId, " err: ", err)
+		return nil
+	}
+	return result.Snapshots[0]
 }
 
 /*
@@ -149,6 +168,18 @@ func GetAMIs(sess session.Session) []*ec2.Image {
 	return result.Images
 }
 
+func GetSingleAMI(sess session.Session, amiId string) *ec2.Image {
+	ec2Serv := *ec2.New(&sess)
+	result, err := ec2Serv.DescribeImages(&ec2.DescribeImagesInput{
+		ImageIds: []*string{&amiId},
+	})
+	if err != nil {
+		fmt.Println("Error in fetching AMI: ", amiId, " err: ", err)
+		return nil
+	}
+	return result.Images[0]
+}
+
 func GetVPCs(sess session.Session) []*ec2.Vpc {
 	ec2Serv := *ec2.New(&sess)
 	result, err := ec2Serv.DescribeVpcs(&ec2.DescribeVpcsInput{})
@@ -159,6 +190,18 @@ func GetVPCs(sess session.Session) []*ec2.Vpc {
 	return result.Vpcs
 }
 
+func GetSingleVPC(sess session.Session, vpcId string) *ec2.Vpc {
+	ec2Serv := *ec2.New(&sess)
+	result, err := ec2Serv.DescribeVpcs(&ec2.DescribeVpcsInput{
+		VpcIds: []*string{&vpcId},
+	})
+	if err != nil {
+		fmt.Println("Error in fetching VPC: ", vpcId, " err: ", err)
+		return nil
+	}
+	return result.Vpcs[0]
+}
+
 func GetSubnets(sess session.Session) []*ec2.Subnet {
 	ec2Serv := *ec2.New(&sess)
 	result, err := ec2Serv.DescribeSubnets(&ec2.DescribeSubnetsInput{})
@@ -167,4 +210,16 @@ func GetSubnets(sess session.Session) []*ec2.Subnet {
 		return nil
 	}
 	return result.Subnets
+}
+
+func GetSingleSubnet(sess session.Session, sId string) *ec2.Subnet {
+	ec2Serv := *ec2.New(&sess)
+	result, err := ec2Serv.DescribeSubnets(&ec2.DescribeSubnetsInput{
+		SubnetIds: []*string{&sId},
+	})
+	if err != nil {
+		fmt.Println("Error in fetching Subnet: ", sId, " err: ", err)
+		return nil
+	}
+	return result.Subnets[0]
 }
