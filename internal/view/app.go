@@ -74,7 +74,7 @@ func (a *App) layout(ctx context.Context) *tview.Flex {
 
 	var ins []aws.EC2Resp
 	var buckets []aws.BucketResp
-
+	var secGrp []*ec2.SecurityGroup
 	var currentRegion *string
 	var currentProfile *string
 	profiles := cfg.Profiles
@@ -112,16 +112,18 @@ func (a *App) layout(ctx context.Context) *tview.Flex {
 			sess, _ = config.GetSession(*currentProfile, *currentRegion, cfg.AwsConfig)
 			ins, _ = aws.GetInstances(*sess)
 			buckets, _ = aws.ListBuckets(*sess)
+			secGrp =aws.GetSecGrps(*sess)
 			if servicePage.ItemAt(0) != nil {
 				servicePage.RemoveItemAtIndex(0)
 			}
 
 			if servicePageContent.GetCell(0, 1).Text == "Creation-Time" {
 				servicePageContent = a.DisplayS3Buckets(sess, buckets)
-			} else {
+			} else if servicePageContent.GetCell(0, 0).Text == "Group-Id"{
+				servicePageContent = a.DisplaySecurityGroup(sess,secGrp)
+			}else {
 				servicePageContent = a.DisplayEc2Instances(ins, sess)
 			}
-
 			servicePageContent.SetBorderFocusColor(tcell.ColorDarkSeaGreen)
 			servicePage.AddItem(servicePageContent, 0, 6, true)
 		})
@@ -280,7 +282,7 @@ func (a *App) layout(ctx context.Context) *tview.Flex {
 			case "Security Group", "sg":
 				a.Flash().Info("Loading Security Groups...")
 				servicePage.RemoveItemAtIndex(0)
-				secGrp := aws.GetSecGrps(*sess)
+				secGrp = aws.GetSecGrps(*sess)
 				servicePageContent = a.DisplaySecurityGroup(sess, secGrp)
 				// ec2Page.AddItem(menuColFlex, 0, 2, false)
 				servicePage.AddItem(servicePageContent, 0, 6, true)
@@ -327,7 +329,48 @@ func (a *App) DisplaySecurityGroup(sess *session.Session, secGrp []*ec2.Security
 	table.SetSelectable(true, false)
 	a.Application.SetFocus(table)
 	table.Select(1, 1).SetFixed(1, 1)
+	table.SetSelectedFunc(func(row, column int) {
+		grpId := secGrp[row-2].GroupId
+		a.DisplaySecGrpJson(sess,*grpId)
+	})
 	return table
+}
+
+func (a *App) DisplaySecGrpJson(sess *session.Session, grpId string) {
+	flex := tview.NewFlex().SetDirection(tview.FlexRow)
+	tvForEc2Json := tview.NewTextView()
+	tvForEc2Json.SetBorder(true)
+	tvForEc2Json.SetBorderFocusColor(tcell.ColorSpringGreen)
+	tvForEc2Json.SetTitle(fmt.Sprintf(" SecurityGroup/%v/::[json] ", grpId))
+	tvForEc2Json.SetTitleColor(tcell.ColorLightSkyBlue)
+	tvForEc2Json.SetText(aws.GetSingleSecGrp(*sess, grpId).GoString())
+	flex.AddItem(a.Views()["pAndRMenu"], 0, 2, false)
+	inputPrompt := tview.NewInputField().
+		SetLabel("🐶>").
+		SetAcceptanceFunc(func(textToCheck string, lastChar rune) bool {
+			return true // accept any input
+		})
+	inputPrompt.SetFieldBackgroundColor(tcell.ColorBlack)
+	inputPrompt.SetBorder(true)
+
+	flex.AddItem(inputPrompt, 0, 1, false)
+	buckets, _ := aws.ListBuckets(*sess)
+	ins, _ := aws.GetInstances(*sess)
+	a.SearchUtility(inputPrompt, sess, buckets, flex, nil, ins)
+	flex.AddItem(tvForEc2Json, 0, 9, true)
+	a.Main.AddAndSwitchToPage("main:secGrpjson", flex, true)
+	flex.SetInputCapture(func(event *tcell.EventKey) *tcell.EventKey {
+		if event.Key() == tcell.KeyESC {
+			flex.Clear()
+			a.Main.SwitchToPage("main")
+			a.Application.SetFocus(a.Views()["content"].(*tview.Flex).ItemAt(0))
+		}
+		if event.Key() == tcell.KeyTab {
+			a.Application.SetFocus(inputPrompt)
+		}
+
+		return event
+	})
 }
 
 func (a *App) setTableHeaderForSecGrp(secGrpTable *tview.Table) *tview.Table {
@@ -354,6 +397,7 @@ func (a *App) setTableContentForSecGrp(table *tview.Table, secGrp []*ec2.Securit
 	table.SetBorderFocusColor(tcell.ColorSpringGreen)
 	return table
 }
+
 
 func (a *App) DisplayEc2Instances(ins []aws.EC2Resp, sess *session.Session) *tview.Table {
 
