@@ -4,7 +4,14 @@ import (
 	"fmt"
 	"strings"
 
+	"github.com/one2nc/cloud-lens/internal/color"
+	"github.com/one2nc/cloud-lens/internal/render"
 	"github.com/rs/zerolog/log"
+)
+
+const (
+	descIndicator = "↓"
+	ascIndicator  = "↑"
 )
 
 // TrimCell removes superfluous padding.
@@ -15,4 +22,16 @@ func TrimCell(tv *SelectTable, row, col int) string {
 		return ""
 	}
 	return strings.TrimSpace(c.Text)
+}
+
+func sortIndicator(sort, asc bool, hc render.HeaderColumn) string {
+	if !sort {
+		return hc.Name
+	}
+
+	order := descIndicator
+	if asc {
+		order = ascIndicator
+	}
+	return fmt.Sprintf("%s%s", color.ColorizeAt(hc.Name, hc.SortIndicatorIdx, "red"), color.ColorizeAt(order, 0, "green"))
 }

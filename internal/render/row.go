@@ -1,5 +1,11 @@
 package render
 
+import (
+	"strings"
+
+	"github.com/fvbommel/sortorder"
+)
+
 // Fields represents a collection of row fields.
 type Fields []string
 
@@ -100,4 +106,27 @@ func (rr Rows) Find(id string) (int, bool) {
 	}
 
 	return 0, false
+}
+
+// ----------------------------------------------------------------------------
+// Helpers...
+
+// Less return true if c1 < c2.
+func Less(isNumber, isDuration bool, id1, id2, v1, v2 string) bool {
+	var less bool
+	switch {
+	case isNumber:
+		v1, v2 = strings.Replace(v1, ",", "", -1), strings.Replace(v2, ",", "", -1)
+		less = sortorder.NaturalLess(v1, v2)
+	case isDuration:
+		d1, d2 := durationToSeconds(v1), durationToSeconds(v2)
+		less = d1 <= d2
+	default:
+		less = sortorder.NaturalLess(v1, v2)
+	}
+	if v1 == v2 {
+		return sortorder.NaturalLess(id1, id2)
+	}
+
+	return less
 }

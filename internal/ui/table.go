@@ -2,6 +2,8 @@ package ui
 
 import (
 	"context"
+	"fmt"
+	"strings"
 
 	"github.com/derailed/tview"
 	"github.com/gdamore/tcell/v2"
@@ -13,6 +15,7 @@ import (
 // Table represents tabular data.
 type Table struct {
 	resource string
+	sortCol  SortColumn
 	header   render.Header
 	*SelectTable
 	actions KeyActions
@@ -29,15 +32,17 @@ func NewTable(res string) *Table {
 			marks: make(map[string]struct{}),
 		},
 		resource: res,
-		actions: make(KeyActions),
+		actions:  make(KeyActions),
 	}
 }
 
 // Init initializes the component.
 func (t *Table) Init(ctx context.Context) {
-	t.SetFixed(1, 0)
+	t.SetFixed(0, 0)
 	t.SetBorder(true)
-	t.SetBorderAttributes(tcell.AttrBold)
+	t.SetBorderAttributes(tcell.AttrBlink)
+	t.SetBorderColor(tcell.ColorDeepSkyBlue)
+	//t.SetBorderFocusColor(tcell.ColorSpringGreen)	
 	t.SetBorderPadding(0, 0, 1, 1)
 	t.SetSelectable(true, false)
 	t.SetSelectionChangedFunc(t.selectionChanged)
@@ -84,7 +89,7 @@ func (t *Table) Update(data *render.TableData) {
 
 func (t *Table) doUpdate(data *render.TableData) {
 	cols := t.header.Columns(t.wide)
-	
+
 	custData := data.Customize(cols, t.wide)
 	t.Clear()
 	var col int
@@ -92,7 +97,15 @@ func (t *Table) doUpdate(data *render.TableData) {
 		t.AddHeaderCell(col, h)
 		col++
 	}
-	
+
+	colIndex := custData.Header.IndexOf(t.sortCol.name, false)
+	custData.RowEvents.Sort(
+		colIndex,
+		custData.Header.IsTimeCol(colIndex),
+		custData.Header.IsMetricsCol(colIndex),
+		t.sortCol.asc,
+	)
+
 	for row, re := range custData.RowEvents {
 		idx, _ := data.RowEvents.FindIndex(re.Row.ID)
 		t.buildRow(row+1, re, data.RowEvents[idx], custData.Header)
@@ -101,7 +114,7 @@ func (t *Table) doUpdate(data *render.TableData) {
 }
 
 func (t *Table) buildRow(r int, re, ore render.RowEvent, h render.Header) {
-	
+
 	marked := t.IsMarked(re.Row.ID)
 	var col int
 	for c, field := range re.Row.Fields {
@@ -111,6 +124,8 @@ func (t *Table) buildRow(r int, re, ore render.RowEvent, h render.Header) {
 		}
 
 		cell := tview.NewTableCell(field)
+		cell.SetAttributes(tcell.AttrNone)
+		cell.SetTextColor(tcell.ColorSkyblue)
 		cell.SetExpansion(1)
 		cell.SetAlign(h[c].Align)
 		if marked {
@@ -124,15 +139,16 @@ func (t *Table) buildRow(r int, re, ore render.RowEvent, h render.Header) {
 	}
 }
 
-
 // AddHeaderCell configures a table cell header.
 func (t *Table) AddHeaderCell(col int, h render.HeaderColumn) {
-	c := tview.NewTableCell(h.Name)
+	sort := h.Name == t.sortCol.name
+	c := tview.NewTableCell(sortIndicator(sort, t.sortCol.asc, h))
+	c.SetTextColor(tcell.ColorBeige)
+	c.SetAttributes(tcell.AttrBold)
 	c.SetExpansion(1)
 	c.SetAlign(h.Align)
 	t.SetCell(0, col, c)
 }
-
 
 // ClearMarks clear out marked items.
 func (t *Table) ClearMarks() {
@@ -152,5 +168,19 @@ func (t *Table) Refresh() {
 
 // UpdateTitle refreshes the table title.
 func (t *Table) UpdateTitle() {
-	t.SetTitle(t.resource)
+	title := strings.Join([]string{" ", t.Resource(), " "}, "")
+	t.SetTitle(fmt.Sprintf("[aqua::b]%s", title))
+}
+
+// SortColCmd designates a sorted column.
+func (t *Table) SortColCmd(name string, asc bool) func(evt *tcell.EventKey) *tcell.EventKey {
+	return func(evt *tcell.EventKey) *tcell.EventKey {
+		t.sortCol.asc = !t.sortCol.asc
+		if t.sortCol.name != name {
+			t.sortCol.asc = asc
+		}
+		t.sortCol.name = name
+		t.Refresh()
+		return nil
+	}
 }

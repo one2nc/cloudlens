@@ -150,10 +150,10 @@ func toMnemonic(s string) string {
 }
 
 func formatNSMenu(i int, name string) string {
-	return fmt.Sprintf("<%d> %s", i, name)
+	return fmt.Sprintf("[pink::]<%d>[black::] %s", i, name)
 }
 
 func formatPlainMenu(h model.MenuHint, size int) string {
-	famt := "%" + strconv.Itoa(size+2) + "s %s"
+	famt := "[blue::]%" + strconv.Itoa(size+2) + "s[white::d] %s"
 	return fmt.Sprintf(famt, toMnemonic(h.Mnemonic), h.Description)
 }

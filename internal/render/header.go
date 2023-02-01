@@ -5,12 +5,16 @@ import (
 )
 
 // HeaderColumn represent a table header.
+// SortIndicatorIdx position of alphabet in header name to highlight
+// Set SortIndicatorIdx to -1 to ignore highlighting any alphabet in header name
 type HeaderColumn struct {
-	Name  string
-	Align int
-	Hide  bool
-	Wide  bool
-	Time  bool
+	Name             string
+	SortIndicatorIdx int
+	Align            int
+	Hide             bool
+	Wide             bool
+	MX               bool
+	Time             bool
 }
 
 // Clone copies a header.
@@ -110,6 +114,15 @@ func (h Header) Customize(cols []string, wide bool) Header {
 	}
 
 	return cc
+}
+
+// IsMetricsCol checks if given column index represents metrics.
+func (h Header) IsMetricsCol(col int) bool {
+	if col < 0 || col >= len(h) {
+		return false
+	}
+
+	return h[col].MX
 }
 
 // IsTimeCol checks if given column index represents a timestamp.

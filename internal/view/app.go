@@ -868,7 +868,7 @@ func (a *App) tempLayout(ctx context.Context) {
 
 	//Testing only
 	a.inject(NewHelp(a))
-	a.inject(NewEC2("ec2"))
+	a.inject(NewEC2("EC2"))
 }
 
 // QueueUpdateDraw queues up a ui action and redraw the ui.

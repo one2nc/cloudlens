@@ -1,5 +1,7 @@
 package render
 
+import "sort"
+
 const (
 	// EventUnchanged notifies listener resource has not changed.
 	EventUnchanged ResEvent = 1 << iota
@@ -37,8 +39,8 @@ func NewRowEvent(kind ResEvent, row Row) RowEvent {
 // Customize returns a new subset based on the given column indices.
 func (r RowEvent) Customize(cols []int) RowEvent {
 	return RowEvent{
-		Kind:   r.Kind,
-		Row:    r.Row.Customize(cols),
+		Kind: r.Kind,
+		Row:  r.Row.Customize(cols),
 	}
 }
 
@@ -107,4 +109,50 @@ func (r RowEvents) FindIndex(id string) (int, bool) {
 	}
 
 	return 0, false
+}
+
+// Sort rows based on column index and order.
+func (r RowEvents) Sort(sortCol int, isDuration, numCol, asc bool) {
+	if sortCol == -1 {
+		return
+	}
+
+	t := RowEventSorter{
+		Events:     r,
+		Index:      sortCol,
+		Asc:        asc,
+		IsNumber:   numCol,
+		IsDuration: isDuration,
+	}
+	sort.Sort(t)
+}
+
+// ----------------------------------------------------------------------------
+
+// RowEventSorter sorts row events by a given colon.
+type RowEventSorter struct {
+	Events     RowEvents
+	Index      int
+	IsNumber   bool
+	IsDuration bool
+	Asc        bool
+}
+
+func (r RowEventSorter) Len() int {
+	return len(r.Events)
+}
+
+func (r RowEventSorter) Swap(i, j int) {
+	r.Events[i], r.Events[j] = r.Events[j], r.Events[i]
+}
+
+func (r RowEventSorter) Less(i, j int) bool {
+	f1, f2 := r.Events[i].Row.Fields, r.Events[j].Row.Fields
+	id1, id2 := r.Events[i].Row.ID, r.Events[j].Row.ID
+	less := Less(r.IsNumber, r.IsDuration, id1, id2, f1[r.Index], f2[r.Index])
+	if r.Asc {
+		return less
+	}
+
+	return !less
 }

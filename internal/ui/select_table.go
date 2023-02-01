@@ -121,7 +121,7 @@ func (s *SelectTable) selectionChanged(r, c int) {
 		return
 	}
 	if cell := s.GetCell(r, c); cell != nil {
-		s.SetSelectedStyle(tcell.StyleDefault.Foreground(s.fgColor).Background(cell.Color).Attributes(tcell.AttrBold))
+		s.SetSelectedStyle(tcell.StyleDefault.Foreground(tcell.ColorBlack.TrueColor()).Background(tcell.ColorAqua).Attributes(tcell.AttrBold))
 	}
 }
 

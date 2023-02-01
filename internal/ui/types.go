@@ -9,6 +9,17 @@ import (
 	"github.com/one2nc/cloud-lens/internal/render"
 )
 
+type (
+	// SortFn represent a function that can sort columnar data.
+	SortFn func(rows render.Rows, sortCol SortColumn)
+
+	// SortColumn represents a sortable column.
+	SortColumn struct {
+		name string
+		asc  bool
+	}
+)
+
 // Lister represents a viewable resource.
 type Lister interface {
 	// Get returns a resource instance.
