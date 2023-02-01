@@ -347,12 +347,12 @@ func (a *App) DisplaySecurityGroup(sess *session.Session, secGrp []*ec2.Security
 
 func (a *App) DisplaySecGrpJson(sess *session.Session, grpId string) {
 	flex := tview.NewFlex().SetDirection(tview.FlexRow)
-	tvForEc2Json := tview.NewTextView()
-	tvForEc2Json.SetBorder(true)
-	tvForEc2Json.SetBorderFocusColor(tcell.ColorSpringGreen)
-	tvForEc2Json.SetTitle(fmt.Sprintf(" SecurityGroup/%v/::[json] ", grpId))
-	tvForEc2Json.SetTitleColor(tcell.ColorLightSkyBlue)
-	tvForEc2Json.SetText(aws.GetSingleSecGrp(*sess, grpId).GoString())
+	tvForSecGrpJson := tview.NewTextView()
+	tvForSecGrpJson.SetBorder(true)
+	tvForSecGrpJson.SetBorderFocusColor(tcell.ColorSpringGreen)
+	tvForSecGrpJson.SetTitle(fmt.Sprintf(" SecurityGroup/%v/::[json] ", grpId))
+	tvForSecGrpJson.SetTitleColor(tcell.ColorLightSkyBlue)
+	tvForSecGrpJson.SetText(aws.GetSingleSecGrp(*sess, grpId).GoString())
 	flex.AddItem(a.Views()["pAndRMenu"], 0, 2, false)
 	inputPrompt := tview.NewInputField().
 		SetLabel("🐶>").
@@ -366,7 +366,8 @@ func (a *App) DisplaySecGrpJson(sess *session.Session, grpId string) {
 	buckets, _ := aws.ListBuckets(*sess)
 	ins, _ := aws.GetInstances(*sess)
 	a.SearchUtility(inputPrompt, sess, buckets, flex, nil, ins)
-	flex.AddItem(tvForEc2Json, 0, 9, true)
+	flex.AddItem(tvForSecGrpJson, 0, 9, true)
+	flex.AddItem(a.FlashView(), 0, 1, false)
 	a.Main.AddAndSwitchToPage("main:secGrpjson", flex, true)
 	flex.SetInputCapture(func(event *tcell.EventKey) *tcell.EventKey {
 		if event.Key() == tcell.KeyESC {
@@ -378,6 +379,14 @@ func (a *App) DisplaySecGrpJson(sess *session.Session, grpId string) {
 			a.Application.SetFocus(inputPrompt)
 		}
 
+		return event
+	})
+	tvForSecGrpJson.SetInputCapture(func(event *tcell.EventKey) *tcell.EventKey {
+		if event.Rune() == 67 {
+			text := tvForSecGrpJson.GetText(true)
+			clipboard.WriteAll(text)
+			a.Flash().Info("Text Copied.")
+		}
 		return event
 	})
 }
@@ -992,3 +1001,4 @@ func concatJson(json1 *s3.ServerSideEncryptionConfiguration, json2 []*s3.Lifecyc
 	tempRes2, _ := json.MarshalIndent(res, "", " ")
 	return string(tempRes2)
 }
+
