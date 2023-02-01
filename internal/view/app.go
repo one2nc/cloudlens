@@ -12,6 +12,7 @@ import (
 	"github.com/aws/aws-sdk-go/service/ec2"
 	"github.com/aws/aws-sdk-go/service/s3"
 	"github.com/derailed/tview"
+	"github.com/dustin/go-humanize"
 	"github.com/gdamore/tcell/v2"
 	"github.com/one2nc/cloud-lens/internal"
 	"github.com/one2nc/cloud-lens/internal/aws"
@@ -114,11 +115,13 @@ func (a *App) layout(ctx context.Context) *tview.Flex {
 			if servicePage.ItemAt(0) != nil {
 				servicePage.RemoveItemAtIndex(0)
 			}
+
 			if servicePageContent.GetCell(0, 1).Text == "Creation-Time" {
 				servicePageContent = a.DisplayS3Buckets(sess, buckets)
 			} else {
 				servicePageContent = a.DisplayEc2Instances(ins, sess)
 			}
+
 			servicePageContent.SetBorderFocusColor(tcell.ColorDarkSeaGreen)
 			servicePage.AddItem(servicePageContent, 0, 6, true)
 		})
@@ -351,7 +354,9 @@ func (a *App) setTableContentForSecGrp(table *tview.Table, secGrp []*ec2.Securit
 	table.SetBorderFocusColor(tcell.ColorSpringGreen)
 	return table
 }
+
 func (a *App) DisplayEc2Instances(ins []aws.EC2Resp, sess *session.Session) *tview.Table {
+
 	table := tview.NewTable()
 	table.SetBorder(true)
 	table.SetBorderFocusColor(tcell.ColorSpringGreen)
@@ -441,11 +446,11 @@ func (a *App) DisplayS3Buckets(sess *session.Session, buckets []aws.BucketResp) 
 	flex.AddItem(table, 0, 1, true).SetDirection(tview.FlexRow)
 
 	//table data
-	table.SetCell(0, 0, tview.NewTableCell("Bucket-Name").SetExpansion(1).SetSelectable(false).SetTextColor(tcell.ColorOrangeRed).SetAlign(tview.AlignCenter))
-	table.SetCell(0, 1, tview.NewTableCell("Creation-Time").SetExpansion(1).SetSelectable(false).SetTextColor(tcell.ColorOrangeRed).SetAlign(tview.AlignCenter))
+	table.SetCell(0, 0, tview.NewTableCell("Bucket-Name").SetExpansion(1).SetSelectable(false).SetTextColor(tcell.ColorOrangeRed).SetAlign(tview.AlignLeft))
+	table.SetCell(0, 1, tview.NewTableCell("Creation-Time").SetExpansion(1).SetSelectable(false).SetTextColor(tcell.ColorOrangeRed).SetAlign(tview.AlignLeft))
 	for i, b := range buckets {
-		table.SetCell((i + 1), 0, tview.NewTableCell(b.BucketName).SetAlign(tview.AlignCenter))
-		table.SetCell((i + 1), 1, tview.NewTableCell(fmt.Sprintf("%v", b.CreationTime)).SetAlign(tview.AlignCenter))
+		table.SetCell((i + 1), 0, tview.NewTableCell(b.BucketName).SetAlign(tview.AlignLeft))
+		table.SetCell((i + 1), 1, tview.NewTableCell(fmt.Sprintf("%v", b.CreationTime)).SetAlign(tview.AlignLeft))
 	}
 	//r := 0
 	table.SetSelectable(true, false)
@@ -807,11 +812,11 @@ func (a *App) SearchUtility(inputField *tview.InputField, sess *session.Session,
 func (a *App) setTableHeaderForS3(s3DataT *tview.Table, tableTitle string) *tview.Table {
 	s3DataT.SetTitle(tableTitle)
 	s3DataT.SetTitleColor(tcell.ColorYellow)
-	s3DataT.SetCell(0, 0, tview.NewTableCell("Name").SetExpansion(1).SetSelectable(false).SetTextColor(tcell.ColorOrangeRed).SetAlign(tview.AlignCenter))
-	s3DataT.SetCell(0, 1, tview.NewTableCell("Type").SetExpansion(1).SetSelectable(false).SetTextColor(tcell.ColorOrangeRed).SetAlign(tview.AlignCenter))
-	s3DataT.SetCell(0, 2, tview.NewTableCell("Last modified").SetExpansion(1).SetSelectable(false).SetTextColor(tcell.ColorOrangeRed).SetAlign(tview.AlignCenter))
-	s3DataT.SetCell(0, 3, tview.NewTableCell("Size").SetExpansion(1).SetSelectable(false).SetTextColor(tcell.ColorOrangeRed).SetAlign(tview.AlignCenter))
-	s3DataT.SetCell(0, 4, tview.NewTableCell("Storage class").SetExpansion(1).SetSelectable(false).SetTextColor(tcell.ColorOrangeRed).SetAlign(tview.AlignCenter))
+	s3DataT.SetCell(0, 0, tview.NewTableCell("Name").SetExpansion(1).SetSelectable(false).SetTextColor(tcell.ColorOrangeRed).SetAlign(tview.AlignLeft))
+	s3DataT.SetCell(0, 1, tview.NewTableCell("Type").SetExpansion(1).SetSelectable(false).SetTextColor(tcell.ColorOrangeRed).SetAlign(tview.AlignLeft))
+	s3DataT.SetCell(0, 2, tview.NewTableCell("Last modified").SetExpansion(1).SetSelectable(false).SetTextColor(tcell.ColorOrangeRed).SetAlign(tview.AlignLeft))
+	s3DataT.SetCell(0, 3, tview.NewTableCell("Size").SetExpansion(1).SetSelectable(false).SetTextColor(tcell.ColorOrangeRed).SetAlign(tview.AlignLeft))
+	s3DataT.SetCell(0, 4, tview.NewTableCell("Storage class").SetExpansion(1).SetSelectable(false).SetTextColor(tcell.ColorOrangeRed).SetAlign(tview.AlignLeft))
 
 	return s3DataT
 }
@@ -820,22 +825,23 @@ func (a *App) setTableContentForS3(table *tview.Table, Folder []*s3.CommonPrefix
 	indx := 0
 	for _, bi := range Folder {
 		keyA := strings.Split(*bi.Prefix, "/")
-		table.SetCell((indx + 2), 0, tview.NewTableCell(keyA[len(keyA)-2]).SetExpansion(1).SetTextColor(tcell.ColorYellow).SetAlign(tview.AlignCenter))
-		table.SetCell((indx + 2), 1, tview.NewTableCell("Folder").SetExpansion(1).SetTextColor(tcell.ColorYellow).SetAlign(tview.AlignCenter))
-		table.SetCell((indx + 2), 2, tview.NewTableCell("_").SetExpansion(1).SetTextColor(tcell.ColorYellow).SetAlign(tview.AlignCenter))
-		table.SetCell((indx + 2), 3, tview.NewTableCell("0").SetExpansion(1).SetTextColor(tcell.ColorYellow).SetAlign(tview.AlignCenter))
-		table.SetCell((indx + 2), 4, tview.NewTableCell("_").SetExpansion(1).SetTextColor(tcell.ColorYellow).SetAlign(tview.AlignCenter))
+		table.SetCell((indx + 2), 0, tview.NewTableCell(keyA[len(keyA)-2]).SetExpansion(1).SetTextColor(tcell.ColorYellow).SetAlign(tview.AlignLeft))
+		table.SetCell((indx + 2), 1, tview.NewTableCell("Folder").SetExpansion(1).SetTextColor(tcell.ColorYellow).SetAlign(tview.AlignLeft))
+		table.SetCell((indx + 2), 2, tview.NewTableCell("_").SetExpansion(1).SetTextColor(tcell.ColorYellow).SetAlign(tview.AlignLeft))
+		table.SetCell((indx + 2), 3, tview.NewTableCell("0").SetExpansion(1).SetTextColor(tcell.ColorYellow).SetAlign(tview.AlignLeft))
+		table.SetCell((indx + 2), 4, tview.NewTableCell("_").SetExpansion(1).SetTextColor(tcell.ColorYellow).SetAlign(tview.AlignLeft))
 		indx++
 	}
 
 	for _, fi := range File {
 		keyA := strings.Split(*fi.Key, "/")
-		table.SetCell((indx + 2), 0, tview.NewTableCell(keyA[len(keyA)-1]).SetExpansion(1).SetTextColor(tcell.ColorAntiqueWhite).SetAlign(tview.AlignCenter))
-		table.SetCell((indx + 2), 1, tview.NewTableCell("File").SetExpansion(1).SetTextColor(tcell.ColorAntiqueWhite).SetAlign(tview.AlignCenter))
+		table.SetCell((indx + 2), 0, tview.NewTableCell(keyA[len(keyA)-1]).SetExpansion(1).SetTextColor(tcell.ColorAntiqueWhite).SetAlign(tview.AlignLeft))
+		table.SetCell((indx + 2), 1, tview.NewTableCell("File").SetExpansion(1).SetTextColor(tcell.ColorAntiqueWhite).SetAlign(tview.AlignLeft))
 		IST := getIST(fi.LastModified)
-		table.SetCell((indx + 2), 2, tview.NewTableCell(IST).SetExpansion(1).SetTextColor(tcell.ColorAntiqueWhite).SetAlign(tview.AlignCenter))
-		table.SetCell((indx + 2), 3, tview.NewTableCell(strconv.Itoa(int(*fi.Size))+" Bytes").SetExpansion(1).SetTextColor(tcell.ColorAntiqueWhite).SetAlign(tview.AlignCenter))
-		table.SetCell((indx + 2), 4, tview.NewTableCell(*fi.StorageClass).SetExpansion(1).SetTextColor(tcell.ColorAntiqueWhite).SetAlign(tview.AlignCenter))
+		table.SetCell((indx + 2), 2, tview.NewTableCell(IST).SetExpansion(1).SetTextColor(tcell.ColorAntiqueWhite).SetAlign(tview.AlignLeft))
+		size := humanize.Bytes(uint64(*fi.Size))
+		table.SetCell((indx + 2), 3, tview.NewTableCell(size).SetExpansion(1).SetTextColor(tcell.ColorAntiqueWhite).SetAlign(tview.AlignLeft))
+		table.SetCell((indx + 2), 4, tview.NewTableCell(*fi.StorageClass).SetExpansion(1).SetTextColor(tcell.ColorAntiqueWhite).SetAlign(tview.AlignLeft))
 		indx++
 	}
 	table.SetBorderFocusColor(tcell.ColorSpringGreen)
