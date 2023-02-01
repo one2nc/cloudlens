@@ -9,6 +9,7 @@ import (
 	"time"
 
 	"github.com/aws/aws-sdk-go/aws/session"
+	"github.com/aws/aws-sdk-go/service/ec2"
 	"github.com/aws/aws-sdk-go/service/s3"
 	"github.com/derailed/tview"
 	"github.com/gdamore/tcell/v2"
@@ -83,6 +84,7 @@ func (a *App) layout(ctx context.Context) *tview.Flex {
 	sess, _ := config.GetSession(*currentProfile, *currentRegion, cfg.AwsConfig)
 	servicePage := tview.NewFlex().SetDirection(tview.FlexRow)
 	servicePageContent := a.DisplayEc2Instances(ins, sess)
+	secGrp := aws.GetSecGrps(*sess)
 
 	profileDropdown := tview.NewDropDown().
 		SetLabel("Profile ▼ ").
@@ -269,6 +271,14 @@ func (a *App) layout(ctx context.Context) *tview.Flex {
 				a.Flash().Info("Loading EC2 instacnes...")
 				servicePage.RemoveItemAtIndex(0)
 				servicePageContent = a.DisplayEc2Instances(ins, sess)
+				servicePage.AddItem(servicePageContent, 0, 6, true)
+				a.Application.SetFocus(servicePageContent)
+				inputField.SetText("")
+
+			case "Security Group", "sg":
+				a.Flash().Info("Loading Security Groups...")
+				servicePage.RemoveItemAtIndex(0)
+				servicePageContent = a.DisplaySecurityGroup(sess, secGrp)
 				// ec2Page.AddItem(menuColFlex, 0, 2, false)
 				servicePage.AddItem(servicePageContent, 0, 6, true)
 				a.Application.SetFocus(servicePageContent)
@@ -278,6 +288,7 @@ func (a *App) layout(ctx context.Context) *tview.Flex {
 				inputField.SetText("")
 				a.Flash().Err(fmt.Errorf("NO SERVICE..."))
 			}
+
 			servicePage.SetInputCapture(func(event *tcell.EventKey) *tcell.EventKey {
 				if event.Key() == tcell.KeyTab {
 					a.Application.SetFocus(inputField)
@@ -304,6 +315,42 @@ func (a *App) layout(ctx context.Context) *tview.Flex {
 	return main
 }
 
+func (a *App) DisplaySecurityGroup(sess *session.Session, secGrp []*ec2.SecurityGroup) *tview.Table {
+	table := tview.NewTable()
+	table.SetBorder(true)
+	table.SetBorderFocusColor(tcell.ColorSpringGreen)
+	a.setTableHeaderForSecGrp(table)
+	a.setTableContentForSecGrp(table, secGrp)
+	table.SetSelectable(true, false)
+	a.Application.SetFocus(table)
+	table.Select(1, 1).SetFixed(1, 1)
+	return table
+}
+
+func (a *App) setTableHeaderForSecGrp(secGrpTable *tview.Table) *tview.Table {
+	secGrpTable.SetTitleColor(tcell.ColorYellow)
+	secGrpTable.SetCell(0, 0, tview.NewTableCell("Group-Id").SetExpansion(1).SetSelectable(false).SetTextColor(tcell.ColorOrangeRed).SetAlign(tview.AlignCenter))
+	secGrpTable.SetCell(0, 1, tview.NewTableCell("Group-Name").SetExpansion(1).SetSelectable(false).SetTextColor(tcell.ColorOrangeRed).SetAlign(tview.AlignCenter))
+	secGrpTable.SetCell(0, 2, tview.NewTableCell("Description").SetExpansion(1).SetSelectable(false).SetTextColor(tcell.ColorOrangeRed).SetAlign(tview.AlignCenter))
+	secGrpTable.SetCell(0, 3, tview.NewTableCell("Owner-Id").SetExpansion(1).SetSelectable(false).SetTextColor(tcell.ColorOrangeRed).SetAlign(tview.AlignCenter))
+	secGrpTable.SetCell(0, 4, tview.NewTableCell("Vpc-Id").SetExpansion(1).SetSelectable(false).SetTextColor(tcell.ColorOrangeRed).SetAlign(tview.AlignCenter))
+
+	return secGrpTable
+}
+
+func (a *App) setTableContentForSecGrp(table *tview.Table, secGrp []*ec2.SecurityGroup) *tview.Table {
+	indx := 0
+	for _, grp := range secGrp {
+		table.SetCell((indx + 2), 0, tview.NewTableCell(*grp.GroupId).SetAlign(tview.AlignCenter))
+		table.SetCell((indx + 2), 1, tview.NewTableCell(*grp.GroupName).SetExpansion(1).SetAlign(tview.AlignCenter))
+		table.SetCell((indx + 2), 2, tview.NewTableCell(*grp.Description).SetExpansion(1).SetAlign(tview.AlignCenter))
+		table.SetCell((indx + 2), 3, tview.NewTableCell(*grp.OwnerId).SetExpansion(1).SetAlign(tview.AlignCenter))
+		table.SetCell((indx + 2), 4, tview.NewTableCell(*grp.VpcId).SetExpansion(1).SetAlign(tview.AlignCenter))
+		indx++
+	}
+	table.SetBorderFocusColor(tcell.ColorSpringGreen)
+	return table
+}
 func (a *App) DisplayEc2Instances(ins []aws.EC2Resp, sess *session.Session) *tview.Table {
 	table := tview.NewTable()
 	table.SetBorder(true)
