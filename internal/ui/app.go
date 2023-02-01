@@ -86,6 +86,10 @@ func (a *App) Menu() *Menu {
 	return a.views["menu"].(*Menu)
 }
 
+func (a *App) FlashView() *Flash {
+	return a.views["flash"].(*Flash)
+}
+
 // Flash returns a flash model.
 func (a *App) Flash() *model.Flash {
 	return a.flash

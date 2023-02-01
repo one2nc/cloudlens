@@ -72,6 +72,9 @@ func (a *App) layout(ctx context.Context) *tview.Flex {
 	//----Flash Mesages----
 	flash := ui.NewFlash(a.App)
 	go flash.Watch(ctx, a.Flash().Channel())
+
+	a.Views()["flash"] = flash
+
 	//------menu-----
 	menuColFlex := tview.NewFlex().SetDirection(tview.FlexColumn)
 	//menuColFlex.SetBorder(true)
@@ -614,7 +617,8 @@ func (a *App) DisplayS3Json(sess *session.Session, bucketName string) {
 	buckets, _ := aws.ListBuckets(*sess)
 	ins, _ := aws.GetInstances(*sess)
 	a.SearchUtility(inputPrompt, sess, buckets, flex, nil, ins)
-	flex.AddItem(tvForS3Json, 0, 9, true)
+	flex.AddItem(tvForS3Json, 0, 8, true)
+	flex.AddItem(a.FlashView(), 0, 1, false)
 	a.Main.AddAndSwitchToPage("s3Json", flex, true)
 	flex.SetInputCapture(func(event *tcell.EventKey) *tcell.EventKey {
 		if event.Key() == tcell.KeyESC {
@@ -629,9 +633,9 @@ func (a *App) DisplayS3Json(sess *session.Session, bucketName string) {
 	})
 	tvForS3Json.SetInputCapture(func(event *tcell.EventKey) *tcell.EventKey {
 		if event.Rune() == 67 {
-			tvForS3Json.SetTextColor(tcell.ColorYellowGreen)
 			text := tvForS3Json.GetText(true)
 			clipboard.WriteAll(text)
+			a.Flash().Info("Text Copied.")
 		}
 		return event
 	})
