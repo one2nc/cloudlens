@@ -10,7 +10,7 @@ type EC2 struct {
 }
 
 // Header returns a header row.
-func (e EC2) Header(ns string) Header {
+func (e EC2) Header() Header {
 	return Header{
 		HeaderColumn{Name: "Instance-Id"},
 		HeaderColumn{Name: "Instance-State"},

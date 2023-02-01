@@ -7,10 +7,14 @@ import (
 	"sync"
 	"time"
 
+	"github.com/cenkalti/backoff"
+	"github.com/one2nc/cloud-lens/internal"
 	"github.com/one2nc/cloud-lens/internal/dao"
 	"github.com/one2nc/cloud-lens/internal/render"
 	"github.com/rs/zerolog/log"
 )
+
+const initRefreshRate = 300 * time.Millisecond
 
 // TableListener represents a table model listener.
 type TableListener interface {
@@ -81,8 +85,21 @@ func (t *Table) SetRefreshRate(d time.Duration) {
 	t.refreshRate = d
 }
 
+// Watch initiates model updates.
+func (t *Table) Watch(ctx context.Context) error {
+	log.Info().Msg(fmt.Sprintf("90: wathc: ctx type: %T", ctx.Value(internal.KeySession)))
+
+	if err := t.refresh(ctx); err != nil {
+		return err
+	}
+	go t.updater(ctx)
+
+	return nil
+}
+
 // Refresh updates the table content.
 func (t *Table) Refresh(ctx context.Context) error {
+	log.Info().Msg(fmt.Sprintf("100: refresh: ctx type: %T", ctx.Value(internal.KeySession)))
 	return t.refresh(ctx)
 }
 
@@ -94,6 +111,30 @@ func (t *Table) Get(ctx context.Context, path string) (dao.Object, error) {
 	}
 
 	return meta.DAO.Get(ctx, path)
+}
+
+func (t *Table) updater(ctx context.Context) {
+	defer log.Debug().Msgf("TABLE-UPDATER canceled -- %q", t.resource)
+
+	bf := backoff.NewExponentialBackOff()
+	bf.InitialInterval, bf.MaxElapsedTime = initRefreshRate, maxReaderRetryInterval
+	rate := initRefreshRate
+	for {
+		select {
+		case <-ctx.Done():
+			return
+		case <-time.After(rate):
+			rate = t.refreshRate
+			err := backoff.Retry(func() error {
+				return t.refresh(ctx)
+			}, backoff.WithContext(bf, ctx))
+			if err != nil {
+				log.Error().Err(err).Msgf("Retry failed")
+				t.fireTableLoadFailed(err)
+				return
+			}
+		}
+	}
 }
 
 func (t *Table) refresh(ctx context.Context) error {
@@ -131,7 +172,7 @@ func (t *Table) reconcile(ctx context.Context) error {
 
 	t.data.Clear()
 	t.data.Update(rows)
-	t.data.SetHeader(meta.Renderer.Header(""))
+	t.data.SetHeader(meta.Renderer.Header())
 
 	if len(t.data.Header) == 0 {
 		return fmt.Errorf("fail to list resource %s", t.resource)
@@ -165,6 +206,12 @@ func resourceMeta(res string) ResourceMeta {
 		log.Debug().Msg(fmt.Sprintf("No registry found for %v", res))
 	}
 	return meta
+}
+
+func (t *Table) fireTableLoadFailed(err error) {
+	// for _, l := range t.listeners {
+	// 	l.TableLoadFailed(err)
+	// }
 }
 
 // ----------------------------------------------------------------------------

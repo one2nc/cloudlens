@@ -2,10 +2,16 @@ package model
 
 import (
 	"context"
+	"time"
 
 	"github.com/derailed/tview"
 	"github.com/one2nc/cloud-lens/internal/dao"
 	"github.com/one2nc/cloud-lens/internal/render"
+)
+
+const (
+	maxReaderRetryInterval   = 2 * time.Minute
+	defaultReaderRefreshRate = 5 * time.Second
 )
 
 // Igniter represents a runnable view.
@@ -47,7 +53,7 @@ type Renderer interface {
 	Render(o interface{}, ns string, row *render.Row) error
 
 	// Header returns the resource header.
-	Header(ns string) render.Header
+	Header() render.Header
 }
 
 // ResourceMeta represents model info about a resource.

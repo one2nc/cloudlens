@@ -2,10 +2,12 @@ package dao
 
 import (
 	"context"
+	"fmt"
 
-	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/one2nc/cloud-lens/internal"
 	"github.com/one2nc/cloud-lens/internal/aws"
+	"github.com/one2nc/cloud-lens/internal/config"
+	"github.com/rs/zerolog/log"
 )
 
 type EC2 struct {
@@ -13,8 +15,14 @@ type EC2 struct {
 }
 
 func (e *EC2) List(ctx context.Context) ([]Object, error) {
-	session := ctx.Value(internal.KeySession).(session.Session)
-	ins, err := aws.GetInstances(session)
+	log.Info().Msg(fmt.Sprintf("ctx type: %T", ctx.Value(internal.KeySession)))
+	cfg, _ := config.Get()
+	session, _ := config.GetSession(cfg.Profiles[0], "ap-south-1", cfg.AwsConfig)
+	//TODO: make dynamic
+	//session := ctx.Value(internal.KeySession).(*session.Session)
+	ins, err := aws.GetInstances(*session)
+	log.Info().Msg(fmt.Sprintf("ins: %+v", ins))
+
 	objs := make([]Object, len(ins))
 	for i, obj := range ins {
 		ins[i] = obj

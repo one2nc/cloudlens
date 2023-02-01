@@ -82,3 +82,8 @@ func (t *Table) bindKeys() {
 
 // Name returns the table name.
 func (t *Table) Name() string { return t.Table.Resource() }
+
+// AddBindKeysFn adds additional key bindings.
+func (t *Table) AddBindKeysFn(f BindKeysFunc) {
+	t.bindKeysFn = append(t.bindKeysFn, f)
+}

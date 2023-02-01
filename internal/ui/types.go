@@ -28,8 +28,8 @@ type Tabular interface {
 	// Peek returns current model data.
 	Peek() *render.TableData
 
-	// Watch watches a given resource for changes.
-	//Watch(context.Context) error
+	//Watch watches a given resource for changes.
+	Watch(context.Context) error
 
 	// Refresh forces a new refresh.
 	Refresh(context.Context) error
