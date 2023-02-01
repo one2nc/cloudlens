@@ -378,24 +378,20 @@ func (a *App) DisplayEc2Instances(ins []aws.EC2Resp, sess *session.Session) *tvi
 	}
 	table.SetSelectable(true, false)
 	a.Application.SetFocus(table)
-	table.Select(1, 1).SetFixed(1, 1)
-	table.Select(1, 1).SetFixed(1, 1).SetDoneFunc(func(key tcell.Key) {
-		if table.GetCell(1, 1).Text != "" {
+	if table.GetCell(1, 1).Text != "" {
+		table.Select(1, 1).SetFixed(1, 1).SetDoneFunc(func(key tcell.Key) {
 			if key == tcell.KeyEnter {
 				table.SetSelectable(true, false)
 			}
-		}
-	}).SetSelectionChangedFunc(func(row int, column int) {
-		table.SetSelectable(true, false)
-	})
+		}).SetSelectionChangedFunc(func(row int, column int) {
+			table.SetSelectable(true, false)
+		})
 
-	table.SetSelectedFunc(func(row, column int) {
-		if table.GetCell(1, 1).Text != "" {
+		table.SetSelectedFunc(func(row, column int) {
 			insId := ins[row-1].InstanceId
 			a.DisplayEc2InstanceJson(sess, insId)
-		}
-	})
-
+		})
+	}
 	return table
 }
 
