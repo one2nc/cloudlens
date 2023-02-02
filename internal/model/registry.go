@@ -14,4 +14,8 @@ var Registry = map[string]ResourceMeta{
 		DAO:      &dao.S3{},
 		Renderer: &render.S3{},
 	},
+	"SG": {
+		DAO:      &dao.SG{},
+		Renderer: &render.SG{},
+	},
 }

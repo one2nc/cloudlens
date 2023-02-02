@@ -60,8 +60,8 @@ func (a *App) Init() error {
 	a.App.Init()
 	a.SetInputCapture(a.keyboard)
 	a.bindKeys()
-	a.layout(ctx)
-	//a.tempLayout(ctx)
+	// a.layout(ctx)
+	a.tempLayout(ctx)
 	return nil
 }
 
@@ -868,8 +868,9 @@ func (a *App) tempLayout(ctx context.Context) {
 
 	//Testing only
 	//a.inject(NewHelp(a))
-	//a.inject(NewEC2("EC2"))
-	a.inject(NewS3("S3"))
+	a.inject(NewEC2("EC2"))
+	a.inject(NewSG("SG"))
+	// a.inject(NewS3("S3"))
 }
 
 // QueueUpdateDraw queues up a ui action and redraw the ui.
