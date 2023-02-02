@@ -5,8 +5,8 @@ import (
 )
 
 // HeaderColumn represent a table header.
-// SortIndicatorIdx position of alphabet in header name to highlight
-// Set SortIndicatorIdx to -1 to ignore highlighting any alphabet in header name
+// SortIndicatorIdx is the position of alphabet in header name to highlight.
+// Set SortIndicatorIdx to -1 to ignore highlighting any alphabet in header name.
 type HeaderColumn struct {
 	Name             string
 	SortIndicatorIdx int
