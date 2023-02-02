@@ -24,7 +24,10 @@ func NewApp() *App {
 		actions:     make(KeyActions),
 		views:       make(map[string]tview.Primitive),
 	}
-	a.views["menu"] = NewMenu()
+	a.views = map[string]tview.Primitive{
+		"menu": NewMenu(),
+		"crumbs": NewCrumbs(),
+	}
 	return &a
 }
 
@@ -82,6 +85,12 @@ func (a *App) Views() map[string]tview.Primitive {
 }
 
 // View Accessors...
+
+// Crumbs return app crumbs.
+func (a *App) Crumbs() *Crumbs {
+	return a.views["crumbs"].(*Crumbs)
+}
+
 func (a *App) Menu() *Menu {
 	return a.views["menu"].(*Menu)
 }
@@ -94,6 +103,9 @@ func (a *App) FlashView() *Flash {
 func (a *App) Flash() *model.Flash {
 	return a.flash
 }
+
+// ----------------------------------------------------------------------------
+// Helpers...
 
 // AsKey converts rune to keyboard key.,.
 func AsKey(evt *tcell.EventKey) tcell.Key {

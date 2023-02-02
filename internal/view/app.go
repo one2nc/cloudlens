@@ -52,14 +52,21 @@ func NewApp() *App {
 	return &a
 }
 
-func (a *App) Init(ctx context.Context) error {
+func (a *App) Init(profile, region string, ctx context.Context) error {
+
+	infoData := map[string]string{
+		"Profile": profile,
+		"Region":  region,
+	}
+	a.Views()["info"] = ui.NewInfo(infoData)
+
 	ctx = context.WithValue(ctx, internal.KeyApp, a)
 	a.context = ctx
-	log.Info().Msg(fmt.Sprintf("one ctx type: %T", ctx.Value(internal.KeySession)))
 	if err := a.Content.Init(ctx); err != nil {
 		return err
 	}
 	a.Content.Stack.AddListener(a.Menu())
+	a.Content.Stack.AddListener(a.Crumbs())
 	a.App.Init()
 	a.SetInputCapture(a.keyboard)
 	a.bindKeys()
@@ -863,6 +870,7 @@ func (a *App) tempLayout(ctx context.Context) {
 
 	main.AddItem(a.statusIndicator(), 1, 1, false)
 	main.AddItem(a.Content, 0, 10, true)
+	main.AddItem(a.Crumbs(), 1, 1, false)
 	main.AddItem(flash, 1, 1, false)
 
 	a.Main.AddPage("main", main, true, false)
@@ -929,7 +937,7 @@ func (a *App) buildHeader() tview.Primitive {
 	if !a.showHeader {
 		return header
 	}
-	header.AddItem(tview.NewBox(), 0, 1, false)
+	header.AddItem(a.info(), 0, 1, false)
 	header.AddItem(a.Menu(), 0, 2, false)
 	header.AddItem(tview.NewBox(), 0, 1, false)
 
@@ -996,6 +1004,10 @@ func (a *App) PrevCmd(evt *tcell.EventKey) *tcell.EventKey {
 
 func (a *App) statusIndicator() *ui.StatusIndicator {
 	return a.Views()["statusIndicator"].(*ui.StatusIndicator)
+}
+
+func (a *App) info() *ui.Info {
+	return a.Views()["info"].(*ui.Info)
 }
 
 func getIST(launchTime *time.Time) string {

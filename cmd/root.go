@@ -63,7 +63,7 @@ func run(cmd *cobra.Command, args []string) {
 
 	app := view.NewApp()
 	//init app
-	if err := app.Init(ctx); err != nil {
+	if err := app.Init(profile, region, ctx); err != nil {
 		panic(fmt.Sprintf("app init failed -- %v", err))
 	}
 	if err := app.Run(); err != nil {
