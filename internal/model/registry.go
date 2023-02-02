@@ -10,4 +10,8 @@ var Registry = map[string]ResourceMeta{
 		DAO:      &dao.EC2{},
 		Renderer: &render.EC2{},
 	},
+	"S3": {
+		DAO:      &dao.S3{},
+		Renderer: &render.S3{},
+	},
 }

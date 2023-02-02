@@ -867,8 +867,9 @@ func (a *App) tempLayout(ctx context.Context) {
 	a.toggleHeader(true)
 
 	//Testing only
-	a.inject(NewHelp(a))
-	a.inject(NewEC2("EC2"))
+	//a.inject(NewHelp(a))
+	//a.inject(NewEC2("EC2"))
+	a.inject(NewS3("S3"))
 }
 
 // QueueUpdateDraw queues up a ui action and redraw the ui.
@@ -1001,4 +1002,3 @@ func concatJson(json1 *s3.ServerSideEncryptionConfiguration, json2 []*s3.Lifecyc
 	tempRes2, _ := json.MarshalIndent(res, "", " ")
 	return string(tempRes2)
 }
-
