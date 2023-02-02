@@ -60,7 +60,7 @@ func (a *App) Init() error {
 	a.App.Init()
 	a.SetInputCapture(a.keyboard)
 	a.bindKeys()
-	// a.layout(ctx)
+	//a.layout(ctx)
 	a.tempLayout(ctx)
 	return nil
 }
