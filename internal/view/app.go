@@ -31,6 +31,7 @@ const (
 type App struct {
 	*ui.App
 	Content             *PageStack
+	context             context.Context
 	cancelFn            context.CancelFunc
 	showHeader          bool
 	IsPageContentSorted bool
@@ -51,8 +52,10 @@ func NewApp() *App {
 	return &a
 }
 
-func (a *App) Init() error {
-	ctx := context.WithValue(context.Background(), internal.KeyApp, a)
+func (a *App) Init(ctx context.Context) error {
+	ctx = context.WithValue(ctx, internal.KeyApp, a)
+	a.context = ctx
+	log.Info().Msg(fmt.Sprintf("one ctx type: %T", ctx.Value(internal.KeySession)))
 	if err := a.Content.Init(ctx); err != nil {
 		return err
 	}
@@ -870,7 +873,7 @@ func (a *App) tempLayout(ctx context.Context) {
 	//a.inject(NewHelp(a))
 	a.inject(NewEC2("EC2"))
 	a.inject(NewSG("SG"))
-	// a.inject(NewS3("S3"))
+	a.inject(NewS3("S3"))
 }
 
 // QueueUpdateDraw queues up a ui action and redraw the ui.
@@ -898,6 +901,10 @@ func (a *App) Run() error {
 	}
 
 	return nil
+}
+
+func (a *App) SetContext(ctx context.Context) {
+	a.context = ctx
 }
 
 func (a *App) toggleHeader(header bool) {
@@ -969,8 +976,7 @@ func (a *App) helpCmd(evt *tcell.EventKey) *tcell.EventKey {
 }
 
 func (a *App) inject(c model.Component) error {
-	ctx := context.WithValue(context.Background(), internal.KeyApp, a)
-	if err := c.Init(ctx); err != nil {
+	if err := c.Init(a.context); err != nil {
 		log.Error().Err(err).Msgf("component init failed for %q", c.Name())
 		//dialog.ShowError(a.Styles.Dialog(), a.Content.Pages, err.Error())
 	}

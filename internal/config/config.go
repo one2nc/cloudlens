@@ -10,7 +10,6 @@ import (
 	awsV2 "github.com/aws/aws-sdk-go-v2/aws"
 	awsV2Config "github.com/aws/aws-sdk-go-v2/config"
 	"github.com/aws/aws-sdk-go/aws"
-	"github.com/aws/aws-sdk-go/aws/credentials"
 	"github.com/aws/aws-sdk-go/aws/session"
 )
 
@@ -23,12 +22,12 @@ type Config struct {
 var config Config
 
 func GetSession(profile, region string, awsCfg awsV2.Config) (*session.Session, error) {
-	crds, _ := awsCfg.Credentials.Retrieve(context.TODO())
+	//crds, _ := awsCfg.Credentials.Retrieve(context.TODO())
 	sess, err := session.NewSessionWithOptions(session.Options{Config: aws.Config{
 		//TODO: remove hardcoded enpoint
-		Endpoint:         aws.String("http://localhost:4566"),
-		Region:           aws.String(region),
-		Credentials:      credentials.NewStaticCredentials(crds.AccessKeyID, crds.SecretAccessKey, ""),
+		//Endpoint: aws.String("http://localhost:4566"),
+		Region:   aws.String(region),
+		//Credentials:      credentials.NewStaticCredentials(crds.AccessKeyID, crds.SecretAccessKey, ""),
 		S3ForcePathStyle: aws.Bool(true),
 	},
 		Profile: profile})

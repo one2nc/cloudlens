@@ -8,7 +8,6 @@ import (
 	"time"
 
 	"github.com/cenkalti/backoff"
-	"github.com/one2nc/cloud-lens/internal"
 	"github.com/one2nc/cloud-lens/internal/dao"
 	"github.com/one2nc/cloud-lens/internal/render"
 	"github.com/rs/zerolog/log"
@@ -87,8 +86,6 @@ func (t *Table) SetRefreshRate(d time.Duration) {
 
 // Watch initiates model updates.
 func (t *Table) Watch(ctx context.Context) error {
-	log.Info().Msg(fmt.Sprintf("90: wathc: ctx type: %T", ctx.Value(internal.KeySession)))
-
 	if err := t.refresh(ctx); err != nil {
 		return err
 	}
@@ -99,7 +96,6 @@ func (t *Table) Watch(ctx context.Context) error {
 
 // Refresh updates the table content.
 func (t *Table) Refresh(ctx context.Context) error {
-	log.Info().Msg(fmt.Sprintf("100: refresh: ctx type: %T", ctx.Value(internal.KeySession)))
 	return t.refresh(ctx)
 }
 

@@ -17,10 +17,9 @@ type Browser struct {
 }
 
 // NewBrowser returns a new browser.
-func NewBrowser(resource string, ctx context.Context) ResourceViewer {
+func NewBrowser(resource string) ResourceViewer {
 	return &Browser{
 		Table:   NewTable(resource),
-		context: ctx,
 	}
 }
 

@@ -1,12 +1,9 @@
 package view
 
 import (
-	"context"
 	"fmt"
 
 	"github.com/gdamore/tcell/v2"
-	"github.com/one2nc/cloud-lens/internal"
-	"github.com/one2nc/cloud-lens/internal/config"
 	"github.com/one2nc/cloud-lens/internal/ui"
 	"github.com/rs/zerolog/log"
 )
@@ -17,12 +14,8 @@ type EC2 struct {
 
 // NewPod returns a new viewer.
 func NewEC2(resource string) ResourceViewer {
-	cfg, _ := config.Get()
-	session, _ := config.GetSession(cfg.Profiles[0], "ap-east-1", cfg.AwsConfig)
-	ctx := context.WithValue(context.Background(), internal.KeySession, session)
-
 	var e EC2
-	e.ResourceViewer = NewBrowser(resource, ctx)
+	e.ResourceViewer = NewBrowser(resource)
 	e.AddBindKeysFn(e.bindKeys)
 	e.GetTable().SetEnterFn(e.describeInstace)
 	return &e
