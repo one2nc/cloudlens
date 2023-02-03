@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"os"
 
+	"github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/one2nc/cloud-lens/internal"
 	"github.com/one2nc/cloud-lens/internal/config"
 	"github.com/one2nc/cloud-lens/internal/view"
@@ -50,11 +51,11 @@ func run(cmd *cobra.Command, args []string) {
 	log.Logger = log.Output(zerolog.ConsoleWriter{Out: file})
 
 	//get config
-	cfg, err := config.Get()
+	// cfg, err := config.Get()
 	if err != nil {
 		panic(fmt.Sprintf("app get config failed -- %v", err))
 	}
-	sess, err := config.GetSession(profile, region, cfg.AwsConfig)
+	sess, err := config.GetSession(profile, region, *aws.NewConfig())
 	if err != nil {
 		panic(fmt.Sprintf("aws session init failed -- %v", err))
 	}
