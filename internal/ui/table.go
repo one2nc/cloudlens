@@ -40,7 +40,6 @@ func NewTable(res string) *Table {
 func (t *Table) Init(ctx context.Context) {
 	t.SetFixed(0, 0)
 	t.SetBorder(true)
-	t.SetBorderAttributes(tcell.AttrBlink)
 	t.SetBorderColor(tcell.ColorDeepSkyBlue)
 	//t.SetBorderFocusColor(tcell.ColorSpringGreen)	
 	t.SetBorderPadding(0, 0, 1, 1)
