@@ -30,6 +30,7 @@ func (e *EC2) bindKeys(aa ui.KeyActions) {
 		ui.KeyShiftM:    ui.NewKeyAction("Sort Monitoring-State", e.GetTable().SortColCmd("Monitoring-State", true), true),
 		ui.KeyShiftP:    ui.NewKeyAction("Sort Public-DNS", e.GetTable().SortColCmd("Public-DNS", true), true),
 		tcell.KeyEscape: ui.NewKeyAction("Back", e.App().PrevCmd, true),
+		tcell.KeyEnter:  ui.NewKeyAction("View", e.enterCmd, true),
 	})
 }
 
@@ -38,4 +39,11 @@ func (e *EC2) describeInstace(app *App, model ui.Tabular, resource string) {
 	// if err := app.inject(co); err != nil {
 	// 	app.Flash().Err(err)
 	// }
+}
+
+func (e *EC2) enterCmd(evt *tcell.EventKey) *tcell.EventKey {
+	instanceId := e.GetTable().GetSelectedItem()
+	e.App().Flash().Info("Instance-Id: " + instanceId)
+
+	return nil
 }

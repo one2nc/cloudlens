@@ -71,10 +71,8 @@ func (s *SelectTable) GetSelectedItem() string {
 	if s.GetSelectedRowIndex() == 0 || s.model.Empty() {
 		return ""
 	}
-	sel, ok := s.GetCell(s.GetSelectedRowIndex(), 0).GetReference().(string)
-	if !ok {
-		return ""
-	}
+	sel := s.GetCell(s.GetSelectedRowIndex(), 0).Text
+
 	if s.selectedFn != nil {
 		return s.selectedFn(sel)
 	}
