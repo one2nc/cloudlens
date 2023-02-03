@@ -32,14 +32,7 @@ type Help struct {
 func NewHelp(app *App) *Help {
 	return &Help{
 		Table: NewTable("help"),
-		//hints: app.Content.Top().Hints
-		hints: func() model.MenuHints {
-			return model.MenuHints{
-				model.MenuHint{Mnemonic: "3", Description: "Bob"},
-				model.MenuHint{Mnemonic: "2", Description: "Abby"},
-				model.MenuHint{Mnemonic: "1", Description: "Chris"},
-			}
-		},
+		hints: app.Content.Top().Hints,
 	}
 }
 
