@@ -6,15 +6,15 @@ import (
 )
 
 var Registry = map[string]ResourceMeta{
-	"EC2": {
+	"ec2": {
 		DAO:      &dao.EC2{},
 		Renderer: &render.EC2{},
 	},
-	"S3": {
+	"s3": {
 		DAO:      &dao.S3{},
 		Renderer: &render.S3{},
 	},
-	"SG": {
+	"sg": {
 		DAO:      &dao.SG{},
 		Renderer: &render.SG{},
 	},

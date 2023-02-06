@@ -31,6 +31,7 @@ const (
 type App struct {
 	*ui.App
 	Content             *PageStack
+	command             *Command
 	context             context.Context
 	cancelFn            context.CancelFunc
 	showHeader          bool
@@ -70,6 +71,11 @@ func (a *App) Init(profile, region string, ctx context.Context) error {
 	a.App.Init()
 	a.SetInputCapture(a.keyboard)
 	a.bindKeys()
+
+	a.command = NewCommand(a)
+	if err := a.command.Init(); err != nil {
+		return err
+	}
 	//a.layout(ctx)
 	a.tempLayout(ctx)
 	return nil
@@ -83,6 +89,7 @@ func (a *App) layout(ctx context.Context) *tview.Flex {
 	flash := ui.NewFlash(a.App)
 	go flash.Watch(ctx, a.Flash().Channel())
 
+	a.Flash().Info("1 minute")
 	a.Views()["flash"] = flash
 
 	//------menu-----
@@ -865,7 +872,6 @@ func getBucLevelInfo(bucketInfo *s3.ListObjectsV2Output) ([]string, []string) {
 func (a *App) tempLayout(ctx context.Context) {
 	flash := ui.NewFlash(a.App)
 	go flash.Watch(ctx, a.Flash().Channel())
-
 	main := tview.NewFlex().SetDirection(tview.FlexRow)
 
 	main.AddItem(a.statusIndicator(), 1, 1, false)
@@ -879,9 +885,9 @@ func (a *App) tempLayout(ctx context.Context) {
 
 	//Testing only
 	//a.inject(NewHelp(a))
-	a.inject(NewEC2("EC2"))
-	a.inject(NewSG("SG"))
-	a.inject(NewS3("S3"))
+	// a.inject(NewEC2("ec2"))
+	// a.inject(NewSG("sg"))
+	// a.inject(NewS3("s3"))
 }
 
 // QueueUpdateDraw queues up a ui action and redraw the ui.
@@ -900,9 +906,13 @@ func (a *App) Run() error {
 		<-time.After(splashDelay)
 		a.QueueUpdateDraw(func() {
 			a.Main.SwitchToPage("main")
-			a.Application.SetFocus(a.Main.CurrentPage().Item)
 		})
 	}()
+
+	if err := a.command.defaultCmd(); err != nil {
+		return err
+	}
+	a.SetRunning(true)
 
 	if err := a.Application.Run(); err != nil {
 		return err
@@ -955,6 +965,7 @@ func (a *App) keyboard(evt *tcell.EventKey) *tcell.EventKey {
 func (a *App) bindKeys() {
 	a.AddActions(ui.KeyActions{
 		tcell.KeyCtrlE: ui.NewKeyAction("ToggleHeader", a.toggleHeaderCmd, false),
+		tcell.KeyEnter: ui.NewKeyAction("Goto", a.gotoCmd, false),
 	})
 }
 
@@ -966,6 +977,16 @@ func (a *App) toggleHeaderCmd(evt *tcell.EventKey) *tcell.EventKey {
 	})
 
 	return nil
+}
+
+func (a *App) gotoCmd(evt *tcell.EventKey) *tcell.EventKey {
+	if a.CmdBuff().IsActive() && !a.CmdBuff().Empty() {
+		a.gotoResource(a.GetCmd(), "", true)
+		a.ResetCmd()
+		return nil
+	}
+
+	return evt
 }
 
 func (a *App) helpCmd(evt *tcell.EventKey) *tcell.EventKey {
@@ -981,6 +1002,13 @@ func (a *App) helpCmd(evt *tcell.EventKey) *tcell.EventKey {
 	}
 
 	return nil
+}
+
+func (a *App) gotoResource(cmd, path string, clearStack bool) {
+	err := a.command.run(cmd, path, clearStack)
+	if err != nil {
+		//dialog.ShowError(a.Styles.Dialog(), a.Content.Pages, err.Error())
+	}
 }
 
 func (a *App) inject(c model.Component) error {

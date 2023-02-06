@@ -52,3 +52,15 @@ type ResourceViewer interface {
 	// AddBindKeys provision additional key bindings.
 	AddBindKeysFn(BindKeysFunc)
 }
+
+// ViewerFunc returns a viewer matching a given gvr.
+type ViewerFunc func(string) ResourceViewer
+
+// MetaViewer represents a registered meta viewer.
+type MetaViewer struct {
+	viewerFn ViewerFunc
+	enterFn  EnterFunc
+}
+
+// MetaViewers represents a collection of meta viewers.
+type MetaViewers map[string]MetaViewer
