@@ -76,7 +76,7 @@ func (a *App) Init(profile, region string, ctx context.Context) error {
 	if err := a.command.Init(); err != nil {
 		return err
 	}
-	//a.layout(ctx)
+	// a.layout(ctx)
 	a.tempLayout(ctx)
 	return nil
 }
@@ -921,6 +921,10 @@ func (a *App) Run() error {
 	return nil
 }
 
+func (a *App) GetContext() context.Context {
+	return a.context
+}
+
 func (a *App) SetContext(ctx context.Context) {
 	a.context = ctx
 }
@@ -1025,6 +1029,17 @@ func (a *App) inject(c model.Component) error {
 func (a *App) PrevCmd(evt *tcell.EventKey) *tcell.EventKey {
 	if !a.Content.IsLast() {
 		a.Content.Pop()
+		fn := fmt.Sprintf("%v", a.context.Value(internal.FolderName))
+		newFn := ""
+		if strings.Count(fn, "/") > 0 {
+			fl := strings.Split(fn, "/")
+			for i := 0; i < len(fl)-2; i++ {
+				newFn = newFn + fl[i] + "/"
+			}
+			ctx := context.WithValue(a.GetContext(), internal.FolderName, newFn)
+			a.SetContext(ctx)
+			log.Info().Msg(fmt.Sprintf("inside prv cmd: %v", a.context.Value(internal.FolderName)))
+		}
 	}
 
 	return nil

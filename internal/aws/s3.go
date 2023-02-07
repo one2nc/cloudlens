@@ -48,7 +48,10 @@ func ListBuckets(sess session.Session) ([]BucketResp, error) {
 
 func GetInfoAboutBucket(sess session.Session, bucketName string, delimiter string, prefix string) *s3.ListObjectsV2Output {
 	s3Serv := *s3.New(&sess)
-	result, err := s3Serv.ListObjectsV2(&s3.ListObjectsV2Input{Bucket: aws.String(bucketName), Delimiter: aws.String(delimiter), Prefix: aws.String(prefix)})
+	result, err := s3Serv.ListObjectsV2(&s3.ListObjectsV2Input{
+		Bucket:    aws.String(bucketName),
+		Delimiter: aws.String(delimiter),
+		Prefix:    aws.String(prefix)})
 	if err != nil {
 		fmt.Println("Error is:", err)
 		return nil
