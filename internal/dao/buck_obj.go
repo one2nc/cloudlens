@@ -71,9 +71,9 @@ func setFoldersAndFIles(Folder []*s3.CommonPrefix, File []*s3.Object) []S3Object
 		o := S3Object{
 			Name:         keyA[len(keyA)-2],
 			ObjectType:   "Folder",
-			LastModified: "_",
-			Size:         "0",
-			StorageClass: "_",
+			LastModified: "-",
+			Size:         "-",
+			StorageClass: "-",
 		}
 		s3Objects = append(s3Objects, o)
 		indx++

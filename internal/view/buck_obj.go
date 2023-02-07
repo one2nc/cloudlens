@@ -34,18 +34,21 @@ func (obj *BObj) bindKeys(aa ui.KeyActions) {
 
 func (obj *BObj) enterCmd(evt *tcell.EventKey) *tcell.EventKey {
 	oName := obj.GetTable().GetSelectedItem()
-	o := NewS3FileViewer("OBJ")
-	ctx := obj.App().GetContext()
-	bn := ctx.Value(internal.BucketName)
-	fn := fmt.Sprintf("%v%v/", ctx.Value(internal.FolderName), oName)
-	log.Info().Msg(fmt.Sprintf("In view Folder Name: %v", fn))
-	ctx = context.WithValue(obj.App().context, internal.BucketName, bn)
-	obj.App().SetContext(ctx)
-	ctx = context.WithValue(obj.App().context, internal.FolderName, fn)
-	obj.App().SetContext(ctx)
+	fileType := obj.GetTable().GetSecondColumn()
+	if fileType == "Folder" {
+		o := NewS3FileViewer("OBJ")
+		ctx := obj.App().GetContext()
+		bn := ctx.Value(internal.BucketName)
+		fn := fmt.Sprintf("%v%v/", ctx.Value(internal.FolderName), oName)
+		log.Info().Msg(fmt.Sprintf("In view Folder Name: %v", fn))
+		ctx = context.WithValue(obj.App().context, internal.BucketName, bn)
+		obj.App().SetContext(ctx)
+		ctx = context.WithValue(obj.App().context, internal.FolderName, fn)
+		obj.App().SetContext(ctx)
 
-	obj.App().Flash().Info("Bucket Name: " + oName)
-	// println(bName)
-	obj.App().inject(o)
+		obj.App().Flash().Info("Bucket Name: " + oName)
+		// println(bName)
+		obj.App().inject(o)
+	}
 	return nil
 }

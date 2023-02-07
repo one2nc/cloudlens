@@ -79,6 +79,18 @@ func (s *SelectTable) GetSelectedItem() string {
 	return sel
 }
 
+func (s *SelectTable) GetSecondColumn() string {
+	if s.GetSelectedRowIndex() == 0 || s.model.Empty() {
+		return ""
+	}
+	sel := s.GetCell(s.GetSelectedRowIndex(), 1).Text
+
+	if s.selectedFn != nil {
+		return s.selectedFn(sel)
+	}
+	return sel
+}
+
 // GetSelectedCell returns the content of a cell for the currently selected row.
 func (s *SelectTable) GetSelectedCell(col int) string {
 	r, _ := s.GetSelection()
