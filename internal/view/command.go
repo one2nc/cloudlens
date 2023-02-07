@@ -6,6 +6,7 @@ import (
 	"strings"
 	"sync"
 
+	"github.com/one2nc/cloud-lens/internal/dao"
 	"github.com/one2nc/cloud-lens/internal/model"
 	"github.com/rs/zerolog/log"
 )
@@ -18,9 +19,9 @@ var (
 
 // Command represents a user command.
 type Command struct {
-	app *App
-
-	mx sync.Mutex
+	app   *App
+	alias *dao.Alias
+	mx    sync.Mutex
 }
 
 // NewCommand returns a new command.
@@ -32,13 +33,26 @@ func NewCommand(app *App) *Command {
 
 // Init initializes the command.
 func (c *Command) Init() error {
+	c.alias = dao.NewAlias()
+	if _, err := c.alias.Ensure(); err != nil {
+		log.Error().Err(err).Msgf("command init failed!")
+		return err
+	}
 	customViewers = loadCustomViewers()
 	return nil
 }
 
 // Reset resets Command and reload aliases.
 func (c *Command) Reset(clear bool) error {
+	c.mx.Lock()
+	defer c.mx.Unlock()
 
+	if clear {
+		c.alias.Clear()
+	}
+	if _, err := c.alias.Ensure(); err != nil {
+		return err
+	}
 	return nil
 }
 
@@ -55,6 +69,9 @@ func (c *Command) run(cmd, path string, clearStack bool) error {
 
 	switch cmds[0] {
 	default:
+		if !c.alias.Check(cmds[0]) {
+			return fmt.Errorf("`%s` Command not found", cmd)
+		}
 		return c.exec(cmd, res, c.componentFor(res, path, v), clearStack)
 	}
 }
@@ -87,18 +104,17 @@ func (c *Command) specialCmd(cmd, path string) bool {
 }
 
 func (c *Command) viewMetaFor(cmd string) (string, *MetaViewer, error) {
-	// gvr, ok := c.alias.AsGVR(cmd)
-	// if !ok {
-	// 	return "", nil, fmt.Errorf("`%s` command not found", cmd)
-	// }
+	res, ok := c.alias.AsResource(cmd)
+	if !ok {
+		return "", nil, fmt.Errorf("`%s` command not found", cmd)
+	}
 
-	v, ok := customViewers[cmd]
-	log.Info().Msg(fmt.Sprintf("Is ok: %v", ok))
+	v, ok := customViewers[res]
 	if !ok {
 		return cmd, &MetaViewer{viewerFn: NewBrowser}, nil
 	}
 
-	return cmd, &v, nil
+	return res, &v, nil
 }
 
 func (c *Command) componentFor(res, path string, v *MetaViewer) ResourceViewer {

@@ -36,12 +36,12 @@ type Config struct {
 // CloudlensHome returns Cloudlens configs home directory.
 func CloudlensHome() string {
 	if env := os.Getenv(CloudlensConfig); env != "" {
-		log.Debug().Msg("env CL: " + env)
+		//log.Debug().Msg("env CL: " + env)
 		return env
 	}
 
 	xdgCLHome, err := xdg.ConfigFile("cloudlens")
-	log.Debug().Msg("xdgsclhome: " + xdgCLHome)
+	//log.Debug().Msg("xdgsclhome: " + xdgCLHome)
 
 	if err != nil {
 		log.Fatal().Err(err).Msg("Unable to create configuration directory for cloudlens")

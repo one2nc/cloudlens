@@ -19,6 +19,7 @@ import (
 	"github.com/one2nc/cloud-lens/internal/aws"
 	"github.com/one2nc/cloud-lens/internal/config"
 	"github.com/one2nc/cloud-lens/internal/model"
+	"github.com/one2nc/cloud-lens/internal/ui/dialog"
 
 	"github.com/one2nc/cloud-lens/internal/ui"
 	"github.com/rs/zerolog/log"
@@ -76,6 +77,7 @@ func (a *App) Init(profile, region string, ctx context.Context) error {
 	if err := a.command.Init(); err != nil {
 		return err
 	}
+	a.CmdBuff().SetSuggestionFn(a.suggestCommand())
 	// a.layout(ctx)
 	a.tempLayout(ctx)
 	return nil
@@ -882,12 +884,6 @@ func (a *App) tempLayout(ctx context.Context) {
 	a.Main.AddPage("main", main, true, false)
 	a.Main.AddPage("splash", ui.NewSplash("0.0.1"), true, true)
 	a.toggleHeader(true)
-
-	//Testing only
-	//a.inject(NewHelp(a))
-	// a.inject(NewEC2("ec2"))
-	// a.inject(NewSG("sg"))
-	// a.inject(NewS3("s3"))
 }
 
 // QueueUpdateDraw queues up a ui action and redraw the ui.
@@ -958,6 +954,32 @@ func (a *App) buildHeader() tview.Primitive {
 	return header
 }
 
+func (a *App) suggestCommand() model.SuggestionFunc {
+	return func(s string) (entries sort.StringSlice) {
+		// if s == "" {
+		// 	if a.cmdHistory.Empty() {
+		// 		return
+		// 	}
+		// 	return a.cmdHistory.List()
+		// }
+
+		s = strings.ToLower(s)
+		for _, k := range a.command.alias.Keys() {
+			if k == s {
+				continue
+			}
+			if strings.HasPrefix(k, s) {
+				entries = append(entries, strings.Replace(k, s, "", 1))
+			}
+		}
+		if len(entries) == 0 {
+			return nil
+		}
+		entries.Sort()
+		return
+	}
+}
+
 func (a *App) keyboard(evt *tcell.EventKey) *tcell.EventKey {
 	if k, ok := a.HasAction(ui.AsKey(evt)); ok && !a.Content.IsTopDialog() {
 		return k.Action(evt)
@@ -1011,14 +1033,14 @@ func (a *App) helpCmd(evt *tcell.EventKey) *tcell.EventKey {
 func (a *App) gotoResource(cmd, path string, clearStack bool) {
 	err := a.command.run(cmd, path, clearStack)
 	if err != nil {
-		//dialog.ShowError(a.Styles.Dialog(), a.Content.Pages, err.Error())
+		dialog.ShowError(a.Content.Pages, err.Error())
 	}
 }
 
 func (a *App) inject(c model.Component) error {
 	if err := c.Init(a.context); err != nil {
 		log.Error().Err(err).Msgf("component init failed for %q", c.Name())
-		//dialog.ShowError(a.Styles.Dialog(), a.Content.Pages, err.Error())
+		dialog.ShowError(a.Content.Pages, err.Error())
 	}
 	a.Content.Push(c)
 

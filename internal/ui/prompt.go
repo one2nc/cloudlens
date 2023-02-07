@@ -98,7 +98,7 @@ func NewPrompt(app *App, noIcons bool) *Prompt {
 	//p.SetBorderAttributes(tcell.AttrUnderline)
 	p.SetBorderPadding(0, 0, 1, 1)
 	p.SetBackgroundColor(tcell.ColorBlack.TrueColor())
-	p.SetTextColor(tcell.ColorOrange)
+	p.SetTextColor(tcell.ColorAquaMarine)
 	p.SetInputCapture(p.keyboard)
 
 	return &p
@@ -191,7 +191,7 @@ func (p *Prompt) write(text, suggest string) {
 	p.SetCursorIndex(p.spacer + len(text))
 	txt := text
 	if suggest != "" {
-		txt += fmt.Sprintf("[%s::-]%s", "red", suggest)
+		txt += fmt.Sprintf("[%s::]%s", "#1E90FF", suggest)
 	}
 	fmt.Fprintf(p, defaultPrompt, p.icon, txt)
 }
@@ -253,7 +253,7 @@ func colorFor(k model.BufferKind) tcell.Color {
 	// nolint:exhaustive
 	switch k {
 	case model.CommandBuffer:
-		return tcell.ColorAqua
+		return tcell.ColorMediumAquamarine
 	default:
 		return tcell.ColorSeaGreen
 	}

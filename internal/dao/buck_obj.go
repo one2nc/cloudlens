@@ -29,7 +29,7 @@ func (bo *BObj) List(ctx context.Context) ([]Object, error) {
 	log.Info().Msg(fmt.Sprintf("In Dao Folder Name: %v", fn))
 	bucketInfo := aws.GetInfoAboutBucket(*sess, bucketName, "/", fn)
 	folderArrayInfo, fileArrayInfo := getBucLevelInfo(bucketInfo)
-	var s3Objects []S3Object
+	var s3Objects []aws.S3Object
 	if len(folderArrayInfo) != 0 || len(fileArrayInfo) != 0 {
 		s3Objects = setFoldersAndFIles(bucketInfo.CommonPrefixes, bucketInfo.Contents)
 	}
@@ -59,16 +59,14 @@ func getBucLevelInfo(bucketInfo *s3.ListObjectsV2Output) ([]string, []string) {
 	return folderArrayInfo, fileArrayInfo
 }
 
-type S3Object struct {
-	Name, ObjectType, LastModified, Size, StorageClass string
-}
 
-func setFoldersAndFIles(Folder []*s3.CommonPrefix, File []*s3.Object) []S3Object {
-	var s3Objects []S3Object
+
+func setFoldersAndFIles(Folder []*s3.CommonPrefix, File []*s3.Object) []aws.S3Object {
+	var s3Objects []aws.S3Object
 	indx := 0
 	for _, bi := range Folder {
 		keyA := strings.Split(*bi.Prefix, "/")
-		o := S3Object{
+		o := aws.S3Object{
 			Name:         keyA[len(keyA)-2],
 			ObjectType:   "Folder",
 			LastModified: "-",
@@ -81,7 +79,7 @@ func setFoldersAndFIles(Folder []*s3.CommonPrefix, File []*s3.Object) []S3Object
 
 	for _, fi := range File {
 		keyA := strings.Split(*fi.Key, "/")
-		o := S3Object{
+		o := aws.S3Object{
 			Name:         keyA[len(keyA)-1],
 			ObjectType:   "File",
 			LastModified: fi.LastModified.String(),

@@ -4,7 +4,7 @@ import (
 	"fmt"
 
 	"github.com/derailed/tview"
-	"github.com/one2nc/cloud-lens/internal/dao"
+	"github.com/one2nc/cloud-lens/internal/aws"
 )
 
 type BObj struct {
@@ -21,7 +21,7 @@ func (obj BObj) Header() Header {
 }
 
 func (obj BObj) Render(o interface{}, ns string, row *Row) error {
-	s3Resp, ok := o.(dao.S3Object)
+	s3Resp, ok := o.(aws.S3Object)
 	if !ok {
 		return fmt.Errorf("expected S3Resp, but got %T", o)
 	}

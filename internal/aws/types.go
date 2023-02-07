@@ -15,3 +15,7 @@ type EC2Resp struct {
 	MonitoringState  string
 	LaunchTime       string
 }
+
+type S3Object struct {
+	Name, ObjectType, LastModified, Size, StorageClass string
+}
