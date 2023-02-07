@@ -98,7 +98,7 @@ func NewPrompt(app *App, noIcons bool) *Prompt {
 	//p.SetBorderAttributes(tcell.AttrUnderline)
 	p.SetBorderPadding(0, 0, 1, 1)
 	p.SetBackgroundColor(tcell.ColorBlack.TrueColor())
-	p.SetTextColor(tcell.ColorAquaMarine)
+	p.SetTextColor(tcell.ColorAqua)
 	p.SetInputCapture(p.keyboard)
 
 	return &p
