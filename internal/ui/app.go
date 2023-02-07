@@ -27,7 +27,7 @@ func NewApp() *App {
 		Main:        NewPages(),
 		views:       make(map[string]tview.Primitive),
 		flash:       model.NewFlash(model.DefaultFlashDelay),
-		cmdBuff:     model.NewFishBuff('	', model.CommandBuffer),
+		cmdBuff:     model.NewFishBuff(':', model.CommandBuffer),
 	}
 	a.views = map[string]tview.Primitive{
 		"menu":   NewMenu(),
@@ -92,7 +92,7 @@ func (a *App) BufferActive(state bool, kind model.BufferKind) {
 	}
 
 	if state && flex.ItemAt(1) != a.Prompt() {
-		flex.AddItemAtIndex(1, a.Prompt(), 2, 1, false)
+		flex.AddItemAtIndex(1, a.Prompt(), 3, 1, false)
 	} else if !state && flex.ItemAt(1) == a.Prompt() {
 		flex.RemoveItemAtIndex(1)
 		a.SetFocus(flex)

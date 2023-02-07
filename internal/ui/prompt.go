@@ -218,7 +218,7 @@ func (p *Prompt) SuggestionChanged(text, suggestion string) {
 func (p *Prompt) BufferActive(activate bool, kind model.BufferKind) {
 	if activate {
 		p.ShowCursor(true)
-		//p.SetBorder(true)
+		p.SetBorder(true)
 		//p.SetTextColor(p.styles.FgColor())
 		p.SetBorderColor(colorFor(kind))
 		p.icon = p.iconFor(kind)
@@ -253,7 +253,7 @@ func colorFor(k model.BufferKind) tcell.Color {
 	// nolint:exhaustive
 	switch k {
 	case model.CommandBuffer:
-		return tcell.ColorSpringGreen
+		return tcell.ColorAqua
 	default:
 		return tcell.ColorSeaGreen
 	}
