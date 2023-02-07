@@ -12,6 +12,11 @@ import (
 
 type SG struct {
 	Accessor
+	ctx context.Context
+}
+
+func (sg *SG) Init(ctx context.Context) {
+	sg.ctx = ctx
 }
 
 func (sg *SG) List(ctx context.Context) ([]Object, error) {
@@ -29,4 +34,13 @@ func (sg *SG) List(ctx context.Context) ([]Object, error) {
 
 func (sg *SG) Get(ctx context.Context, path string) (Object, error) {
 	return nil, nil
+}
+
+func (sg *SG) Describe(path string) (string, error) {
+	sess, ok := sg.ctx.Value(internal.KeySession).(*session.Session)
+	if !ok {
+		log.Err(fmt.Errorf("conversion err: Expected session.session but got %v", sess))
+	}
+	sgInfo := aws.GetSingleSecGrp(*sess, path)
+	return sgInfo.GoString(), nil
 }

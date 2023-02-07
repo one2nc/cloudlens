@@ -19,9 +19,8 @@ import (
 	"github.com/one2nc/cloud-lens/internal/aws"
 	"github.com/one2nc/cloud-lens/internal/config"
 	"github.com/one2nc/cloud-lens/internal/model"
-	"github.com/one2nc/cloud-lens/internal/ui/dialog"
-
 	"github.com/one2nc/cloud-lens/internal/ui"
+	"github.com/one2nc/cloud-lens/internal/ui/dialog"
 	"github.com/rs/zerolog/log"
 )
 

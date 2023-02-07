@@ -10,7 +10,7 @@ require (
 	github.com/cenkalti/backoff v2.2.1+incompatible
 	github.com/derailed/tview v0.7.2
 	github.com/fvbommel/sortorder v1.0.2
-	github.com/gdamore/tcell/v2 v2.5.2
+	github.com/gdamore/tcell/v2 v2.5.4
 	github.com/rs/zerolog v1.28.0
 	github.com/spf13/cobra v1.6.1
 )
@@ -19,6 +19,8 @@ require (
 	github.com/adrg/xdg v0.4.0
 	github.com/atotto/clipboard v0.1.4
 )
+
+require github.com/kylelemons/godebug v1.1.0 // indirect
 
 require (
 	github.com/aws/aws-sdk-go-v2/credentials v1.13.8 // indirect
@@ -45,6 +47,6 @@ require (
 	github.com/spf13/pflag v1.0.5 // indirect
 	golang.org/x/sys v0.3.0 // indirect
 	golang.org/x/term v0.1.0 // indirect
-	golang.org/x/text v0.4.0 // indirect
+	golang.org/x/text v0.5.0 // indirect
 	gopkg.in/yaml.v2 v2.4.0
 )

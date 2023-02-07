@@ -34,7 +34,6 @@ func (sg *SG) enterCmd(evt *tcell.EventKey) *tcell.EventKey {
 	if sg.GetTable().enterFn != nil {
 		f = sg.GetTable().enterFn
 	}
-	f(sg.App(), sg.GetTable().GetModel(), sg.Resource(), "")
-
+	f(sg.App(), sg.GetTable().GetModel(), sg.Resource(), groupId)
 	return nil
 }

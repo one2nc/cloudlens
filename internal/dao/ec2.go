@@ -12,6 +12,11 @@ import (
 
 type EC2 struct {
 	Accessor
+	ctx context.Context
+}
+
+func (ec2 *EC2) Init(ctx context.Context) {
+	ec2.ctx = ctx
 }
 
 func (e *EC2) List(ctx context.Context) ([]Object, error) {

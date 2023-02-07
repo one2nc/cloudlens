@@ -12,6 +12,11 @@ import (
 
 type S3 struct {
 	Accessor
+	ctx context.Context
+}
+
+func (s3 *S3) Init(ctx context.Context) {
+	s3.ctx = ctx
 }
 
 func (s3 *S3) List(ctx context.Context) ([]Object, error) {

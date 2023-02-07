@@ -3,6 +3,7 @@ package view
 import (
 	"context"
 	"strconv"
+	"strings"
 
 	"github.com/derailed/tview"
 	"github.com/gdamore/tcell/v2"
@@ -69,6 +70,7 @@ func (v *LiveView) Init(_ context.Context) error {
 	v.bindKeys()
 	v.SetInputCapture(v.keyboard)
 	v.model.AddListener(v)
+	v.SetTitle(v.model.GetPath())
 	return nil
 }
 
@@ -100,13 +102,12 @@ func (v *LiveView) ResourceChanged(lines []string, matches fuzzy.Matches) {
 			v.text.ScrollToBeginning()
 		}
 
-		// v.text.SetText(colorizeYAML(v.app.Styles.Views().Yaml, strings.Join(ll, "\n")))
+		v.text.SetText(strings.Join(ll, "\n"))
 		v.text.Highlight()
 		if v.currentRegion < v.maxRegions {
 			v.text.Highlight("search_" + strconv.Itoa(v.currentRegion))
 			v.text.ScrollToHighlight()
 		}
-		// v.updateTitle()
 	})
 }
 
@@ -125,16 +126,16 @@ func (v *LiveView) BufferActive(state bool, k model.BufferKind) {
 
 func (v *LiveView) bindKeys() {
 	v.actions.Set(ui.KeyActions{
-		tcell.KeyEnter:  ui.NewSharedKeyAction("Filter", v.filterCmd, false),
+		//tcell.KeyEnter:  ui.NewSharedKeyAction("Filter", v.filterCmd, false),
 		tcell.KeyEscape: ui.NewKeyAction("Back", v.resetCmd, false),
 		// tcell.KeyCtrlS:  ui.NewKeyAction("Save", v.saveCmd, false),
 		// ui.KeyC:         ui.NewKeyAction("Copy", cpCmd(v.app.Flash(), v.text), true),
-		ui.KeyF:         ui.NewKeyAction("Toggle FullScreen", v.toggleFullScreenCmd, true),
-		ui.KeyR:         ui.NewKeyAction("Toggle Auto-Refresh", v.toggleRefreshCmd, true),
-		ui.KeyN:         ui.NewKeyAction("Next Match", v.nextCmd, true),
-		ui.KeyShiftN:    ui.NewKeyAction("Prev Match", v.prevCmd, true),
-		ui.KeySlash:     ui.NewSharedKeyAction("Filter Mode", v.activateCmd, false),
-		tcell.KeyDelete: ui.NewSharedKeyAction("Erase", v.eraseCmd, false),
+		ui.KeyF: ui.NewKeyAction("Toggle FullScreen", v.toggleFullScreenCmd, true),
+		ui.KeyR: ui.NewKeyAction("Toggle Auto-Refresh", v.toggleRefreshCmd, true),
+		//ui.KeyN:         ui.NewKeyAction("Next Match", v.nextCmd, true),
+		//ui.KeyShiftN:    ui.NewKeyAction("Prev Match", v.prevCmd, true),
+		//ui.KeySlash:     ui.NewSharedKeyAction("Filter Mode", v.activateCmd, false),
+		//tcell.KeyDelete: ui.NewSharedKeyAction("Erase", v.eraseCmd, false),
 	})
 
 	// if v.title == "YAML" {
@@ -193,13 +194,13 @@ func (v *LiveView) Start() {
 		}
 		return
 	}
-	if err := v.model.Refresh(v.defaultCtx()); err != nil {
+	if err := v.model.Refresh(v.app.context); err != nil {
 		log.Error().Err(err).Msgf("refresh failed")
 	}
 }
 
 func (v *LiveView) defaultCtx() context.Context {
-	return context.WithValue(context.Background(), internal.KeyFactory, " ")
+	return context.WithValue(context.Background(), internal.KeyFactory, v.app)
 }
 
 // Stop terminates the updater.
@@ -318,7 +319,7 @@ func (v *LiveView) resetCmd(evt *tcell.EventKey) *tcell.EventKey {
 	}
 	v.cmdBuff.SetActive(false)
 	v.cmdBuff.Reset()
-	// v.updateTitle()
+	//v.updateTitle()
 
 	return nil
 }
@@ -331,23 +332,4 @@ func (v *LiveView) resetCmd(evt *tcell.EventKey) *tcell.EventKey {
 // 	}
 
 // 	return nil
-// }
-
-// func (v *LiveView) updateTitle() {
-// 	if v.title == "" {
-// 		return
-// 	}
-// 	fmat := fmt.Sprintf(liveViewTitleFmt, v.title, v.model.GetPath())
-
-// 	buff := v.cmdBuff.GetText()
-// 	if buff == "" {
-// 		v.SetTitle(ui.SkinTitle(fmat, v.app.Styles.Frame()))
-// 		return
-// 	}
-
-// 	if v.maxRegions > 0 {
-// 		buff += fmt.Sprintf("[%d:%d]", v.currentRegion+1, v.maxRegions)
-// 	}
-// 	fmat += fmt.Sprintf(ui.SearchFmt, buff)
-// 	v.SetTitle(ui.SkinTitle(fmat, v.app.Styles.Frame()))
 // }
