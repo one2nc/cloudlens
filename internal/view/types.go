@@ -9,7 +9,7 @@ import (
 
 type (
 	// EnterFunc represents an enter key action.
-	EnterFunc func(app *App, model ui.Tabular, resource string)
+	EnterFunc func(app *App, model ui.Tabular, resource, path string)
 
 	// ContextFunc enhances a given context.
 	ContextFunc func(context.Context) context.Context

@@ -7,6 +7,7 @@ import (
 	"github.com/derailed/tview"
 	"github.com/one2nc/cloud-lens/internal/dao"
 	"github.com/one2nc/cloud-lens/internal/render"
+	"github.com/sahilm/fuzzy"
 )
 
 const (
@@ -60,4 +61,23 @@ type Renderer interface {
 type ResourceMeta struct {
 	DAO      dao.Accessor
 	Renderer Renderer
+}
+
+type ResourceViewerListener interface {
+	ResourceChanged(lines []string, matches fuzzy.Matches)
+	ResourceFailed(error)
+}
+
+type ViewerToggleOpts map[string]bool
+
+type ResourceViewer interface {
+	GetPath() string
+	Filter(string)
+	ClearFilter()
+	Peek() []string
+	SetOptions(context.Context, ViewerToggleOpts)
+	Watch(context.Context) error
+	Refresh(context.Context) error
+	AddListener(ResourceViewerListener)
+	RemoveListener(ResourceViewerListener)
 }

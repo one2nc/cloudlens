@@ -7,6 +7,7 @@ import (
 	"github.com/one2nc/cloud-lens/internal/dao"
 	"github.com/one2nc/cloud-lens/internal/model"
 	"github.com/one2nc/cloud-lens/internal/render"
+	"github.com/sahilm/fuzzy"
 )
 
 type (
@@ -53,4 +54,13 @@ type Tabular interface {
 
 	// RemoveListener unregister a model listener.
 	RemoveListener(model.TableListener)
+}
+
+type Viewer interface {
+	Lister
+}
+
+type ResourceViewerListener interface {
+	ResourceChanged(lines []string, matches fuzzy.Matches)
+	ResourceFailed(error)
 }

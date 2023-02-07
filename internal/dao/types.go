@@ -22,3 +22,10 @@ type Accessor interface {
 	Lister
 	Getter
 }
+type Describer interface {
+	// Describe describes a resource.
+	Describe(path string) (string, error)
+
+	// ToYAML dumps a resource to YAML.
+	// ToYAML(path string, showManaged bool) (string, error)
+}

@@ -9,7 +9,7 @@ type SG struct {
 	ResourceViewer
 }
 
-// NewPod returns a new viewer.
+// NewSG returns a new viewer.
 func NewSG(resource string) ResourceViewer {
 	var sg SG
 	sg.ResourceViewer = NewBrowser(resource)
@@ -22,5 +22,19 @@ func (sg SG) bindKeys(aa ui.KeyActions) {
 		ui.KeyShiftI:    ui.NewKeyAction("Sort Group-Id", sg.GetTable().SortColCmd("Group-Id", true), true),
 		ui.KeyShiftN:    ui.NewKeyAction("Sort Group-Name", sg.GetTable().SortColCmd("Group-Name", true), true),
 		tcell.KeyEscape: ui.NewKeyAction("Back", sg.App().PrevCmd, true),
+		tcell.KeyEnter:  ui.NewKeyAction("View", sg.enterCmd, true),
 	})
+}
+
+func (sg *SG) enterCmd(evt *tcell.EventKey) *tcell.EventKey {
+	groupId := sg.GetTable().GetSelectedItem()
+	sg.App().Flash().Info("groupId: " + groupId)
+
+	f := describeResource
+	if sg.GetTable().enterFn != nil {
+		f = sg.GetTable().enterFn
+	}
+	f(sg.App(), sg.GetTable().GetModel(), sg.Resource(), "")
+
+	return nil
 }

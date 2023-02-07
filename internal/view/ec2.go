@@ -17,7 +17,7 @@ func NewEC2(resource string) ResourceViewer {
 	var e EC2
 	e.ResourceViewer = NewBrowser(resource)
 	e.AddBindKeysFn(e.bindKeys)
-	e.GetTable().SetEnterFn(e.describeInstace)
+	// e.GetTable().SetEnterFn(e.describeInstace)
 	return &e
 }
 
