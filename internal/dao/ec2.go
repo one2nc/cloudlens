@@ -35,3 +35,12 @@ func (e *EC2) List(ctx context.Context) ([]Object, error) {
 func (e *EC2) Get(ctx context.Context, path string) (Object, error) {
 	return nil, nil
 }
+
+func (e *EC2) Describe(instanceId string) (string, error) {
+	sess, ok := e.ctx.Value(internal.KeySession).(*session.Session)
+	if !ok {
+		log.Err(fmt.Errorf("conversion err: Expected session.session but got %v", sess))
+	}
+	res := aws.GetSingleInstance(*sess, instanceId).GoString()
+	return res, nil
+}
