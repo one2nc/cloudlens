@@ -22,4 +22,8 @@ var Registry = map[string]ResourceMeta{
 		DAO:      &dao.BObj{},
 		Renderer: &render.BObj{},
 	},
+	"iam:u": {
+		DAO:      &dao.IAMU{},
+		Renderer: &render.IAMU{},
+	},
 }

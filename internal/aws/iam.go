@@ -2,19 +2,33 @@ package aws
 
 import (
 	"fmt"
+	"time"
 
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/iam"
 )
 
-func GetUsers(sess session.Session) []*iam.User {
+func GetUsers(sess session.Session) []IAMUSerResp {
 	iamSrv := iam.New(&sess)
 	result, err := iamSrv.ListUsers(&iam.ListUsersInput{})
 	if err != nil {
 		fmt.Println("Error in fetching Iam Users: ", " err: ", err)
 		return nil
 	}
-	return result.Users
+	var users []IAMUSerResp
+	for _, u := range result.Users {
+		launchTime := u.CreateDate
+		loc, _ := time.LoadLocation("Asia/Kolkata")
+		IST := launchTime.In(loc)
+		user := &IAMUSerResp{
+			UserId:       *u.UserId,
+			UserName:     *u.UserName,
+			ARN:          *u.Arn,
+			CreationTime: IST.Format("Mon Jan _2 15:04:05 2006"),
+		}
+		users = append(users, *user)
+	}
+	return users
 }
 
 func GetUserGroups(sess session.Session) []*iam.Group {

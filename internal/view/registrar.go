@@ -16,4 +16,7 @@ func coreViewers(vv MetaViewers) {
 	vv["sg"] = MetaViewer{
 		viewerFn: NewSG,
 	}
+	vv["iam:u"] = MetaViewer{
+		viewerFn: NewIAMU,
+	}
 }

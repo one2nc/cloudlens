@@ -25,3 +25,10 @@ type BucketInfo struct {
 	EncryptionConfiguration *s3.ServerSideEncryptionConfiguration
 	LifeCycleRules          []*s3.LifecycleRule
 }
+
+type IAMUSerResp struct {
+	UserId       string
+	UserName     string
+	ARN          string
+	CreationTime string
+}
