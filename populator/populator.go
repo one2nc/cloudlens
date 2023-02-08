@@ -66,12 +66,14 @@ func CreateBuckets(sess *session.Session) error {
 			"Africa", "Africa/Jamaica", "Europe/England/London", "Vietnam", "Asia/South-Korea", "Asia/India/Kolkata",
 			"Australia/Sydney", "Paris", "India/Kerala/Kochi", "Asia/Sri-Lanka", "Asia/Indonesia", "Europe/France", "Europe/Sweden",
 			"Africa/West-Indies/City1", "North-America/USA/New-York", "Asia/India/Bangalore", "Asia/Nepal", "Asia/Burma"}
-		for i := 0; i < len(key); i++ {
-
+		for j := 0; j < len(key); j++ {
+			if i == 4 {
+				continue
+			}
 			body := []byte(gofakeit.Name())
 			s3Service.PutObject(&s3.PutObjectInput{
 				Bucket: bName,
-				Key:    aws.String(key[i]),
+				Key:    aws.String(key[j]),
 				Body:   bytes.NewReader(body),
 			})
 		}

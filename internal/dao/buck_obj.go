@@ -22,7 +22,6 @@ func (bo *BObj) List(ctx context.Context) ([]Object, error) {
 	if !ok {
 		log.Err(fmt.Errorf("conversion err: Expected session.session but got %v", sess))
 	}
-	log.Info().Msg(fmt.Sprintf("In Dao Ctx: %v", ctx.Value(internal.BucketName)))
 	bucketName := fmt.Sprintf("%v", ctx.Value(internal.BucketName))
 	fn := fmt.Sprintf("%v", ctx.Value(internal.FolderName))
 	log.Info().Msg(fmt.Sprintf("In Dao Bucket Name: %v", bucketName))
@@ -31,7 +30,11 @@ func (bo *BObj) List(ctx context.Context) ([]Object, error) {
 	folderArrayInfo, fileArrayInfo := getBucLevelInfo(bucketInfo)
 	var s3Objects []aws.S3Object
 	if len(folderArrayInfo) != 0 || len(fileArrayInfo) != 0 {
-		s3Objects = setFoldersAndFIles(bucketInfo.CommonPrefixes, bucketInfo.Contents)
+		s3Objects = setFoldersAndFiles(bucketInfo.CommonPrefixes, bucketInfo.Contents)
+	} else {
+		s3Objects = append(s3Objects, aws.S3Object{
+			Name: "No objects found",
+		})
 	}
 	objs := make([]Object, len(s3Objects))
 	for i, obj := range s3Objects {
@@ -59,9 +62,7 @@ func getBucLevelInfo(bucketInfo *s3.ListObjectsV2Output) ([]string, []string) {
 	return folderArrayInfo, fileArrayInfo
 }
 
-
-
-func setFoldersAndFIles(Folder []*s3.CommonPrefix, File []*s3.Object) []aws.S3Object {
+func setFoldersAndFiles(Folder []*s3.CommonPrefix, File []*s3.Object) []aws.S3Object {
 	var s3Objects []aws.S3Object
 	indx := 0
 	for _, bi := range Folder {
