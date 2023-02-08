@@ -2,12 +2,10 @@ package view
 
 import (
 	"context"
-	"fmt"
 
 	"github.com/gdamore/tcell/v2"
 	"github.com/one2nc/cloud-lens/internal"
 	"github.com/one2nc/cloud-lens/internal/ui"
-	"github.com/rs/zerolog/log"
 )
 
 type S3 struct {
@@ -27,34 +25,35 @@ func (s3 *S3) bindKeys(aa ui.KeyActions) {
 		ui.KeyShiftT:    ui.NewKeyAction("Sort Creation-Time", s3.GetTable().SortColCmd("Creation-Time", true), true),
 		tcell.KeyEscape: ui.NewKeyAction("Back", s3.App().PrevCmd, true),
 		tcell.KeyEnter:  ui.NewKeyAction("View", s3.enterCmd, true),
-		ui.KeyD:         ui.NewKeyAction("Describe", s3.describeInstace, true),
+		ui.KeyD:         ui.NewKeyAction("Describe", s3.describeBucket, true),
 	})
 }
 
-func (s3 *S3) describeInstace(evt *tcell.EventKey) *tcell.EventKey {
+func (s3 *S3) describeBucket(evt *tcell.EventKey) *tcell.EventKey {
 	bName := s3.GetTable().GetSelectedItem()
-	s3.App().Flash().Info("Instance-Id: " + bName)
-
 	f := describeResource
 	if s3.GetTable().enterFn != nil {
 		f = s3.GetTable().enterFn
 	}
-	f(s3.App(), s3.GetTable().GetModel(), s3.Resource(), bName)
+	if bName != "" {
+		s3.App().Flash().Info("Bucket-Name: " + bName)
+		f(s3.App(), s3.GetTable().GetModel(), s3.Resource(), bName)
+	}
+
 	return nil
 }
 
 func (s3 *S3) enterCmd(evt *tcell.EventKey) *tcell.EventKey {
 	bName := s3.GetTable().GetSelectedItem()
-	o := NewS3FileViewer("OBJ")
-	log.Info().Msg(fmt.Sprintf("Before Assigning Bucket Name: %v", bName))
+	if bName != "" {
+		o := NewS3FileViewer("OBJ")
+		ctx := context.WithValue(s3.App().GetContext(), internal.BucketName, bName)
+		s3.App().SetContext(ctx)
+		ctx = context.WithValue(s3.App().GetContext(), internal.FolderName, "")
+		s3.App().SetContext(ctx)
+		s3.App().Flash().Info("Bucket Name: " + bName)
+		s3.App().inject(o)
+	}
 
-	ctx := context.WithValue(s3.App().GetContext(), internal.BucketName, bName)
-	s3.App().SetContext(ctx)
-	ctx = context.WithValue(s3.App().GetContext(), internal.FolderName, "")
-	s3.App().SetContext(ctx)
-
-	s3.App().Flash().Info("After Bucket Name: " + bName)
-	// println(bName)
-	s3.App().inject(o)
 	return nil
 }

@@ -3,6 +3,7 @@ package view
 import (
 	"context"
 
+	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/one2nc/cloud-lens/internal/model"
 	"github.com/one2nc/cloud-lens/internal/ui"
 )
@@ -64,3 +65,8 @@ type MetaViewer struct {
 
 // MetaViewers represents a collection of meta viewers.
 type MetaViewers map[string]MetaViewer
+
+type ObjectParams struct {
+	sess            *session.Session
+	bucketName, key string
+}

@@ -3,12 +3,15 @@ package aws
 import (
 	"context"
 	"fmt"
+	"os"
 	"strings"
 	"time"
 
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/s3"
+	"github.com/aws/aws-sdk-go/service/s3/s3manager"
+	"github.com/rs/zerolog/log"
 )
 
 type BucketResp struct {
@@ -57,6 +60,44 @@ func GetInfoAboutBucket(sess session.Session, bucketName string, delimiter strin
 		return nil
 	}
 	return result
+}
+
+func GetPreSignedUrl(sess session.Session, bucketName, key string) string {
+	s3Serv := *s3.New(&sess)
+	req, _ := s3Serv.GetObjectRequest(&s3.GetObjectInput{
+		Bucket: aws.String(bucketName),
+		Key:    aws.String(key),
+	})
+
+	url, _ := req.Presign(15 * time.Minute)
+	return url
+}
+
+func DownloadObject(sess session.Session, bucketName, key string) string {
+	downloader := s3manager.NewDownloader(&sess)
+	err := os.MkdirAll("./resource/s3/objects", os.ModePerm)
+	if err != nil {
+		log.Info().Msg(fmt.Sprintf("error in creating CSV directory: %v", err))
+	}
+	files := strings.Split(key, "/")
+	objectName := files[len(files)-1]
+	p := fmt.Sprintf("./resource/s3/objects/%v", objectName)
+	f, err := os.Create(p)
+	if err != nil {
+		fmt.Println("Failed to create file", err)
+		return ""
+	}
+	defer f.Close()
+	n, err := downloader.Download(f, &s3.GetObjectInput{
+		Bucket: aws.String(bucketName),
+		Key:    aws.String(key),
+	})
+	if err != nil {
+		fmt.Println("failed to download file, err: ", err)
+		return ""
+	}
+
+	return fmt.Sprintf("%v with size %d bytes, downloaded successfully", objectName, n)
 }
 
 func PutObjects(sess session.Session) {
