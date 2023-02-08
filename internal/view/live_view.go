@@ -5,6 +5,7 @@ import (
 	"strconv"
 	"strings"
 
+	"github.com/atotto/clipboard"
 	"github.com/derailed/tview"
 	"github.com/gdamore/tcell/v2"
 	"github.com/one2nc/cloud-lens/internal"
@@ -132,6 +133,7 @@ func (v *LiveView) bindKeys() {
 		// ui.KeyC:         ui.NewKeyAction("Copy", cpCmd(v.app.Flash(), v.text), true),
 		ui.KeyF: ui.NewKeyAction("Toggle FullScreen", v.toggleFullScreenCmd, true),
 		ui.KeyR: ui.NewKeyAction("Toggle Auto-Refresh", v.toggleRefreshCmd, true),
+		ui.KeyC: ui.NewKeyAction("Copy Json", v.copyJson, true),
 		//ui.KeyN:         ui.NewKeyAction("Next Match", v.nextCmd, true),
 		//ui.KeyShiftN:    ui.NewKeyAction("Prev Match", v.prevCmd, true),
 		//ui.KeySlash:     ui.NewSharedKeyAction("Filter Mode", v.activateCmd, false),
@@ -165,6 +167,13 @@ func (v *LiveView) keyboard(evt *tcell.EventKey) *tcell.EventKey {
 	}
 
 	return evt
+}
+
+func (v *LiveView) copyJson(evt *tcell.EventKey) *tcell.EventKey {
+	copiedText := v.text.GetText(true)
+	clipboard.WriteAll(copiedText)
+	v.app.Flash().Info("Text Copied to Clipboard.")
+	return nil
 }
 
 // StylesChanged notifies the skin changed.

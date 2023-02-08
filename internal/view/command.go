@@ -94,7 +94,6 @@ func (c *Command) specialCmd(cmd, path string) bool {
 		return true
 		// case "a", "alias":
 		// 	c.app.aliasCmd(nil)
-		return true
 	default:
 		if !canRX.MatchString(cmd) {
 			return false
