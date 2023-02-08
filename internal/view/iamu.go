@@ -19,9 +19,17 @@ func NewIAMU(resource string) ResourceViewer {
 
 func (iamu IAMU) bindKeys(aa ui.KeyActions) {
 	aa.Add(ui.KeyActions{
-		// ui.KeyShiftI:    ui.NewKeyAction("Sort ", iamu.GetTable().SortColCmd("Group-Id", true), true),
-		// ui.KeyShiftN:    ui.NewKeyAction("Sort Group-Name", iamu.GetTable().SortColCmd("Group-Name", true), true),
+		ui.KeyShiftI:    ui.NewKeyAction("Sort User-Id ", iamu.GetTable().SortColCmd("User-Id", true), true),
+		ui.KeyShiftN:    ui.NewKeyAction("Sort User-Name", iamu.GetTable().SortColCmd("User-Name", true), true),
+		ui.KeyShiftD:    ui.NewKeyAction("Sort Created-Date", iamu.GetTable().SortColCmd("Created-Date", true), true),
 		tcell.KeyEscape: ui.NewKeyAction("Back", iamu.App().PrevCmd, true),
+		// tcell.KeyEnter:  ui.NewKeyAction("View", iamu.enterCmd, true),
 	})
+}
+
+func (iamu *IAMU) enterCmd(evt *tcell.EventKey) *tcell.EventKey {
+	groupId := iamu.GetTable().GetSelectedItem()
+	iamu.App().Flash().Info("groupId: " + groupId)
+	return nil
 }
 

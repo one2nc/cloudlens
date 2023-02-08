@@ -8,6 +8,7 @@ import (
 	"github.com/aws/aws-sdk-go/service/iam"
 )
 
+
 func GetUsers(sess session.Session) []IAMUSerResp {
 	iamSrv := iam.New(&sess)
 	result, err := iamSrv.ListUsers(&iam.ListUsersInput{})
@@ -26,7 +27,7 @@ func GetUsers(sess session.Session) []IAMUSerResp {
 			ARN:          *u.Arn,
 			CreationTime: IST.Format("Mon Jan _2 15:04:05 2006"),
 		}
-		users = append(users, *user)
+		users = append(users,*user)
 	}
 	return users
 }
