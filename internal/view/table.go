@@ -100,14 +100,13 @@ func (t *Table) toggleWideCmd(evt *tcell.EventKey) *tcell.EventKey {
 	return nil
 }
 func (t *Table) importAsCSV(evt *tcell.EventKey) *tcell.EventKey {
-
 	var tableData [][]string
-	row := t.GetRowCount()
-	col := t.GetColumnCount()
+	rowCount := t.GetRowCount()
+	colCount := t.GetColumnCount()
 
-	for i := 0; i < row; i++ {
+	for i := 0; i < rowCount; i++ {
 		var row []string
-		for j := 0; j < col; j++ {
+		for j := 0; j < colCount; j++ {
 			row = append(row, t.GetCell(i, j).Text)
 		}
 		tableData = append(tableData, row)
