@@ -2,10 +2,15 @@ package view
 
 import (
 	"context"
+	"encoding/csv"
+	"fmt"
+	"os"
+	"strings"
 	"time"
 
 	"github.com/gdamore/tcell/v2"
 	"github.com/one2nc/cloud-lens/internal/ui"
+	"github.com/rs/zerolog/log"
 )
 
 const (
@@ -78,6 +83,7 @@ func (t *Table) bindKeys() {
 	t.Actions().Add(ui.KeyActions{
 		tcell.KeyCtrlW: ui.NewKeyAction("Toggle Wide", t.toggleWideCmd, true),
 		ui.KeyHelp:     ui.NewKeyAction("Help", t.App().helpCmd, true),
+		ui.KeyZ:        ui.NewKeyAction("CSV", t.importAsCSV, true),
 	})
 }
 
@@ -91,5 +97,41 @@ func (t *Table) AddBindKeysFn(f BindKeysFunc) {
 
 func (t *Table) toggleWideCmd(evt *tcell.EventKey) *tcell.EventKey {
 	t.ToggleWide()
+	return nil
+}
+func (t *Table) importAsCSV(evt *tcell.EventKey) *tcell.EventKey {
+
+	var tableData [][]string
+	row := t.GetRowCount()
+	col := t.GetColumnCount()
+
+	for i := 0; i < row; i++ {
+		var row []string
+		for j := 0; j < col; j++ {
+			row = append(row, t.GetCell(i, j).Text)
+		}
+		tableData = append(tableData, row)
+	}
+
+	csvName := strings.Split(t.GetTitle(), " ")
+	err := os.MkdirAll("./resource/CSV", os.ModePerm)
+	if err != nil {
+		log.Info().Msg(fmt.Sprintf("error in creating CSV directory: %v", err))
+	}
+	file, err := os.Create("./resource/CSV/" + csvName[len(csvName)-2] + ".csv")
+	if err != nil {
+		log.Info().Msg(fmt.Sprintf("error in creating .csv file: %v", err))
+	}
+	defer file.Close()
+
+	writer := csv.NewWriter(file)
+	for _, record := range tableData {
+		err := writer.Write(record)
+		if err != nil {
+			log.Info().Msg(fmt.Sprintf("error in writing records to csv file: %v", err))
+		}
+	}
+	writer.Flush()
+	t.app.Flash().Info("CSV Created.")
 	return nil
 }
