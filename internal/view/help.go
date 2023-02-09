@@ -198,15 +198,15 @@ func (h *Help) addSection(c int, title string, hh model.MenuHints) {
 		h.maxRows = len(hh)
 	}
 	row := 0
-	h.SetCell(row, c, h.titleCell(title))
+	h.SetCell(row, c, h.titleCell(title).SetTextColor(tcell.ColorSpringGreen))
 	h.addSpacer(c + 1)
 	row++
 
 	for _, hint := range hh {
 		col := c
-		h.SetCell(row, col, tview.NewTableCell(toMnemonic(hint.Mnemonic)))
+		h.SetCell(row, col, tview.NewTableCell(toMnemonic(hint.Mnemonic)).SetTextColor(tcell.ColorDodgerBlue))
 		col++
-		h.SetCell(row, col, tview.NewTableCell(hint.Description))
+		h.SetCell(row, col, tview.NewTableCell(hint.Description).SetTextColor(tcell.ColorPapayaWhip))
 		row++
 	}
 
