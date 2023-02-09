@@ -32,8 +32,7 @@ func (d *DropDown) SetSelectedFn(selectedFn DropdownSelectedFn) {
 }
 
 func (d *DropDown) build() {
-	d.SetLabel(d.label)
-	d.SetLabelColor(tcell.ColorOrange)
+	d.SetLabel(fmt.Sprintf("[%s::b]%s", "orange", d.label))
 	d.SetOptions(d.options, func(text string, index int) {})
 	d.SetCurrentOption(0)
 	d.SetBorderPadding(0, 0, 0, 0)

@@ -53,7 +53,7 @@ func (i *Info) build() {
 	i.SetDirection(tview.FlexRow)
 	i.SetBorderColor(tcell.ColorBlack.TrueColor())
 	i.SetBorderPadding(0, 4, 1, 1)
-	for _, p := range i.items {
-		i.AddItem(p, 0, 1, false)
+	for _, k := range SortMapKeys(i.items) {
+		i.AddItem(i.items[k], 0, 1, false)
 	}
 }
