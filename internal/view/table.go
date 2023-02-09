@@ -115,8 +115,14 @@ func (t *Table) importAsCSV(evt *tcell.EventKey) *tcell.EventKey {
 	}
 	csvFileName := strings.Split(t.GetTitle(), " ")
 	usr, err := user.Current()
-	path := usr.HomeDir + "/cloud-lens/CSV/"
+	if err != nil {
+		log.Info().Msg(fmt.Sprintf("error in getting the machine's user: %v", err))
+	}
+	path := usr.HomeDir + "/cloud-lens/csv/"
 	err = os.MkdirAll(path, os.ModePerm)
+	if err != nil {
+		log.Info().Msg(fmt.Sprintf("error in creating csv directory: %v", err))
+	}
 	path = filepath.Join(path + "/" + csvFileName[len(csvFileName)-2] + ".csv")
 	file, err := os.Create(path)
 	if err != nil {

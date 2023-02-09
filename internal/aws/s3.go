@@ -4,9 +4,11 @@ import (
 	"context"
 	"fmt"
 	"os"
+	"os/user"
 	"strings"
 	"time"
 
+	"github.com/atotto/clipboard"
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/s3"
@@ -75,16 +77,22 @@ func GetPreSignedUrl(sess session.Session, bucketName, key string) string {
 
 func DownloadObject(sess session.Session, bucketName, key string) string {
 	downloader := s3manager.NewDownloader(&sess)
-	err := os.MkdirAll("./resource/s3/objects", os.ModePerm)
+	usr, err := user.Current()
 	if err != nil {
-		log.Info().Msg(fmt.Sprintf("error in creating CSV directory: %v", err))
+		log.Info().Msg(fmt.Sprintf("error in getting the machine's user: %v", err))
+	}
+	path := usr.HomeDir + "/cloud-lens/s3objects/"
+	err = os.MkdirAll(path, os.ModePerm)
+	if err != nil {
+		log.Info().Msg(fmt.Sprintf("error in creating s3 Object directory: %v", err))
 	}
 	files := strings.Split(key, "/")
 	objectName := files[len(files)-1]
-	p := fmt.Sprintf("./resource/s3/objects/%v", objectName)
+	p := fmt.Sprintf("%v%v", path, objectName)
+	log.Info().Msg(fmt.Sprintf("path: %v", p))
 	f, err := os.Create(p)
 	if err != nil {
-		fmt.Println("Failed to create file", err)
+		log.Info().Msg(fmt.Sprintf("Failed to create file, err: %v", err))
 		return ""
 	}
 	defer f.Close()
@@ -93,11 +101,12 @@ func DownloadObject(sess session.Session, bucketName, key string) string {
 		Key:    aws.String(key),
 	})
 	if err != nil {
-		fmt.Println("failed to download file, err: ", err)
+		log.Info().Msg(fmt.Sprintf("failed to download file, err: %v", err))
 		return ""
 	}
+	clipboard.WriteAll(p)
 
-	return fmt.Sprintf("%v with size %d bytes, downloaded successfully", objectName, n)
+	return fmt.Sprintf("%v with size %d bytes, downloaded and its path copied to the clipboard", objectName, n)
 }
 
 func PutObjects(sess session.Session) {
