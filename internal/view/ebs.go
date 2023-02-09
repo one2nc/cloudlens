@@ -23,8 +23,8 @@ func (ebs *EBS) bindKeys(aa ui.KeyActions) {
 		ui.KeyShiftV:    ui.NewKeyAction("Sort Volume-Type", ebs.GetTable().SortColCmd("Volume-Type", true), true),
 		ui.KeyShiftZ:    ui.NewKeyAction("Sort Availability-Zone", ebs.GetTable().SortColCmd("Availability-Zone", true), true),
 		ui.KeyShiftT:    ui.NewKeyAction("Sort Creation-Time", ebs.GetTable().SortColCmd("Creation-Time", true), true),
-		tcell.KeyEscape: ui.NewKeyAction("Back", ebs.App().PrevCmd, true),
-		tcell.KeyEnter:  ui.NewKeyAction("View", ebs.enterCmd, true),
+		tcell.KeyEscape: ui.NewKeyAction("Back", ebs.App().PrevCmd, false),
+		tcell.KeyEnter:  ui.NewKeyAction("View", ebs.enterCmd, false),
 	})
 }
 

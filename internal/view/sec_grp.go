@@ -21,8 +21,8 @@ func (sg SG) bindKeys(aa ui.KeyActions) {
 	aa.Add(ui.KeyActions{
 		ui.KeyShiftI:    ui.NewKeyAction("Sort Group-Id", sg.GetTable().SortColCmd("Group-Id", true), true),
 		ui.KeyShiftN:    ui.NewKeyAction("Sort Group-Name", sg.GetTable().SortColCmd("Group-Name", true), true),
-		tcell.KeyEscape: ui.NewKeyAction("Back", sg.App().PrevCmd, true),
-		tcell.KeyEnter:  ui.NewKeyAction("View", sg.enterCmd, true),
+		tcell.KeyEscape: ui.NewKeyAction("Back", sg.App().PrevCmd, false),
+		tcell.KeyEnter:  ui.NewKeyAction("View", sg.enterCmd, false),
 	})
 }
 

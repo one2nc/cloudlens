@@ -23,8 +23,8 @@ func (s3 *S3) bindKeys(aa ui.KeyActions) {
 	aa.Add(ui.KeyActions{
 		ui.KeyShiftB:    ui.NewKeyAction("Sort Bucket-Name", s3.GetTable().SortColCmd("Bucket-Name", true), true),
 		ui.KeyShiftT:    ui.NewKeyAction("Sort Creation-Time", s3.GetTable().SortColCmd("Creation-Time", true), true),
-		tcell.KeyEscape: ui.NewKeyAction("Back", s3.App().PrevCmd, true),
-		tcell.KeyEnter:  ui.NewKeyAction("View", s3.enterCmd, true),
+		tcell.KeyEscape: ui.NewKeyAction("Back", s3.App().PrevCmd, false),
+		tcell.KeyEnter:  ui.NewKeyAction("View", s3.enterCmd, false),
 		ui.KeyD:         ui.NewKeyAction("Describe", s3.describeBucket, true),
 	})
 }

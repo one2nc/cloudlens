@@ -25,8 +25,8 @@ func (iamug IAMUG) bindKeys(aa ui.KeyActions) {
 		ui.KeyShiftI:    ui.NewKeyAction("Sort Group-Id ", iamug.GetTable().SortColCmd("Group-Id", true), true),
 		ui.KeyShiftN:    ui.NewKeyAction("Sort Group-Name", iamug.GetTable().SortColCmd("Group-Name", true), true),
 		ui.KeyShiftD:    ui.NewKeyAction("Sort Created-Date", iamug.GetTable().SortColCmd("Created-Date", true), true),
-		tcell.KeyEscape: ui.NewKeyAction("Back", iamug.App().PrevCmd, true),
-		ui.KeyShiftP:    ui.NewKeyAction("View", iamug.enterCmd, true),
+		tcell.KeyEscape: ui.NewKeyAction("Back", iamug.App().PrevCmd, false),
+		ui.KeyShiftP:    ui.NewKeyAction("View", iamug.enterCmd, false),
 	})
 }
 
