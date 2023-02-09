@@ -15,6 +15,10 @@ var lspop = &cobra.Command{
 	Short: ``,
 	Long:  ``,
 	Run: func(cmd *cobra.Command, args []string) {
+		profiles, err := config.GetProfiles()
+		if !config.LookupForValue(profiles, profile) {
+			profile = profiles[0]
+		}
 		sess, err := config.GetSession(profile, region)
 		if err != nil {
 			log.Fatal("err: ", err)
