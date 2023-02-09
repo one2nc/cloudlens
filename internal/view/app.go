@@ -53,16 +53,26 @@ func NewApp() *App {
 	return &a
 }
 
-func (a *App) Init(profile, region string, ctx context.Context) error {
+func (a *App) Init(profiles, regions []string, ctx context.Context) error {
+	ctx = context.WithValue(ctx, internal.KeyActiveProfile, profiles[0])
+	ctx = context.WithValue(ctx, internal.KeyActiveRegion, regions[0])
+	ctx = context.WithValue(ctx, internal.KeyApp, a)
+	a.SetContext(ctx)
 
-	infoData := map[string]string{
-		"Profile": profile,
-		"Region":  region,
+	p := ui.NewDropDown("Profile", profiles)
+	p.SetSelectedFunc(a.profileChanged)
+	a.Views()["profile"] = p
+
+	r := ui.NewDropDown("Region", regions)
+	r.SetSelectedFunc(a.regionChanged)
+	a.Views()["region"] = r
+
+	infoData := map[string]tview.Primitive{
+		"profile": a.profile(),
+		"region": a.region(),
 	}
 	a.Views()["info"] = ui.NewInfo(infoData)
 
-	ctx = context.WithValue(ctx, internal.KeyApp, a)
-	a.context = ctx
 	if err := a.Content.Init(ctx); err != nil {
 		return err
 	}
@@ -109,7 +119,7 @@ func (a *App) layout(ctx context.Context) *tview.Flex {
 
 	currentProfile = &profiles[0]
 	currentRegion = &regions[0]
-	sess, _ := config.GetSession(*currentProfile, *currentRegion, cfg.AwsConfig)
+	sess, _ := config.GetSession(*currentProfile, *currentRegion)
 	servicePage := tview.NewFlex().SetDirection(tview.FlexRow)
 	servicePageContent := a.DisplayEc2Instances(ins, sess)
 
@@ -117,7 +127,7 @@ func (a *App) layout(ctx context.Context) *tview.Flex {
 		SetLabel("Profile ▼ ").
 		SetOptions(profiles, func(text string, index int) {
 			currentProfile = &text
-			sess, _ = config.GetSession(*currentProfile, *currentRegion, cfg.AwsConfig)
+			sess, _ = config.GetSession(*currentProfile, *currentRegion)
 			ins, _ = aws.GetInstances(*sess)
 			buckets, _ = aws.ListBuckets(*sess)
 			if servicePage.ItemAt(0) != nil {
@@ -136,7 +146,7 @@ func (a *App) layout(ctx context.Context) *tview.Flex {
 		SetLabel("Region ▼ ").
 		SetOptions(regions, func(text string, index int) {
 			currentRegion = &text
-			sess, _ = config.GetSession(*currentProfile, *currentRegion, cfg.AwsConfig)
+			sess, _ = config.GetSession(*currentProfile, *currentRegion)
 			ins, _ = aws.GetInstances(*sess)
 			buckets, _ = aws.ListBuckets(*sess)
 			secGrp = aws.GetSecGrps(*sess)
@@ -949,7 +959,6 @@ func (a *App) buildHeader() tview.Primitive {
 	header.AddItem(a.info(), 0, 1, false)
 	header.AddItem(a.Menu(), 0, 2, false)
 	header.AddItem(tview.NewBox(), 0, 1, false)
-
 	return header
 }
 
@@ -1029,6 +1038,29 @@ func (a *App) helpCmd(evt *tcell.EventKey) *tcell.EventKey {
 	return nil
 }
 
+func (a *App) profileChanged(profile string, index int) {
+	region := a.GetContext().Value(internal.KeyActiveRegion).(string)
+	a.refreshSession(profile, region)
+}
+
+func (a *App) regionChanged(region string, index int) {
+	profile := a.GetContext().Value(internal.KeyActiveProfile).(string)
+	a.refreshSession(profile, region)
+}
+
+func (a *App) refreshSession(profile string, region string) {
+	sess, err := config.GetSession(profile, region)
+	if err != nil {
+		a.App.Flash().Err(err)
+		return
+	}
+	ctx := context.WithValue(a.GetContext(), internal.KeySession, sess)
+	a.SetContext(ctx)
+	stackedViews := a.Content.Pages.Stack.Flatten()
+	a.gotoResource(stackedViews[0], "", true)
+	a.App.Flash().Infof("Refreshing %v...", stackedViews[0])
+}
+
 func (a *App) gotoResource(cmd, path string, clearStack bool) {
 	err := a.command.run(cmd, path, clearStack)
 	if err != nil {
@@ -1072,6 +1104,14 @@ func (a *App) statusIndicator() *ui.StatusIndicator {
 
 func (a *App) info() *ui.Info {
 	return a.Views()["info"].(*ui.Info)
+}
+
+func (a *App) profile() *ui.DropDown {
+	return a.Views()["profile"].(*ui.DropDown)
+}
+
+func (a *App) region() *ui.DropDown {
+	return a.Views()["region"].(*ui.DropDown)
 }
 
 func getIST(launchTime *time.Time) string {

@@ -1,34 +1,45 @@
 package ui
 
 import (
-	"fmt"
-
 	"github.com/derailed/tview"
+	"github.com/gdamore/tcell/v2"
 )
 
-// Crumbs represents user breadcrumbs.
 type Info struct {
-	*tview.TextView
-	data map[string]string
+	*tview.Flex
+	dropdowns []DropDown
+	items     map[string]tview.Primitive
 }
 
-// NewCrumbs returns a new breadcrumb view.
-func NewInfo(data map[string]string) *Info {
+func NewInfo(items map[string]tview.Primitive) *Info {
 	i := Info{
-		TextView: tview.NewTextView(),
-		data:     data,
+		Flex:      tview.NewFlex(),
+		items:     items,
+		dropdowns: []DropDown{},
 	}
-	i.SetTextAlign(tview.AlignLeft)
-	i.SetBorderPadding(0, 0, 1, 1)
-	i.SetDynamicColors(true)
+	i.padDropDownLabels()
 	i.build()
 	return &i
 }
 
-// Refresh updates view with new crumbs.
+func (i *Info) padDropDownLabels() {
+	for _, p := range i.items {
+		d, ok := p.(DropDown)
+		if ok {
+			i.dropdowns = append(i.dropdowns, d)
+		}
+	}
+}
+
 func (i *Info) build() {
 	i.Clear()
-	for k, v := range i.data {
-		fmt.Fprintf(i, "[%s::b]%s: [%s::b]%s\n", "orange", k, "#ffffff", v)
+	i.SetDirection(tview.FlexRow)
+	i.SetBorderColor(tcell.ColorBlack.TrueColor())
+	i.SetBorderPadding(1, 1, 1, 1)
+	for _, p := range i.items {
+		i.AddItem(p, 0, 1, false)
 	}
+	// for k, v := range i.data {
+	// 	fmt.Fprintf(i, "[%s::b]%s: [%s::b]%s\n", "orange", k, "#ffffff", v)
+	// }
 }

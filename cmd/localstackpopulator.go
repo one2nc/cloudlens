@@ -15,12 +15,7 @@ var lspop = &cobra.Command{
 	Short: ``,
 	Long:  ``,
 	Run: func(cmd *cobra.Command, args []string) {
-		cfg, err := config.Get()
-		if err != nil {
-			log.Fatal("err: ", err)
-		}
-
-		sess, err := config.GetSession(profile, region, cfg.AwsConfig)
+		sess, err := config.GetSession(profile, region)
 		if err != nil {
 			log.Fatal("err: ", err)
 		}
@@ -41,7 +36,7 @@ var lspop = &cobra.Command{
 
 		for i := 0; i < 4; i++ {
 			gofakeit.Seed(0)
-			sess, err := config.GetSession(profile, regions[gofakeit.Number(0, len(regions)-1)], cfg.AwsConfig)
+			sess, err := config.GetSession(profile, regions[gofakeit.Number(0, len(regions)-1)])
 			if err != nil {
 				log.Fatal("err: ", err)
 			}

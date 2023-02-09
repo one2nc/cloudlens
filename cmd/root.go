@@ -5,8 +5,9 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/one2nc/cloud-lens/internal"
+	"github.com/one2nc/cloud-lens/internal/aws"
+	"github.com/one2nc/cloud-lens/internal/color"
 	"github.com/one2nc/cloud-lens/internal/config"
 	"github.com/one2nc/cloud-lens/internal/view"
 	"github.com/rs/zerolog"
@@ -17,7 +18,7 @@ import (
 var rootCmd = &cobra.Command{
 	Use:   `cloudlens`,
 	Short: `cli for aws services`,
-	Long:  `cli for aws services[s3, ec2]`,
+	Long:  `cli for aws services[s3, ec2, security-groups, iam]`,
 	Run:   run,
 }
 
@@ -50,24 +51,63 @@ func run(cmd *cobra.Command, args []string) {
 	}()
 	log.Logger = log.Output(zerolog.ConsoleWriter{Out: file})
 
-	//get config
-	// cfg, err := config.Get()
-	if err != nil {
-		panic(fmt.Sprintf("app get config failed -- %v", err))
-	}
-	sess, err := config.GetSession(profile, region, *aws.NewConfig())
+	profiles := readAndValidateProfile()
+	regions := readAndValidateRegion()
+	sess, err := config.GetSession(profiles[0], regions[0])
 	if err != nil {
 		panic(fmt.Sprintf("aws session init failed -- %v", err))
 	}
-
 	ctx := context.WithValue(context.Background(), internal.KeySession, sess)
-
 	app := view.NewApp()
-	//init app
-	if err := app.Init(profile, region, ctx); err != nil {
+	if err := app.Init(profiles, regions, ctx); err != nil {
 		panic(fmt.Sprintf("app init failed -- %v", err))
 	}
 	if err := app.Run(); err != nil {
 		panic(fmt.Sprintf("app run failed %v", err))
 	}
+}
+
+func readAndValidateProfile() []string {
+	profiles, err := config.GetProfiles()
+	if err != nil {
+		panic(fmt.Sprintf("failed to read profiles -- %v", err))
+	}
+	profiles, isSwapped := config.SwapFirstIndexWithValue(profiles, profile)
+	if !isSwapped {
+	loop:
+		for {
+			var input string
+			fmt.Printf("Profile '%v' not found, would you like to pick one from profiles[%v,..] ["+color.Colorize("y", color.Cyan)+"/"+color.Colorize("n", color.Red)+"]: ", color.Colorize(profile, color.Red), profiles[0])
+			fmt.Scanln(&input)
+			switch input {
+			case "y", "Y", "yes", "YES":
+				break loop
+			case "n", "N", "no", "NO":
+				fmt.Printf("Profile '%v' not found, exiting..", profile)
+				os.Exit(0)
+			}
+		}
+	}
+	return profiles
+}
+
+func readAndValidateRegion() []string {
+	regions := aws.GetAllRegions()
+	regions, isSwapped := config.SwapFirstIndexWithValue(regions, region)
+	if !isSwapped {
+	loop:
+		for {
+			var input string
+			fmt.Printf("Region '%v' not found, would you like to pick one from regions[%v,..] ["+color.Colorize("y", color.Cyan)+"/"+color.Colorize("n", color.Red)+"]: ", color.Colorize(region, color.Red), regions[0])
+			fmt.Scanln(&input)
+			switch input {
+			case "y", "Y", "yes", "YES":
+				break loop
+			case "n", "N", "no", "NO":
+				fmt.Printf("Region '%v' not found, exiting..", region)
+				os.Exit(0)
+			}
+		}
+	}
+	return regions
 }

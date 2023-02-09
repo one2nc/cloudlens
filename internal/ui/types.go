@@ -11,6 +11,8 @@ import (
 )
 
 type (
+	DropdownSelectedFn func(text string, index int)
+
 	// SortFn represent a function that can sort columnar data.
 	SortFn func(rows render.Rows, sortCol SortColumn)
 

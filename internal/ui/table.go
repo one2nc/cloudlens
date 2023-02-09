@@ -38,7 +38,7 @@ func NewTable(res string) *Table {
 
 // Init initializes the component.
 func (t *Table) Init(ctx context.Context) {
-	t.SetFixed(0, 0)
+	t.SetFixed(1, 0)
 	t.SetBorder(true)
 	t.SetBorderColor(tcell.ColorDeepSkyBlue)
 	//t.SetBorderFocusColor(tcell.ColorSpringGreen)	

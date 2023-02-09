@@ -2,6 +2,7 @@ package config
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"io/ioutil"
 	"os"
@@ -13,6 +14,7 @@ import (
 	awsV2 "github.com/aws/aws-sdk-go-v2/aws"
 	awsV2Config "github.com/aws/aws-sdk-go-v2/config"
 	"github.com/aws/aws-sdk-go/aws"
+	"github.com/aws/aws-sdk-go/aws/defaults"
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/rs/zerolog/log"
 	"gopkg.in/yaml.v2"
@@ -50,7 +52,7 @@ func CloudlensHome() string {
 	return xdgCLHome
 }
 
-// Load K9s configuration from file.
+// Load cloudlens configuration from file.
 func (c *Config) Load(path string) error {
 	f, err := os.ReadFile(path)
 	if err != nil {
@@ -89,13 +91,11 @@ func (c *Config) SaveFile(path string) error {
 
 var config Config
 
-func GetSession(profile, region string, awsCfg awsV2.Config) (*session.Session, error) {
-	//crds, _ := awsCfg.Credentials.Retrieve(context.TODO())
+func GetSession(profile, region string) (*session.Session, error) {
 	sess, err := session.NewSessionWithOptions(session.Options{Config: aws.Config{
 		//TODO: remove hardcoded enpoint
-		Endpoint: aws.String("http://localhost:4566"),
-		Region:   aws.String(region),
-		//Credentials:      credentials.NewStaticCredentials(crds.AccessKeyID, crds.SecretAccessKey, ""),
+		Endpoint:         aws.String("http://localhost:4566"),
+		Region:           aws.String(region),
 		S3ForcePathStyle: aws.Bool(true),
 	},
 		Profile: profile})
@@ -109,29 +109,28 @@ func GetSession(profile, region string, awsCfg awsV2.Config) (*session.Session, 
 func Get() (Config, error) {
 	emptyCfg := Config{}
 	if reflect.DeepEqual(emptyCfg, config) {
-		// Load the Shared AWS Configuration (~/.aws/config)
-		awsLocalCfg, err := awsV2Config.LoadDefaultConfig(context.TODO())
+		profiles, err := GetProfiles()
 		if err != nil {
 			return emptyCfg, err
 		}
-		config.AwsConfig = awsLocalCfg
-		creds, err := awsLocalCfg.Credentials.Retrieve(context.TODO())
-		if err != nil {
-			return emptyCfg, err
-		}
-		config.Profiles, err = GetProfiles(strings.Split(creds.Source, " ")[1])
-		if err != nil {
-			return emptyCfg, err
+		config.Profiles = profiles
+		if LookupForValue(config.Profiles, "default") {
+			// Load the Shared AWS Configuration (~/.aws/config)
+			awsLocalCfg, err := awsV2Config.LoadDefaultConfig(context.TODO())
+			if err != nil {
+				return emptyCfg, err
+			}
+			config.AwsConfig = awsLocalCfg
 		}
 	}
 	return config, nil
 }
 
-func GetProfiles(filepath string) ([]string, error) {
-	profiles := []string{}
+func GetProfiles() (profiles []string, err error) {
+	filepath := defaults.SharedCredentialsFilename()
 	fileContent, err := ioutil.ReadFile(filepath)
 	if err != nil {
-		return nil, err
+		return profiles, err
 	}
 	lines := strings.Split(string(fileContent), "\n")
 	for _, line := range lines {
@@ -140,5 +139,10 @@ func GetProfiles(filepath string) ([]string, error) {
 			profiles = append(profiles, profile)
 		}
 	}
+	if len(profiles) < 1 {
+		err = errors.New("NO PROFILES FOUND")
+		return nil, err
+	}
+
 	return profiles, nil
 }

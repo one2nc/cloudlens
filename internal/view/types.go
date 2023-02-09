@@ -48,7 +48,7 @@ type ResourceViewer interface {
 	Resource() string
 
 	// SetContextFn provision a custom context.
-	SetContext(context.Context)
+	SetContextFn(ContextFunc)
 
 	// AddBindKeys provision additional key bindings.
 	AddBindKeysFn(BindKeysFunc)
