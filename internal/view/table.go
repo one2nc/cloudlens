@@ -7,6 +7,7 @@ import (
 	"os"
 	"os/user"
 	"path/filepath"
+	"regexp"
 	"strings"
 	"time"
 
@@ -109,7 +110,12 @@ func (t *Table) importAsCSV(evt *tcell.EventKey) *tcell.EventKey {
 	for i := 0; i < rowCount; i++ {
 		var row []string
 		for j := 0; j < colCount; j++ {
-			row = append(row, t.GetCell(i, j).Text)
+			text := t.GetCell(i, j).Text
+			if strings.Contains(text, "↑") || strings.Contains(text, "↓") {
+				text = decolorize(text)
+				text = text[:len(text)-3]
+			}
+			row = append(row, text)
 		}
 		tableData = append(tableData, row)
 	}
@@ -139,4 +145,9 @@ func (t *Table) importAsCSV(evt *tcell.EventKey) *tcell.EventKey {
 	t.app.Flash().Info("CSV file created and CSV file path copied to clipboard.")
 	clipboard.WriteAll(path)
 	return nil
+}
+
+func decolorize(input string) string {
+	re := regexp.MustCompile("\\[.*?\\]")
+	return re.ReplaceAllString(input, "")
 }
