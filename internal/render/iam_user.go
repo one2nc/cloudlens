@@ -22,7 +22,7 @@ func (iamu IAMU) Header() Header {
 func (iamu IAMU) Render(o interface{}, ns string, row *Row) error {
 	iamuResp, ok := o.(aws.IAMUSerResp)
 	if !ok {
-		return fmt.Errorf("Expected S3Resp, but got %T", o)
+		return fmt.Errorf("Expected iamuResp, but got %T", o)
 	}
 	
 	row.ID = ns

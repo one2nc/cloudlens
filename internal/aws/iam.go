@@ -8,7 +8,6 @@ import (
 	"github.com/aws/aws-sdk-go/service/iam"
 )
 
-
 func GetUsers(sess session.Session) []IAMUSerResp {
 	iamSrv := iam.New(&sess)
 	result, err := iamSrv.ListUsers(&iam.ListUsersInput{})
@@ -27,19 +26,30 @@ func GetUsers(sess session.Session) []IAMUSerResp {
 			ARN:          *u.Arn,
 			CreationTime: IST.Format("Mon Jan _2 15:04:05 2006"),
 		}
-		users = append(users,*user)
+		users = append(users, *user)
 	}
 	return users
 }
 
-func GetUserGroups(sess session.Session) []*iam.Group {
+func GetUserGroups(sess session.Session) []IAMUSerGroupResp {
 	iamSrv := iam.New(&sess)
 	result, err := iamSrv.ListGroups(&iam.ListGroupsInput{})
 	if err != nil {
 		fmt.Println("Error in fetching Iam Groups: ", " err: ", err)
 		return nil
 	}
-	return result.Groups
+	var userGroups []IAMUSerGroupResp
+	for _, u := range result.Groups {
+		// log.Info().Msg(fmt.Sprintf("Group Date : %v", *u))
+		userGroup := &IAMUSerGroupResp{
+			GroupId:   *u.GroupId,
+			GroupName: *u.GroupName,
+			ARN:       *u.Arn,
+			// CreationTime: fmt.Sprintf("%v",*u.CreateDate),
+		}
+		userGroups = append(userGroups, *userGroup)
+	}
+	return userGroups
 }
 
 func GetGroupUsers(sess session.Session, grpName string) []*iam.User {
@@ -54,7 +64,7 @@ func GetGroupUsers(sess session.Session, grpName string) []*iam.User {
 	return result.Users
 }
 
-func GetPoliciesOfGrp(sess session.Session, grpName string) []*iam.AttachedPolicy {
+func GetPoliciesOfGrp(sess session.Session, grpName string) []IAMUSerGroupPolicyResponse {
 	imaSrv := iam.New(&sess)
 	result, err := imaSrv.ListAttachedGroupPolicies(&iam.ListAttachedGroupPoliciesInput{
 		GroupName: &grpName,
@@ -63,12 +73,20 @@ func GetPoliciesOfGrp(sess session.Session, grpName string) []*iam.AttachedPolic
 		fmt.Println("Error in fetching Iam policies of the Group: ", grpName, " err: ", err)
 		return nil
 	}
-	return result.AttachedPolicies
+	var grpPolicies []IAMUSerGroupPolicyResponse
+	for _, up := range result.AttachedPolicies {
+		grpPolicy := &IAMUSerGroupPolicyResponse{
+			PolicyArn:  *up.PolicyArn,
+			PolicyName: *up.PolicyName,
+		}
+		grpPolicies = append(grpPolicies, *grpPolicy)
+	}
+	return grpPolicies
 }
 
 // If a user belong to a Group then we can't see the user's attached policy here,
 // their policies are governed on the top of the group
-func GetPoliciesOfUser(sess session.Session, usrName string) []IAMUSerPolicyResponse{
+func GetPoliciesOfUser(sess session.Session, usrName string) []IAMUSerPolicyResponse {
 	imaSrv := iam.New(&sess)
 	result, err := imaSrv.ListAttachedUserPolicies(&iam.ListAttachedUserPoliciesInput{
 		UserName: &usrName,
@@ -83,7 +101,7 @@ func GetPoliciesOfUser(sess session.Session, usrName string) []IAMUSerPolicyResp
 			PolicyArn:  *up.PolicyArn,
 			PolicyName: *up.PolicyName,
 		}
-		usersPolicy = append(usersPolicy,*userPolicy)
+		usersPolicy = append(usersPolicy, *userPolicy)
 	}
 	return usersPolicy
 }

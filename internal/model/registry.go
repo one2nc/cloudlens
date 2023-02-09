@@ -26,6 +26,10 @@ var Registry = map[string]ResourceMeta{
 		DAO:      &dao.IAMU{},
 		Renderer: &render.IAMU{},
 	},
+	"iam:g": {
+		DAO:      &dao.IAMUG{},
+		Renderer: &render.IAMUG{},
+	},
 	"User Policy": {
 		DAO:      &dao.IAMUP{},
 		Renderer: &render.IamUserPloicy{},
@@ -33,5 +37,9 @@ var Registry = map[string]ResourceMeta{
 	"ebs": {
 		DAO:      &dao.EBS{},
 		Renderer: &render.EBS{},
+	},
+	"User Group Policy": {
+		DAO:      &dao.IAMUGP{},
+		Renderer: &render.IamUserGroupPloicy{},
 	},
 }

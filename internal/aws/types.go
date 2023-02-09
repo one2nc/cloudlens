@@ -33,6 +33,13 @@ type IAMUSerResp struct {
 	CreationTime string
 }
 
+type IAMUSerGroupResp struct {
+	GroupId       string
+	GroupName     string
+	ARN          string
+	CreationTime string
+}
+
 type IAMUSerPolicyResponse struct {
 	PolicyArn  string
 	PolicyName string
@@ -46,4 +53,9 @@ type EBSResp struct {
 	AvailabilityZone string
 	Snapshot         string
 	CreationTime     string
+}
+
+type IAMUSerGroupPolicyResponse struct {
+	PolicyArn      string
+	PolicyName     string
 }
