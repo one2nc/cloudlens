@@ -34,6 +34,16 @@ type IAMUSerResp struct {
 }
 
 type IAMUSerPolicyResponse struct {
-	PolicyArn      string
-	PolicyName     string
+	PolicyArn  string
+	PolicyName string
+}
+
+type EBSResp struct {
+	VolumeId         string
+	Size             string
+	VolumeType       string
+	State            string
+	AvailabilityZone string
+	Snapshot         string
+	CreationTime     string
 }

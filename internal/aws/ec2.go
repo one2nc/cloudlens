@@ -2,6 +2,7 @@ package aws
 
 import (
 	"fmt"
+	"strconv"
 	"time"
 
 	"github.com/aws/aws-sdk-go/aws/session"
@@ -27,8 +28,6 @@ func (e ByLaunchTime) Swap(i, j int) { e[i], e[j] = e[j], e[i] }
 func (e ByLaunchTime) Less(i, j int) bool {
 	return e[i].Instance.LaunchTime.Before(*e[j].Instance.LaunchTime)
 }
-
-
 
 func GetInstances(sess session.Session) ([]EC2Resp, error) {
 	var ec2Info []EC2Resp
@@ -98,14 +97,31 @@ func GetSingleSecGrp(sess session.Session, sgId string) *ec2.DescribeSecurityGro
 Volumes(ebs) are region specific
 Localstack doesn't have default volumes, so at some regions, there won't be any volumes.
 */
-func GetVolumes(sess session.Session) []*ec2.Volume {
+func GetVolumes(sess session.Session) ([]EBSResp, error) {
+	var volumes []EBSResp
 	ec2Serv := *ec2.New(&sess)
 	result, err := ec2Serv.DescribeVolumes(&ec2.DescribeVolumesInput{})
 	if err != nil {
 		fmt.Println("Error in fetching Volumes: ", " err: ", err)
-		return nil
+		return nil, err
 	}
-	return result.Volumes
+	for _, v := range result.Volumes {
+		launchTime := v.CreateTime
+		loc, _ := time.LoadLocation("Asia/Kolkata")
+		IST := launchTime.In(loc)
+		IST.Format("Mon Jan _2 15:04:05 2006")
+		volume := EBSResp{
+			VolumeId:         *v.VolumeId,
+			Size:             strconv.Itoa(int(*v.Size)) + " GB",
+			VolumeType:       *v.VolumeType,
+			State:            *v.State,
+			AvailabilityZone: *v.AvailabilityZone,
+			Snapshot:         *v.SnapshotId,
+			CreationTime:     IST.String(),
+		}
+		volumes = append(volumes, volume)
+	}
+	return volumes, nil
 }
 
 func GetSingleVolume(sess session.Session, vId string) *ec2.Volume {

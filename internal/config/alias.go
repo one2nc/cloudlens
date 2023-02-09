@@ -127,11 +127,12 @@ func (a *Aliases) declare(key string, aliases ...string) {
 func (a *Aliases) loadDefaultAliases() {
 	a.mx.Lock()
 	defer a.mx.Unlock()
-	
+
 	a.declare("ec2", "Ec2", "EC2")
 	a.declare("s3", "S3")
 	a.declare("sg", "SG")
-	a.declare("iam:u","IAM:U")
+	a.declare("iam:u", "IAM:U")
+	a.declare("ebs", "EBS")
 
 	a.declare("help", "h", "?")
 	a.declare("quit", "q", "q!", "Q")

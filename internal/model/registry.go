@@ -30,4 +30,8 @@ var Registry = map[string]ResourceMeta{
 		DAO:      &dao.IAMUP{},
 		Renderer: &render.IamUserPloicy{},
 	},
+	"ebs": {
+		DAO:      &dao.EBS{},
+		Renderer: &render.EBS{},
+	},
 }
