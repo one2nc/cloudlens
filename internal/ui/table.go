@@ -40,8 +40,8 @@ func NewTable(res string) *Table {
 func (t *Table) Init(ctx context.Context) {
 	t.SetFixed(1, 0)
 	t.SetBorder(true)
-	t.SetBorderColor(tcell.ColorDeepSkyBlue)
-	//t.SetBorderFocusColor(tcell.ColorSpringGreen)	
+	t.SetBorderColor(tcell.ColorLightSkyBlue)
+	t.SetBorderFocusColor(tcell.ColorDeepSkyBlue)
 	t.SetBorderPadding(0, 0, 1, 1)
 	t.SetSelectable(true, false)
 	t.SetSelectionChangedFunc(t.selectionChanged)
@@ -167,7 +167,7 @@ func (t *Table) Refresh() {
 
 // UpdateTitle refreshes the table title.
 func (t *Table) UpdateTitle() {
-	title := strings.Join([]string{" ", t.Resource(), " "}, "")
+	title := strings.Join([]string{" ", strings.ToUpper(t.Resource()), " "}, "")
 	t.SetTitle(fmt.Sprintf("[aqua::b]%s", title))
 }
 

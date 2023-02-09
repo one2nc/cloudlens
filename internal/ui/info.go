@@ -1,21 +1,23 @@
 package ui
 
 import (
+	"strings"
+
 	"github.com/derailed/tview"
 	"github.com/gdamore/tcell/v2"
 )
 
+const DropdownPadSpaces int = 3
+
 type Info struct {
 	*tview.Flex
-	dropdowns []DropDown
-	items     map[string]tview.Primitive
+	items map[string]tview.Primitive
 }
 
 func NewInfo(items map[string]tview.Primitive) *Info {
 	i := Info{
-		Flex:      tview.NewFlex(),
-		items:     items,
-		dropdowns: []DropDown{},
+		Flex:  tview.NewFlex(),
+		items: items,
 	}
 	i.padDropDownLabels()
 	i.build()
@@ -23,10 +25,25 @@ func NewInfo(items map[string]tview.Primitive) *Info {
 }
 
 func (i *Info) padDropDownLabels() {
+	maxLabelLen := 0
+	maxOptionLen := 0
 	for _, p := range i.items {
-		d, ok := p.(DropDown)
+		d, ok := p.(*DropDown)
 		if ok {
-			i.dropdowns = append(i.dropdowns, d)
+			if len(d.GetLabel()) > maxLabelLen {
+				maxLabelLen = len(d.GetLabel())
+			}
+			if d.GetFieldWidth() > maxOptionLen {
+				maxOptionLen = d.GetFieldWidth()
+			}
+		}
+	}
+
+	for _, p := range i.items {
+		d, ok := p.(*DropDown)
+		if ok {
+			d.SetFieldWidth(maxOptionLen + DropdownPadSpaces)
+			d.SetLabel(d.GetLabel() + strings.Repeat(" ", (maxLabelLen-len(d.GetLabel()))+1))
 		}
 	}
 }
@@ -35,11 +52,8 @@ func (i *Info) build() {
 	i.Clear()
 	i.SetDirection(tview.FlexRow)
 	i.SetBorderColor(tcell.ColorBlack.TrueColor())
-	i.SetBorderPadding(1, 1, 1, 1)
+	i.SetBorderPadding(0, 4, 1, 1)
 	for _, p := range i.items {
 		i.AddItem(p, 0, 1, false)
 	}
-	// for k, v := range i.data {
-	// 	fmt.Fprintf(i, "[%s::b]%s: [%s::b]%s\n", "orange", k, "#ffffff", v)
-	// }
 }

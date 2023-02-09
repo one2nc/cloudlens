@@ -1,21 +1,25 @@
 package ui
 
 import (
+	"fmt"
+
 	"github.com/derailed/tview"
 	"github.com/gdamore/tcell/v2"
 )
 
+const DropDownIndicatiorColor string = "green"
+
 type DropDown struct {
 	*tview.DropDown
-	label      string
-	options    []string
+	label   string
+	options []string
 }
 
 func NewDropDown(label string, options []string) *DropDown {
 	d := DropDown{
-		DropDown:   tview.NewDropDown(),
-		label:      label,
-		options:    options,
+		DropDown: tview.NewDropDown(),
+		label:    label,
+		options:  options,
 	}
 	d.build()
 	return &d
@@ -33,5 +37,7 @@ func (d *DropDown) build() {
 	d.SetOptions(d.options, func(text string, index int) {})
 	d.SetCurrentOption(0)
 	d.SetBorderPadding(0, 0, 0, 0)
-	//profileDropdown.SetBorder(true)
+	d.SetTextOptions("  ", " ", fmt.Sprintf("[%s::bd]▽[-:-:-] ", DropDownIndicatiorColor), "", "")
+	d.SetFieldBackgroundColor(tcell.ColorBlack.TrueColor())
+	d.SetFieldTextColor(tcell.ColorAntiqueWhite.TrueColor())
 }

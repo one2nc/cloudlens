@@ -85,7 +85,7 @@ func (t *Table) keyboard(evt *tcell.EventKey) *tcell.EventKey {
 
 func (t *Table) bindKeys() {
 	t.Actions().Add(ui.KeyActions{
-		tcell.KeyCtrlW: ui.NewKeyAction("Toggle Wide", t.toggleWideCmd, true),
+		tcell.KeyCtrlW: ui.NewKeyAction("Toggle Wide", t.toggleWideCmd, false),
 		ui.KeyHelp:     ui.NewKeyAction("Help", t.App().helpCmd, true),
 		ui.KeyZ:        ui.NewKeyAction("CSV", t.importAsCSV, true),
 	})

@@ -20,21 +20,19 @@ func NewEC2(resource string) ResourceViewer {
 
 func (e *EC2) bindKeys(aa ui.KeyActions) {
 	aa.Add(ui.KeyActions{
-		ui.KeyShiftI:    ui.NewKeyAction("Sort Instance-Id", e.GetTable().SortColCmd("Instance-Id", true), true),
-		ui.KeyShiftS:    ui.NewKeyAction("Sort Instance-State", e.GetTable().SortColCmd("Instance-State", true), true),
-		ui.KeyShiftT:    ui.NewKeyAction("Sort Instance-Type", e.GetTable().SortColCmd("Instance-Type", true), true),
-		ui.KeyShiftL:    ui.NewKeyAction("Sort Launch-Time", e.GetTable().SortColCmd("Launch-Time", true), true),
-		ui.KeyShiftM:    ui.NewKeyAction("Sort Monitoring-State", e.GetTable().SortColCmd("Monitoring-State", true), true),
-		ui.KeyShiftP:    ui.NewKeyAction("Sort Public-DNS", e.GetTable().SortColCmd("Public-DNS", true), true),
-		tcell.KeyEscape: ui.NewKeyAction("Back", e.App().PrevCmd, true),
-		tcell.KeyEnter:  ui.NewKeyAction("View", e.enterCmd, true),
+		ui.KeyShiftI:    ui.NewKeyAction("Sort Instance-Id", e.GetTable().SortColCmd("Instance-Id", true), false),
+		ui.KeyShiftS:    ui.NewKeyAction("Sort Instance-State", e.GetTable().SortColCmd("Instance-State", true), false),
+		ui.KeyShiftT:    ui.NewKeyAction("Sort Instance-Type", e.GetTable().SortColCmd("Instance-Type", true), false),
+		ui.KeyShiftL:    ui.NewKeyAction("Sort Launch-Time", e.GetTable().SortColCmd("Launch-Time", true), false),
+		ui.KeyShiftM:    ui.NewKeyAction("Sort Monitoring-State", e.GetTable().SortColCmd("Monitoring-State", true), false),
+		ui.KeyShiftP:    ui.NewKeyAction("Sort Public-DNS", e.GetTable().SortColCmd("Public-DNS", true), false),
+		tcell.KeyEscape: ui.NewKeyAction("Back", e.App().PrevCmd, false),
+		tcell.KeyEnter:  ui.NewKeyAction("View", e.enterCmd, false),
 	})
 }
 
 func (e *EC2) enterCmd(evt *tcell.EventKey) *tcell.EventKey {
 	instanceId := e.GetTable().GetSelectedItem()
-	e.App().Flash().Info("Instance-Id: " + instanceId)
-
 	f := describeResource
 	if e.GetTable().enterFn != nil {
 		f = e.GetTable().enterFn

@@ -59,11 +59,11 @@ func (a *App) Init(profiles, regions []string, ctx context.Context) error {
 	ctx = context.WithValue(ctx, internal.KeyApp, a)
 	a.SetContext(ctx)
 
-	p := ui.NewDropDown("Profile", profiles)
+	p := ui.NewDropDown("Profile:", profiles)
 	p.SetSelectedFunc(a.profileChanged)
 	a.Views()["profile"] = p
 
-	r := ui.NewDropDown("Region", regions)
+	r := ui.NewDropDown("Region:", regions)
 	r.SetSelectedFunc(a.regionChanged)
 	a.Views()["region"] = r
 
@@ -1000,6 +1000,7 @@ func (a *App) bindKeys() {
 	a.AddActions(ui.KeyActions{
 		tcell.KeyCtrlE: ui.NewKeyAction("ToggleHeader", a.toggleHeaderCmd, false),
 		tcell.KeyEnter: ui.NewKeyAction("Goto", a.gotoCmd, false),
+		tcell.KeyTAB: ui.NewKeyAction("switch", NewTab(a).tabAction, false),
 	})
 }
 

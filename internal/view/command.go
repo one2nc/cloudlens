@@ -119,10 +119,8 @@ func (c *Command) viewMetaFor(cmd string) (string, *MetaViewer, error) {
 func (c *Command) componentFor(res, path string, v *MetaViewer) ResourceViewer {
 	var view ResourceViewer
 	if v.viewerFn != nil {
-		log.Info().Msg(fmt.Sprintf("If res: %v, Path: %v", res, path))
 		view = v.viewerFn(res)
 	} else {
-		log.Info().Msg(fmt.Sprintf("else: res: %v, Path: %v", res, path))
 		view = NewBrowser(res)
 	}
 
@@ -150,7 +148,6 @@ func (c *Command) exec(cmd, gvr string, comp model.Component, clearStack bool) (
 		// 	err = fmt.Errorf("Invalid command %q", cmd)
 		// }
 	}()
-	log.Info().Msg(fmt.Sprintf("cmd: %v, res: %v, comp: %T", cmd, gvr, comp))
 
 	if comp == nil {
 		return fmt.Errorf("No component found for %s", gvr)
