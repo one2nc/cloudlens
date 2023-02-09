@@ -1,8 +1,10 @@
 package cmd
 
 import (
+	"fmt"
 	"log"
 
+	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/brianvoe/gofakeit"
 	"github.com/one2nc/cloud-lens/internal/config"
@@ -16,10 +18,13 @@ var lspop = &cobra.Command{
 	Long:  ``,
 	Run: func(cmd *cobra.Command, args []string) {
 		profiles, err := config.GetProfiles()
+		if err != nil {
+			panic(fmt.Sprintf("failed to read profiles -- %v", err))
+		}
 		if !config.LookupForValue(profiles, profile) {
 			profile = profiles[0]
 		}
-		sess, err := config.GetSession(profile, region)
+		sess, err := getSession(profile, region)
 		if err != nil {
 			log.Fatal("err: ", err)
 		}
@@ -40,7 +45,7 @@ var lspop = &cobra.Command{
 
 		for i := 0; i < 4; i++ {
 			gofakeit.Seed(0)
-			sess, err := config.GetSession(profile, regions[gofakeit.Number(0, len(regions)-1)])
+			sess, err := getSession(profile, regions[gofakeit.Number(0, len(regions)-1)])
 			if err != nil {
 				log.Fatal("err: ", err)
 			}
@@ -66,4 +71,19 @@ var lspop = &cobra.Command{
 
 func init() {
 	rootCmd.AddCommand(lspop)
+}
+
+func getSession(profile, region string) (*session.Session, error) {
+	sess, err := session.NewSessionWithOptions(session.Options{Config: aws.Config{
+		//TODO: remove hardcoded enpoint
+		Endpoint:         aws.String("http://localhost:4566"),
+		Region:           aws.String(region),
+		S3ForcePathStyle: aws.Bool(true),
+	},
+		Profile: profile})
+	if err != nil {
+		fmt.Println("Error creating session:", err)
+		return nil, err
+	}
+	return sess, nil
 }
