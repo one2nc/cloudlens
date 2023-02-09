@@ -26,4 +26,8 @@ var Registry = map[string]ResourceMeta{
 		DAO:      &dao.IAMU{},
 		Renderer: &render.IAMU{},
 	},
+	"User Policy": {
+		DAO:      &dao.IAMUP{},
+		Renderer: &render.IamUserPloicy{},
+	},
 }

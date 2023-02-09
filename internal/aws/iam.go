@@ -68,7 +68,7 @@ func GetPoliciesOfGrp(sess session.Session, grpName string) []*iam.AttachedPolic
 
 // If a user belong to a Group then we can't see the user's attached policy here,
 // their policies are governed on the top of the group
-func GetPoliciesOfUser(sess session.Session, usrName string) []*iam.AttachedPolicy {
+func GetPoliciesOfUser(sess session.Session, usrName string) []IAMUSerPolicyResponse{
 	imaSrv := iam.New(&sess)
 	result, err := imaSrv.ListAttachedUserPolicies(&iam.ListAttachedUserPoliciesInput{
 		UserName: &usrName,
@@ -77,7 +77,15 @@ func GetPoliciesOfUser(sess session.Session, usrName string) []*iam.AttachedPoli
 		fmt.Println("Error in fetching Iam policies of the User: ", usrName, " err: ", err)
 		return nil
 	}
-	return result.AttachedPolicies
+	var usersPolicy []IAMUSerPolicyResponse
+	for _, up := range result.AttachedPolicies {
+		userPolicy := &IAMUSerPolicyResponse{
+			PolicyArn:  *up.PolicyArn,
+			PolicyName: *up.PolicyName,
+		}
+		usersPolicy = append(usersPolicy,*userPolicy)
+	}
+	return usersPolicy
 }
 
 func GetIamRoles(sess session.Session) []*iam.Role {

@@ -32,3 +32,8 @@ type IAMUSerResp struct {
 	ARN          string
 	CreationTime string
 }
+
+type IAMUSerPolicyResponse struct {
+	PolicyArn      string
+	PolicyName     string
+}

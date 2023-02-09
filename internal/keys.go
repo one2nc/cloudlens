@@ -14,4 +14,5 @@ const (
 	ObjectName       ContextKey = "object_name"
 	FolderName       ContextKey = "folder_name"
 	KeyAliases       ContextKey = "aliases"
+	UserName         ContextKey = "user_name"
 )
