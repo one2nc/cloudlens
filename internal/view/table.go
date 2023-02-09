@@ -5,9 +5,12 @@ import (
 	"encoding/csv"
 	"fmt"
 	"os"
+	"os/user"
+	"path/filepath"
 	"strings"
 	"time"
 
+	"github.com/atotto/clipboard"
 	"github.com/gdamore/tcell/v2"
 	"github.com/one2nc/cloud-lens/internal/ui"
 	"github.com/rs/zerolog/log"
@@ -110,18 +113,15 @@ func (t *Table) importAsCSV(evt *tcell.EventKey) *tcell.EventKey {
 		}
 		tableData = append(tableData, row)
 	}
-
-	csvName := strings.Split(t.GetTitle(), " ")
-	err := os.MkdirAll("./resource/CSV", os.ModePerm)
+	csvFileName := strings.Split(t.GetTitle(), " ")
+	usr, err := user.Current()
+	path := usr.HomeDir + "/cloud-lens/CSV/"
+	err = os.MkdirAll(path, os.ModePerm)
+	path = filepath.Join(path + "/" + csvFileName[len(csvFileName)-2] + ".csv")
+	file, err := os.Create(path)
 	if err != nil {
-		log.Info().Msg(fmt.Sprintf("error in creating CSV directory: %v", err))
+		log.Info().Msg(fmt.Sprintf("error in creating csv file: %v", err))
 	}
-	file, err := os.Create("./resource/CSV/" + csvName[len(csvName)-2] + ".csv")
-	if err != nil {
-		log.Info().Msg(fmt.Sprintf("error in creating .csv file: %v", err))
-	}
-	defer file.Close()
-
 	writer := csv.NewWriter(file)
 	for _, record := range tableData {
 		err := writer.Write(record)
@@ -130,6 +130,7 @@ func (t *Table) importAsCSV(evt *tcell.EventKey) *tcell.EventKey {
 		}
 	}
 	writer.Flush()
-	t.app.Flash().Info("CSV Created.")
+	t.app.Flash().Info("CSV file created and CSV file path copied to clipboard.")
+	clipboard.WriteAll(path)
 	return nil
 }
