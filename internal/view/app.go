@@ -956,9 +956,9 @@ func (a *App) buildHeader() tview.Primitive {
 	if !a.showHeader {
 		return header
 	}
-	header.AddItem(a.info(), 0, 1, false)
-	header.AddItem(a.Menu(), 0, 2, false)
-	header.AddItem(tview.NewBox(), 0, 1, false)
+	header.AddItem(a.info(), 50, 1, false)
+	header.AddItem(a.Menu(), 0, 1, false)
+	header.AddItem(ui.NewLogo(), 26, 1, false)
 	return header
 }
 

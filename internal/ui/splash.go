@@ -7,12 +7,6 @@ import (
 	"github.com/gdamore/tcell/v2"
 )
 
-// LogoBig K9s big logo for splash page.
-var LogoBig = []string{
-	`█▀▀ █░░ █▀▀█ █░░█ █▀▀▄ █░░ █▀▀ █▀▀▄ █▀▀`,
-	`█░░ █░░ █░░█ █░░█ █░░█ █░░ █▀▀ █░░█ ▀▀█`,
-	`▀▀▀ ▀▀▀ ▀▀▀▀ ░▀▀▀ ▀▀▀░ ▀▀▀ ▀▀▀ ▀░░▀ ▀▀▀`,
-}
 
 type Splash struct {
 	*tview.Flex
