@@ -147,6 +147,8 @@ func (t *Table) importAsCSV(evt *tcell.EventKey) *tcell.EventKey {
 }
 
 func decolorize(input string) string {
-	re := regexp.MustCompile(`\[.*?\]|\^`)
+	input = strings.Replace(input, "↑", "", 1)
+	input = strings.Replace(input, "↓", "", 1)
+	re := regexp.MustCompile(`\[.*?\]`)
 	return re.ReplaceAllString(input, "")
 }
