@@ -17,3 +17,6 @@ const (
 	UserName         ContextKey = "user_name"
 	GroupName        ContextKey = "group_name"
 )
+
+// TODO rename the file name to constants.go
+// TODO move the constants in the package where they used. e.g KeyFactory is used in view package so create constants.go in view package and move view related consts in that file.

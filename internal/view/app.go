@@ -53,6 +53,7 @@ func NewApp() *App {
 	return &a
 }
 
+// TODO keep context param at first place always
 func (a *App) Init(profiles, regions []string, ctx context.Context) error {
 	ctx = context.WithValue(ctx, internal.KeyActiveProfile, profiles[0])
 	ctx = context.WithValue(ctx, internal.KeyActiveRegion, regions[0])
@@ -69,7 +70,7 @@ func (a *App) Init(profiles, regions []string, ctx context.Context) error {
 
 	infoData := map[string]tview.Primitive{
 		"profile": a.profile(),
-		"region": a.region(),
+		"region":  a.region(),
 	}
 	a.Views()["info"] = ui.NewInfo(infoData)
 
@@ -92,6 +93,7 @@ func (a *App) Init(profiles, regions []string, ctx context.Context) error {
 	return nil
 }
 
+// TODO remove older unused code
 func (a *App) layout(ctx context.Context) *tview.Flex {
 	cfg, _ := config.Get()
 
@@ -300,6 +302,7 @@ func (a *App) layout(ctx context.Context) *tview.Flex {
 		if key == tcell.KeyEnter {
 			serviceName := inputField.GetText()
 			switch serviceName {
+			// TODO create consts instead of hardcoded
 			case "S3", "s3":
 				a.Flash().Info("Loading S3 Buckets...")
 				servicePage.RemoveItemAtIndex(0)
@@ -1000,7 +1003,7 @@ func (a *App) bindKeys() {
 	a.AddActions(ui.KeyActions{
 		tcell.KeyCtrlE: ui.NewKeyAction("ToggleHeader", a.toggleHeaderCmd, false),
 		tcell.KeyEnter: ui.NewKeyAction("Goto", a.gotoCmd, false),
-		tcell.KeyTAB: ui.NewKeyAction("switch", NewTab(a).tabAction, false),
+		tcell.KeyTAB:   ui.NewKeyAction("switch", NewTab(a).tabAction, false),
 	})
 }
 

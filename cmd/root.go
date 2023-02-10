@@ -51,14 +51,19 @@ func run(cmd *cobra.Command, args []string) {
 	}()
 	log.Logger = log.Output(zerolog.ConsoleWriter{Out: file})
 
+	//TODO profiles and regions should under aws
 	profiles := readAndValidateProfile()
 	regions := readAndValidateRegion()
+
+	//TODO Move this in the AWS folder
 	sess, err := config.GetSession(profiles[0], regions[0])
 	if err != nil {
 		panic(fmt.Sprintf("aws session init failed -- %v", err))
 	}
 	ctx := context.WithValue(context.Background(), internal.KeySession, sess)
 	app := view.NewApp()
+
+	// TODO pass the AWS session instead of profiles and regions
 	if err := app.Init(profiles, regions, ctx); err != nil {
 		panic(fmt.Sprintf("app init failed -- %v", err))
 	}

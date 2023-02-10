@@ -7,6 +7,7 @@ func loadCustomViewers() MetaViewers {
 }
 
 func coreViewers(vv MetaViewers) {
+	// TODO create consts instead of hardcoded
 	vv["ec2"] = MetaViewer{
 		viewerFn: NewEC2,
 	}
