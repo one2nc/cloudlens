@@ -22,12 +22,6 @@ type BucketResp struct {
 	Region       string
 }
 
-type ByBucketName []BucketResp
-
-func (b ByBucketName) Len() int           { return len(b) }
-func (b ByBucketName) Swap(i, j int)      { b[i], b[j] = b[j], b[i] }
-func (b ByBucketName) Less(i, j int) bool { return b[i].BucketName < b[j].BucketName }
-
 func ListBuckets(sess session.Session) ([]BucketResp, error) {
 	var bucketInfo []BucketResp
 	s3Serv := *s3.New(&sess)
