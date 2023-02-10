@@ -141,6 +141,7 @@ func (t *Table) buildRow(r int, re, ore render.RowEvent, h render.Header) {
 // AddHeaderCell configures a table cell header.
 func (t *Table) AddHeaderCell(col int, h render.HeaderColumn) {
 	sort := h.Name == t.sortCol.name
+	//c := tview.NewTableCell(sortIndicator(sort, t.sortCol.asc, h))
 	c := tview.NewTableCell(sortIndicator(sort, t.sortCol.asc, h))
 	c.SetTextColor(tcell.ColorBeige)
 	c.SetAttributes(tcell.AttrBold)

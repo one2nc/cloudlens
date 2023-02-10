@@ -34,8 +34,8 @@ func Colorize(s string, c Paint) string {
 	return fmt.Sprintf(colorFmt, c, s)
 }
 
-func ColorizeAt(s string, idx int, color string) string {
-	if len(s) <= idx {
+func ColorizeAt(s string, idx int, color string, underscore bool) string {
+	if idx < 0 || len(s) <= idx {
 		return s
 	}
 	//colr := color.New(c).FprintfFunc()
@@ -44,6 +44,9 @@ func ColorizeAt(s string, idx int, color string) string {
 	left := string(chrs[:idx])
 
 	mid := fmt.Sprintf("[-:-:-][%s::b]%s[-:-:-]", color, string(chrs[idx]))
+	if underscore {
+		mid = fmt.Sprintf("[-:-:-][%s::bu]%s[-:-:-]", color, string(chrs[idx]))
+	}
 	right := string(chrs[idx+1:])
 	return fmt.Sprintf("%s%s%s", left, mid, right)
 }

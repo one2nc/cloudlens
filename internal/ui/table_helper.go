@@ -26,12 +26,12 @@ func TrimCell(tv *SelectTable, row, col int) string {
 
 func sortIndicator(sort, asc bool, hc render.HeaderColumn) string {
 	if !sort {
-		return hc.Name
+		return color.ColorizeAt(hc.Name, hc.SortIndicatorIdx, "wheat", true)
 	}
 
 	order := descIndicator
 	if asc {
 		order = ascIndicator
 	}
-	return fmt.Sprintf("%s%s", color.ColorizeAt(hc.Name, hc.SortIndicatorIdx, "red"), color.ColorizeAt(order, 0, "green"))
+	return fmt.Sprintf("%s%s", color.ColorizeAt(hc.Name, hc.SortIndicatorIdx, "red", true), color.ColorizeAt(order, 0, "green", false))
 }

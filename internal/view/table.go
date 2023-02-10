@@ -113,10 +113,7 @@ func (t *Table) importAsCSV(evt *tcell.EventKey) *tcell.EventKey {
 		var row []string
 		for j := 0; j < colCount; j++ {
 			text := t.GetCell(i, j).Text
-			if strings.Contains(text, "↑") || strings.Contains(text, "↓") {
-				text = decolorize(text)
-				text = text[:len(text)-3]
-			}
+			text = decolorize(text)
 			row = append(row, text)
 		}
 		tableData = append(tableData, row)
@@ -150,6 +147,6 @@ func (t *Table) importAsCSV(evt *tcell.EventKey) *tcell.EventKey {
 }
 
 func decolorize(input string) string {
-	re := regexp.MustCompile("\\[.*?\\]")
+	re := regexp.MustCompile(`\[.*?\]|\^`)
 	return re.ReplaceAllString(input, "")
 }
