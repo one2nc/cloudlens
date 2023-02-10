@@ -166,7 +166,7 @@ func CreateEC2Instances(sess []*session.Session) error {
 				}
 				iamPolicy, err := iip.createIamPolicy(iamService)
 				if err != nil {
-					return err
+					fmt.Println(fmt.Errorf("error in creating Iam policy for instance:%v , err:%v", *in.InstanceId, err))
 				}
 				iamPolicies = append(iamPolicies, iamPolicy)
 				// lastEc2Policy = iamPolicy.Policy
@@ -188,7 +188,7 @@ func CreateKeyPair(sess []*session.Session) error {
 			KeyType:   aws.String("ssh-rsa"),
 		})
 		if err != nil {
-			return fmt.Errorf("error in creating Key Pairs: %v", err)
+			fmt.Println(fmt.Errorf("error in creating Key Pairs: %v", err))
 		}
 	}
 	return nil
@@ -563,7 +563,7 @@ func IamAwsSrv(sess *session.Session) error {
 	for i := 0; i < 4; i++ {
 		err := createIamRole(srv)
 		if err != nil {
-			return fmt.Errorf("error creating role: %v", err)
+			fmt.Println(fmt.Errorf("error creating role: %v", err))
 		}
 	}
 
@@ -587,9 +587,17 @@ func createIamRole(srv *iam.IAM) error {
 		AssumeRolePolicyDocument: aws.String(rpd),
 		RoleName:                 aws.String(gofakeit.FirstName()),
 	})
+	log.Println("Iam Role Created: ", *cr.Role.RoleId)
 	if err != nil {
 		return fmt.Errorf("error creating role: %v", err)
 	}
-	log.Println("Iam Role Created: ", *cr.Role.RoleId)
+	srv.AttachRolePolicy(&iam.AttachRolePolicyInput{
+		PolicyArn: iamPolicies[gofakeit.Number(0, len(iamPolicies)-1)].Arn,
+		RoleName:  cr.Role.RoleName,
+	})
+	// if err != nil {
+	// 	return fmt.Errorf("error creating role policy: %v", err)
+	// }
+	log.Println("Iam Role Policy Created for: ", *cr.Role.RoleId)
 	return nil
 }
