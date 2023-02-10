@@ -104,6 +104,8 @@ func (t *Table) toggleWideCmd(evt *tcell.EventKey) *tcell.EventKey {
 	return nil
 }
 func (t *Table) importAsCSV(evt *tcell.EventKey) *tcell.EventKey {
+	_, profile := t.app.profile().GetCurrentOption()
+	_, region := t.app.region().GetCurrentOption()
 	var tableData [][]string
 	rowCount := t.GetRowCount()
 	colCount := t.GetColumnCount()
@@ -129,7 +131,7 @@ func (t *Table) importAsCSV(evt *tcell.EventKey) *tcell.EventKey {
 	if err != nil {
 		log.Info().Msg(fmt.Sprintf("error in creating csv directory: %v", err))
 	}
-	path = filepath.Join(path + "/" + csvFileName[len(csvFileName)-2] + ".csv")
+	path = filepath.Join(path + "/" + csvFileName[len(csvFileName)-2] + "-" + profile + "-" + region + ".csv")
 	file, err := os.Create(path)
 	if err != nil {
 		log.Info().Msg(fmt.Sprintf("error in creating csv file: %v", err))
