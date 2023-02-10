@@ -13,35 +13,46 @@ import (
 	"github.com/rs/zerolog/log"
 )
 
-type BObj struct {
+type S3FileViewer struct {
+	name, path string
 	ResourceViewer
 }
 
-func NewS3FileViewer(resource string) ResourceViewer {
-	var obj BObj
-	obj.ResourceViewer = NewBrowser(resource)
+func NewS3FileViewer(path, resource string) *S3FileViewer {
+	var obj S3FileViewer
+	obj.name = resource
+	obj.path = path
+	if obj.path == "s3://" {
+		obj.path = obj.path + obj.name
+	}
+	obj.ResourceViewer = NewBrowser("OBJ")
 	obj.AddBindKeysFn(obj.bindKeys)
 	//s3.GetTable().SetEnterFn(s3.describeInstace)
 	return &obj
 }
-func (obj *BObj) bindKeys(aa ui.KeyActions) {
+
+func (obj *S3FileViewer) Name() string {
+	return obj.name
+}
+
+func (obj *S3FileViewer) bindKeys(aa ui.KeyActions) {
 	aa.Add(ui.KeyActions{
 		ui.KeyShiftN:    ui.NewKeyAction("Sort Name", obj.GetTable().SortColCmd("Name", true), true),
 		ui.KeyShiftM:    ui.NewKeyAction("Sort Modification-Time", obj.GetTable().SortColCmd("Last-Modified", true), true),
 		ui.KeyShiftS:    ui.NewKeyAction("Sort Size", obj.GetTable().SortColCmd("Size", true), true),
 		ui.KeyShiftC:    ui.NewKeyAction("Sort Storage-Class", obj.GetTable().SortColCmd("Storage-Class", true), true),
-		tcell.KeyEscape: ui.NewKeyAction("Back", obj.App().PrevCmd, true),
-		tcell.KeyEnter:  ui.NewKeyAction("View", obj.enterCmd, true),
+		tcell.KeyEscape: ui.NewKeyAction("Back", obj.App().PrevCmd, false),
+		tcell.KeyEnter:  ui.NewKeyAction("View", obj.enterCmd, false),
 		tcell.KeyCtrlD:  ui.NewKeyAction("Download Object", obj.downloadCmd, true),
 		tcell.KeyCtrlP:  ui.NewKeyAction("Pre-Signed URL", obj.preSignedUrlCmd, true),
 	})
 }
 
-func (obj *BObj) enterCmd(evt *tcell.EventKey) *tcell.EventKey {
+func (obj *S3FileViewer) enterCmd(evt *tcell.EventKey) *tcell.EventKey {
 	objName := obj.GetTable().GetSelectedItem()
 	fileType := obj.GetTable().GetSecondColumn()
 	if fileType == "Folder" {
-		o := NewS3FileViewer("OBJ")
+		o := NewS3FileViewer(obj.path+"/"+objName, objName)
 		ctx := obj.App().GetContext()
 		bn := ctx.Value(internal.BucketName)
 		fn := fmt.Sprintf("%v%v/", ctx.Value(internal.FolderName), objName)
@@ -54,12 +65,13 @@ func (obj *BObj) enterCmd(evt *tcell.EventKey) *tcell.EventKey {
 		obj.App().Flash().Info(fmt.Sprintf("Bucket Name: %v", bn))
 		// println(bName)
 		obj.App().inject(o)
+		o.GetTable().SetTitle(o.path)
 	}
 
-	return nil
+	return evt
 }
 
-func (obj *BObj) downloadCmd(evt *tcell.EventKey) *tcell.EventKey {
+func (obj *S3FileViewer) downloadCmd(evt *tcell.EventKey) *tcell.EventKey {
 	objName := obj.GetTable().GetSelectedItem()
 	fileType := obj.GetTable().GetSecondColumn()
 
@@ -73,7 +85,7 @@ func (obj *BObj) downloadCmd(evt *tcell.EventKey) *tcell.EventKey {
 	return nil
 }
 
-func (obj *BObj) preSignedUrlCmd(evt *tcell.EventKey) *tcell.EventKey {
+func (obj *S3FileViewer) preSignedUrlCmd(evt *tcell.EventKey) *tcell.EventKey {
 	objNmae := obj.GetTable().GetSelectedItem()
 	fileType := obj.GetTable().GetSecondColumn()
 

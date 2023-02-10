@@ -9,25 +9,6 @@ import (
 	"github.com/aws/aws-sdk-go/service/ec2"
 )
 
-type ByInstanceId []EC2Resp
-
-func (e ByInstanceId) Len() int           { return len(e) }
-func (e ByInstanceId) Swap(i, j int)      { e[i], e[j] = e[j], e[i] }
-func (e ByInstanceId) Less(i, j int) bool { return e[i].InstanceId < e[j].InstanceId }
-
-type ByInstanceType []EC2Resp
-
-func (e ByInstanceType) Len() int           { return len(e) }
-func (e ByInstanceType) Swap(i, j int)      { e[i], e[j] = e[j], e[i] }
-func (e ByInstanceType) Less(i, j int) bool { return e[i].InstanceType < e[j].InstanceType }
-
-type ByLaunchTime []EC2Resp
-
-func (e ByLaunchTime) Len() int      { return len(e) }
-func (e ByLaunchTime) Swap(i, j int) { e[i], e[j] = e[j], e[i] }
-func (e ByLaunchTime) Less(i, j int) bool {
-	return e[i].Instance.LaunchTime.Before(*e[j].Instance.LaunchTime)
-}
 
 func GetInstances(sess session.Session) ([]EC2Resp, error) {
 	var ec2Info []EC2Resp

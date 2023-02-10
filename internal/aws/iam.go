@@ -4,8 +4,10 @@ import (
 	"fmt"
 	"time"
 
+	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/iam"
+	"github.com/rs/zerolog/log"
 )
 
 func GetUsers(sess session.Session) []IAMUSerResp {
@@ -106,12 +108,45 @@ func GetPoliciesOfUser(sess session.Session, usrName string) []IAMUSerPolicyResp
 	return usersPolicy
 }
 
-func GetIamRoles(sess session.Session) []*iam.Role {
+func GetIamRoles(sess session.Session) []IamRoleResp {
 	iamSrv := iam.New(&sess)
 	result, err := iamSrv.ListRoles(&iam.ListRolesInput{})
 	if err != nil {
 		fmt.Println("Error in fetching Iam Roles: ", " err: ", err)
 		return nil
 	}
-	return result.Roles
+	var roles []IamRoleResp
+	for _, r := range result.Roles {
+		launchTime := r.CreateDate
+		loc, _ := time.LoadLocation("Asia/Kolkata")
+		IST := launchTime.In(loc)
+		role := &IamRoleResp{
+			RoleId:       *r.RoleId,
+			RoleName:     *r.RoleName,
+			ARN:          *r.Arn,
+			CreationTime: IST.Format("Mon Jan _2 15:04:05 2006"),
+		}
+		roles = append(roles, *role)
+	}
+	return roles
+}
+
+func GetPoliciesOfRoles(sess session.Session, roleName string) []IamRolePolicyResponse {
+	imaSrv := iam.New(&sess)
+	result, err := imaSrv.ListAttachedRolePolicies(&iam.ListAttachedRolePoliciesInput{
+		RoleName: aws.String(roleName),
+	})
+	if err != nil {
+		log.Info().Msg(fmt.Sprintf("Error in fetching Iam policies of the User: %v  err: %v", roleName, err))
+		return nil
+	}
+	var Policies []IamRolePolicyResponse
+	for _, up := range result.AttachedPolicies {
+		userPolicy := &IamRolePolicyResponse{
+			PolicyArn:  *up.PolicyArn,
+			PolicyName: *up.PolicyName,
+		}
+		Policies = append(Policies, *userPolicy)
+	}
+	return Policies
 }

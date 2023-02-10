@@ -34,8 +34,8 @@ type IAMUSerResp struct {
 }
 
 type IAMUSerGroupResp struct {
-	GroupId       string
-	GroupName     string
+	GroupId      string
+	GroupName    string
 	ARN          string
 	CreationTime string
 }
@@ -56,6 +56,18 @@ type EBSResp struct {
 }
 
 type IAMUSerGroupPolicyResponse struct {
-	PolicyArn      string
-	PolicyName     string
+	PolicyArn  string
+	PolicyName string
+}
+
+type IamRoleResp struct {
+	RoleId       string
+	RoleName     string
+	ARN          string
+	CreationTime string
+}
+
+type IamRolePolicyResponse struct {
+	PolicyArn  string
+	PolicyName string
 }

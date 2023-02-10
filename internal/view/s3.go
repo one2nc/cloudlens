@@ -46,13 +46,14 @@ func (s3 *S3) describeBucket(evt *tcell.EventKey) *tcell.EventKey {
 func (s3 *S3) enterCmd(evt *tcell.EventKey) *tcell.EventKey {
 	bName := s3.GetTable().GetSelectedItem()
 	if bName != "" {
-		o := NewS3FileViewer("OBJ")
+		o := NewS3FileViewer("s3://", bName)
 		ctx := context.WithValue(s3.App().GetContext(), internal.BucketName, bName)
 		s3.App().SetContext(ctx)
 		ctx = context.WithValue(s3.App().GetContext(), internal.FolderName, "")
 		s3.App().SetContext(ctx)
 		s3.App().Flash().Info("Bucket Name: " + bName)
 		s3.App().inject(o)
+		o.GetTable().SetTitle(o.path)
 	}
 
 	return nil

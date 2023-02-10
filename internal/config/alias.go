@@ -133,9 +133,9 @@ func (a *Aliases) loadDefaultAliases() {
 	a.declare("sg", "SG")
 	a.declare("iam:u", "IAM:U")
 	a.declare("ebs", "EBS")
-	a.declare("iam:u","IAM:U")
-	a.declare("iam:g","IAM:G")
-
+	a.declare("iam:u", "IAM:U")
+	a.declare("iam:g", "IAM:G")
+	a.declare("iam:r", "IAM:R")
 
 	a.declare("help", "h", "?")
 	a.declare("quit", "q", "q!", "Q")
