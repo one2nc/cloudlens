@@ -26,11 +26,11 @@ func (iamu IAMU) bindKeys(aa ui.KeyActions) {
 		ui.KeyShiftN:    ui.NewKeyAction("Sort User-Name", iamu.GetTable().SortColCmd("User-Name", true), true),
 		ui.KeyShiftD:    ui.NewKeyAction("Sort Created-Date", iamu.GetTable().SortColCmd("Created-Date", true), true),
 		tcell.KeyEscape: ui.NewKeyAction("Back", iamu.App().PrevCmd, true),
-		ui.KeyShiftP:    ui.NewKeyAction("View", iamu.enterCmd, false),
+		ui.KeyShiftP:    ui.NewKeyAction("View", iamu.viewUserPolicy, true),
 	})
 }
 
-func (iamu *IAMU) enterCmd(evt *tcell.EventKey) *tcell.EventKey {
+func (iamu *IAMU) viewUserPolicy(evt *tcell.EventKey) *tcell.EventKey {
 	userName := iamu.GetTable().GetSecondColumn()
 	if userName != "" {
 		up := NewIamUserPloicy("User Policy")
