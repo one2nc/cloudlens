@@ -28,12 +28,15 @@ func (sg SG) bindKeys(aa ui.KeyActions) {
 
 func (sg *SG) enterCmd(evt *tcell.EventKey) *tcell.EventKey {
 	groupId := sg.GetTable().GetSelectedItem()
-	sg.App().Flash().Info("groupId: " + groupId)
+	if groupId != "" {
+		f := describeResource
+		if sg.GetTable().enterFn != nil {
+			f = sg.GetTable().enterFn
+		}
+		f(sg.App(), sg.GetTable().GetModel(), sg.Resource(), groupId)
+		sg.App().Flash().Info("groupId: " + groupId)
 
-	f := describeResource
-	if sg.GetTable().enterFn != nil {
-		f = sg.GetTable().enterFn
 	}
-	f(sg.App(), sg.GetTable().GetModel(), sg.Resource(), groupId)
+
 	return nil
 }

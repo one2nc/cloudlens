@@ -33,10 +33,14 @@ func (e *EC2) bindKeys(aa ui.KeyActions) {
 
 func (e *EC2) enterCmd(evt *tcell.EventKey) *tcell.EventKey {
 	instanceId := e.GetTable().GetSelectedItem()
-	f := describeResource
-	if e.GetTable().enterFn != nil {
-		f = e.GetTable().enterFn
+	if instanceId != "" {
+		f := describeResource
+		if e.GetTable().enterFn != nil {
+			f = e.GetTable().enterFn
+		}
+		f(e.App(), e.GetTable().GetModel(), e.Resource(), instanceId)
+		e.App().Flash().Info("Instance Id: " + instanceId)
 	}
-	f(e.App(), e.GetTable().GetModel(), e.Resource(), instanceId)
+
 	return nil
 }
