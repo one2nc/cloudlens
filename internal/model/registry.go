@@ -50,4 +50,8 @@ var Registry = map[string]ResourceMeta{
 		DAO:      &dao.IamRolePloicy{},
 		Renderer: &render.IamRolePloicy{},
 	},
+	"Group Users": {
+		DAO:      &dao.IamGroupUser{},
+		Renderer: &render.IamGroupUser{},
+	},
 }

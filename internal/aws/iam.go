@@ -14,7 +14,7 @@ func GetUsers(sess session.Session) []IAMUSerResp {
 	iamSrv := iam.New(&sess)
 	result, err := iamSrv.ListUsers(&iam.ListUsersInput{})
 	if err != nil {
-		fmt.Println("Error in fetching Iam Users: ", " err: ", err)
+		log.Info().Msg(fmt.Sprintf("Error in fetching Iam users: ,  err: %v", err))
 		return nil
 	}
 	var users []IAMUSerResp
@@ -37,42 +37,52 @@ func GetUserGroups(sess session.Session) []IAMUSerGroupResp {
 	iamSrv := iam.New(&sess)
 	result, err := iamSrv.ListGroups(&iam.ListGroupsInput{})
 	if err != nil {
-		fmt.Println("Error in fetching Iam Groups: ", " err: ", err)
+		log.Info().Msg(fmt.Sprintf("Error in fetching Iam Groups: , err: %v", err))
 		return nil
 	}
 	var userGroups []IAMUSerGroupResp
 	for _, u := range result.Groups {
-		// log.Info().Msg(fmt.Sprintf("Group Date : %v", *u))
 		userGroup := &IAMUSerGroupResp{
 			GroupId:   *u.GroupId,
 			GroupName: *u.GroupName,
 			ARN:       *u.Arn,
-			// CreationTime: fmt.Sprintf("%v",*u.CreateDate),
+			// CreationTime: fmt.Sprintf("%v",*u.CreateDate), Created time is not coming from sdk
 		}
 		userGroups = append(userGroups, *userGroup)
 	}
 	return userGroups
 }
 
-func GetGroupUsers(sess session.Session, grpName string) []*iam.User {
+func GetGroupUsers(sess session.Session, grpName string) []IAMUSerResp {
 	iamSrv := iam.New(&sess)
 	result, err := iamSrv.GetGroup(&iam.GetGroupInput{
-		GroupName: &grpName,
+		GroupName: aws.String(grpName),
 	})
 	if err != nil {
-		fmt.Println("Error in fetching Iam users of the Group: ", grpName, " err: ", err)
+		log.Info().Msg(fmt.Sprintf("Error in fetching Iam users of the Group: %s,  err: %v", grpName, err))
 		return nil
 	}
-	return result.Users
+
+	var users []IAMUSerResp
+	for _, u := range result.Users {
+		user := &IAMUSerResp{
+			UserId:   *u.UserId,
+			UserName: *u.UserName,
+			ARN:      *u.Arn,
+			// CreationTime: , Created time is not coming from sdk
+		}
+		users = append(users, *user)
+	}
+	return users
 }
 
 func GetPoliciesOfGrp(sess session.Session, grpName string) []IAMUSerGroupPolicyResponse {
 	imaSrv := iam.New(&sess)
 	result, err := imaSrv.ListAttachedGroupPolicies(&iam.ListAttachedGroupPoliciesInput{
-		GroupName: &grpName,
+		GroupName: aws.String(grpName),
 	})
 	if err != nil {
-		fmt.Println("Error in fetching Iam policies of the Group: ", grpName, " err: ", err)
+		log.Info().Msg(fmt.Sprintf("Error in fetching Iam policies of the Group: %s,  err: %v", grpName, err))
 		return nil
 	}
 	var grpPolicies []IAMUSerGroupPolicyResponse
@@ -91,10 +101,10 @@ func GetPoliciesOfGrp(sess session.Session, grpName string) []IAMUSerGroupPolicy
 func GetPoliciesOfUser(sess session.Session, usrName string) []IAMUSerPolicyResponse {
 	imaSrv := iam.New(&sess)
 	result, err := imaSrv.ListAttachedUserPolicies(&iam.ListAttachedUserPoliciesInput{
-		UserName: &usrName,
+		UserName: aws.String(usrName),
 	})
 	if err != nil {
-		fmt.Println("Error in fetching Iam policies of the User: ", usrName, " err: ", err)
+		log.Info().Msg(fmt.Sprintf("Error in fetching Iam policies of the User: %s,  err: %v", usrName, err))
 		return nil
 	}
 	var usersPolicy []IAMUSerPolicyResponse
@@ -112,7 +122,7 @@ func GetIamRoles(sess session.Session) []IamRoleResp {
 	iamSrv := iam.New(&sess)
 	result, err := iamSrv.ListRoles(&iam.ListRolesInput{})
 	if err != nil {
-		fmt.Println("Error in fetching Iam Roles: ", " err: ", err)
+		log.Info().Msg(fmt.Sprintf("Error in fetching Iam roles,  err: %v", err))
 		return nil
 	}
 	var roles []IamRoleResp

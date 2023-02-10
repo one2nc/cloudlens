@@ -26,11 +26,12 @@ func (iamug IAMUG) bindKeys(aa ui.KeyActions) {
 		ui.KeyShiftN:    ui.NewKeyAction("Sort Group-Name", iamug.GetTable().SortColCmd("Group-Name", true), true),
 		ui.KeyShiftD:    ui.NewKeyAction("Sort Created-Date", iamug.GetTable().SortColCmd("Created-Date", true), true),
 		tcell.KeyEscape: ui.NewKeyAction("Back", iamug.App().PrevCmd, false),
-		ui.KeyShiftP:    ui.NewKeyAction("View", iamug.enterCmd, false),
+		tcell.KeyEnter:  ui.NewKeyAction("Group Users", iamug.enterCmd, false),
+		ui.KeyShiftP:    ui.NewKeyAction("View", iamug.policyCmd, false),
 	})
 }
 
-func (iamug *IAMUG) enterCmd(evt *tcell.EventKey) *tcell.EventKey {
+func (iamug *IAMUG) policyCmd(evt *tcell.EventKey) *tcell.EventKey {
 	grpName := iamug.GetTable().GetSecondColumn()
 	if grpName != "" {
 		up := NewIamUserGroupPloicy("User Group Policy")
@@ -38,6 +39,18 @@ func (iamug *IAMUG) enterCmd(evt *tcell.EventKey) *tcell.EventKey {
 		iamug.App().SetContext(ctx)
 		iamug.App().Flash().Info("userName: " + grpName)
 		iamug.App().inject(up)
+	}
+	return nil
+}
+
+func (iamug *IAMUG) enterCmd(evt *tcell.EventKey) *tcell.EventKey {
+	grpName := iamug.GetTable().GetSecondColumn()
+	if grpName != "" {
+		gu := NewIamGroupUser("Group Users")
+		ctx := context.WithValue(iamug.App().GetContext(), internal.GroupName, grpName)
+		iamug.App().SetContext(ctx)
+		iamug.App().Flash().Info("userName: " + grpName)
+		iamug.App().inject(gu)
 	}
 	return nil
 }
