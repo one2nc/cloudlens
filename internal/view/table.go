@@ -128,7 +128,11 @@ func (t *Table) importAsCSV(evt *tcell.EventKey) *tcell.EventKey {
 	if err != nil {
 		log.Info().Msg(fmt.Sprintf("error in creating csv directory: %v", err))
 	}
-	path = filepath.Join(path + "/" + csvFileName[len(csvFileName)-2] + "-" + profile + "-" + region + ".csv")
+	if csvFileName[len(csvFileName)-2] == "S3" || strings.Contains(csvFileName[len(csvFileName)-2], "IAM") {
+		path = filepath.Join(path + "/" + csvFileName[len(csvFileName)-2] + "-" + profile + ".csv")
+	} else {
+		path = filepath.Join(path + "/" + csvFileName[len(csvFileName)-2] + "-" + profile + "-" + region + ".csv")
+	}
 	file, err := os.Create(path)
 	if err != nil {
 		log.Info().Msg(fmt.Sprintf("error in creating csv file: %v", err))
