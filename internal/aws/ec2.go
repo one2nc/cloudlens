@@ -9,7 +9,6 @@ import (
 	"github.com/aws/aws-sdk-go/service/ec2"
 )
 
-
 func GetInstances(sess session.Session) ([]EC2Resp, error) {
 	var ec2Info []EC2Resp
 	ec2Serv := *ec2.New(&sess)

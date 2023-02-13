@@ -94,7 +94,7 @@ var config Config
 func GetSession(profile, region string) (*session.Session, error) {
 	sess, err := session.NewSessionWithOptions(session.Options{Config: aws.Config{
 		//TODO: remove hardcoded enpoint
-		//Endpoint:         aws.String("http://localhost:4566"),
+		Endpoint:         aws.String("http://localhost:4566"),
 		Region:           aws.String(region),
 		S3ForcePathStyle: aws.Bool(true),
 	},

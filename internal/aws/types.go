@@ -71,3 +71,13 @@ type IamRolePolicyResponse struct {
 	PolicyArn  string
 	PolicyName string
 }
+
+type QueueResp struct {
+	Name              string
+	URL               string
+	Type              string
+	Created           string
+	MessagesAvailable string
+	Encryption        string
+	MaxMessageSize    string
+}

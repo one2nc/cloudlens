@@ -66,6 +66,11 @@ var lspop = &cobra.Command{
 		if errIAM != nil {
 			log.Fatal("err: ", errIAM)
 		}
+
+		errSQS := pop.CreateQueueAndSetMessages(sessions)
+		if errSQS != nil {
+			log.Fatal("err: ", errSQS)
+		}
 	},
 }
 

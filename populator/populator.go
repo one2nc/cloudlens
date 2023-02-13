@@ -11,6 +11,7 @@ import (
 	"github.com/aws/aws-sdk-go/service/ec2"
 	"github.com/aws/aws-sdk-go/service/iam"
 	"github.com/aws/aws-sdk-go/service/s3"
+	"github.com/aws/aws-sdk-go/service/sqs"
 	"github.com/brianvoe/gofakeit"
 )
 
@@ -599,5 +600,45 @@ func createIamRole(srv *iam.IAM) error {
 	// 	return fmt.Errorf("error creating role policy: %v", err)
 	// }
 	log.Println("Iam Role Policy Created for: ", *cr.Role.RoleId)
+	return nil
+}
+
+func CreateQueueAndSetMessages(sessions []*session.Session) error {
+	for _, sess := range sessions {
+		sqsServ := *sqs.New(sess)
+		for i := 0; i < 5; i++ {
+			gofakeit.Seed(0)
+			qName := gofakeit.FirstName()
+			res, err := sqsServ.CreateQueue(&sqs.CreateQueueInput{
+				QueueName: aws.String(qName + "-queue-" + strconv.Itoa(i)),
+			})
+			if err != nil {
+				fmt.Println("Error in creating queue: ", qName, " err: ", err)
+				return err
+			}
+			log.Println("Queue created..."+qName, " and url is:", res.QueueUrl)
+			queueUrl := res.QueueUrl
+			messages := []*sqs.SendMessageBatchRequestEntry{
+				{
+					Id:          aws.String(strconv.Itoa(i)),
+					MessageBody: aws.String("Hello-world-" + strconv.Itoa(i) + "!"),
+				},
+				{
+					Id:          aws.String(strconv.Itoa(gofakeit.Number(i, 99999999))),
+					MessageBody: aws.String("Hello-world-" + strconv.Itoa(i) + "!"),
+				},
+			}
+			batchRequest := &sqs.SendMessageBatchInput{
+				QueueUrl: aws.String(*queueUrl),
+				Entries:  messages,
+			}
+			_, err = sqsServ.SendMessageBatch(batchRequest)
+			if err != nil {
+				fmt.Println("Error sending messages:", err)
+				return err
+			}
+			log.Println("Messages added to queue:", res.QueueUrl)
+		}
+	}
 	return nil
 }
