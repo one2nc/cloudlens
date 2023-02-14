@@ -2,10 +2,13 @@ package aws
 
 import (
 	"fmt"
+	"io/ioutil"
+	"log"
 	"strings"
 
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/session"
+	"github.com/aws/aws-sdk-go/service/lambda"
 	"github.com/aws/aws-sdk-go/service/sqs"
 )
 
@@ -57,4 +60,38 @@ func GetMessageFromQueue(sess session.Session, queueUrl string) (*sqs.ReceiveMes
 		return nil, err
 	}
 	return result, nil
+}
+
+func CreateLambdaFunction(sess session.Session) {
+	lambdaServ := lambda.New(&sess)
+	codeBytes, err := ioutil.ReadFile("code.zip")
+	if err != nil {
+		log.Fatalf("Failed to read function code: %v", err)
+	}
+	fmt.Println("codebytes are:", codeBytes)
+	params := &lambda.CreateFunctionInput{
+		FunctionName: aws.String("lambdaaaTemp1"),
+		//Runtime:      aws.String(*aws.String("python3.7")),
+		//Runtime: aws.String("go1.x"),
+		Role: aws.String("arn:aws:iam::000000000000:role/Andre"),
+		Code: &lambda.FunctionCode{
+			ZipFile: codeBytes,
+		},
+	}
+	resp, err := lambdaServ.CreateFunction(params)
+	if err != nil {
+		log.Fatalf("Failed to create function: %v", err)
+	}
+
+	fmt.Printf("Function ARN: %s\n", aws.StringValue(resp.FunctionArn))
+
+}
+
+func GetAllLambdaFunctions(sess session.Session) {
+	lambdaServ := lambda.New(&sess)
+	response, err := lambdaServ.ListFunctions(nil)
+	if err != nil {
+		fmt.Println("Error getting list of functions: ", err)
+	}
+	fmt.Println("response is:", response)
 }

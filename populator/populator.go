@@ -579,7 +579,7 @@ func createIamRole(srv *iam.IAM) error {
 			{
 				"Effect":"Allow",
 				"Principal":{"Service":["ec2.amazonaws.com"]},
-				"Action":["s3:*", "ec2:*"]
+				"Action":["s3:*", "ec2:*", "lambda:*"]
 			}
 		]
 	}`
