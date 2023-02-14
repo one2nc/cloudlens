@@ -656,7 +656,6 @@ func CreateLambdaFunction(sessions []*session.Session) error {
 		params := &lambda.CreateFunctionInput{
 			FunctionName: aws.String("lambdaaa-func-" + strconv.Itoa(gofakeit.Number(0, 999999))),
 			//Runtime:      aws.String(*aws.String("python3.7")),
-			//Runtime: aws.String("go1.x"),
 			Role: aws.String("arn:aws:iam::000000000000:role/Andre"),
 			Code: &lambda.FunctionCode{
 				ZipFile: codeBytes,

@@ -22,5 +22,20 @@ func (v *VPC) bindKeys(aa ui.KeyActions) {
 		ui.KeyShiftI:    ui.NewKeyAction("Sort VPC-Id", v.GetTable().SortColCmd("VPC-Id", true), true),
 		ui.KeyShiftS:    ui.NewKeyAction("Sort VPC-State", v.GetTable().SortColCmd("VPC-State", true), true),
 		tcell.KeyEscape: ui.NewKeyAction("Back", v.App().PrevCmd, false),
+		tcell.KeyEnter:  ui.NewKeyAction("View", v.enterCmd, false),
 	})
+}
+
+func (v *VPC) enterCmd(evt *tcell.EventKey) *tcell.EventKey {
+	vpcId := v.GetTable().GetSelectedItem()
+	if vpcId != "" {
+		f := describeResource
+		if v.GetTable().enterFn != nil {
+			f = v.GetTable().enterFn
+		}
+		f(v.App(), v.GetTable().GetModel(), v.Resource(), vpcId)
+		v.App().Flash().Info("VPC Id: " + vpcId)
+	}
+
+	return nil
 }
