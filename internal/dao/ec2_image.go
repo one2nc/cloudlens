@@ -35,3 +35,12 @@ func (ei *EC2I) List(ctx context.Context) ([]Object, error) {
 func (ei *EC2I) Get(ctx context.Context, path string) (Object, error) {
 	return nil, nil
 }
+
+func (ei *EC2I) Describe(imageId string) (string, error) {
+	sess, ok := ei.ctx.Value(internal.KeySession).(*session.Session)
+	if !ok {
+		log.Err(fmt.Errorf("conversion err: Expected session.session but got %v", sess))
+	}
+	res := aws.GetSingleAMI(*sess, imageId).GoString()
+	return res, nil
+}

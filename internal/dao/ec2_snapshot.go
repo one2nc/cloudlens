@@ -35,3 +35,12 @@ func (es *EC2S) List(ctx context.Context) ([]Object, error) {
 func (es *EC2S) Get(ctx context.Context, path string) (Object, error) {
 	return nil, nil
 }
+
+func (es *EC2S) Describe(snapshotId string) (string, error) {
+	sess, ok := es.ctx.Value(internal.KeySession).(*session.Session)
+	if !ok {
+		log.Err(fmt.Errorf("conversion err: Expected session.session but got %v", sess))
+	}
+	res := aws.GetSingleSnapshot(*sess, snapshotId).GoString()
+	return res, nil
+}
