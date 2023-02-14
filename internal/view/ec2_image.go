@@ -10,7 +10,7 @@ type EC2I struct {
 }
 
 func NewEC2I(resource string) ResourceViewer {
-	var es EC2S
+	var es EC2I
 	es.ResourceViewer = NewBrowser(resource)
 	es.AddBindKeysFn(es.bindKeys)
 	return &es
@@ -18,9 +18,7 @@ func NewEC2I(resource string) ResourceViewer {
 
 func (ei *EC2I) bindKeys(aa ui.KeyActions) {
 	aa.Add(ui.KeyActions{
-		ui.KeyShiftI:    ui.NewKeyAction("Sort Snapshot-Id", ei.GetTable().SortColCmd("Snapshot-Id", true), true),
-		ui.KeyShiftV:    ui.NewKeyAction("Sort Volume-Size", ei.GetTable().SortColCmd("Volume-Size", true), true),
-		ui.KeyShiftT:    ui.NewKeyAction("Sort Start-Time", ei.GetTable().SortColCmd("Start-Time", true), true),
+		ui.KeyShiftI:    ui.NewKeyAction("Sort Image-Id", ei.GetTable().SortColCmd("Image-Id", true), true),
 		tcell.KeyEscape: ui.NewKeyAction("Back", ei.App().PrevCmd, true),
 	})
 }

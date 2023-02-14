@@ -29,4 +29,10 @@ func coreViewers(vv MetaViewers) {
 	vv["iam:r"] = MetaViewer{
 		viewerFn: NewIamRole,
 	}
+	vv["ec2:s"] = MetaViewer{
+		viewerFn: NewEC2S,
+	}
+	vv["ec2:i"] = MetaViewer{
+		viewerFn: NewEC2I,
+	}
 }
