@@ -62,8 +62,14 @@ var Registry = map[string]ResourceMeta{
 		DAO:      &dao.EC2I{},
 		Renderer: &render.EC2I{},
 	},
+
 	"sqs": {
 		DAO:      &dao.SQS{},
 		Renderer: &render.SQS{},
+	},
+
+	"vpc": {
+		DAO:      &dao.VPC{},
+		Renderer: &render.VPC{},
 	},
 }

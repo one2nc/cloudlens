@@ -139,6 +139,7 @@ func (a *Aliases) loadDefaultAliases() {
 	a.declare("ec2:s", "EC2:S")
 	a.declare("ec2:i", "EC2:I")
 	a.declare("sqs", "SQS")
+	a.declare("vpc", "VPC")
 
 	a.declare("help", "h", "?")
 	a.declare("quit", "q", "q!", "Q")

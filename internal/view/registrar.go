@@ -36,6 +36,9 @@ func coreViewers(vv MetaViewers) {
 		viewerFn: NewEC2I,
 	}
 	vv["sqs"] = MetaViewer{
-		viewerFn: NewSQS,
+		viewerFn: NewEC2I,
+	}
+	vv["vpc"] = MetaViewer{
+		viewerFn: NewVPC,
 	}
 }
