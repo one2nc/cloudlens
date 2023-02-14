@@ -72,7 +72,7 @@ type IamRolePolicyResponse struct {
 	PolicyName string
 }
 
-type QueueResp struct {
+type SQSResp struct {
 	Name              string
 	URL               string
 	Type              string
@@ -97,4 +97,12 @@ type ImageResp struct {
 	ImageLocation string
 	Name          string
 	ImageType     string
+}
+
+type VpcResp struct {
+	VpcId           string
+	OwnerId         string
+	CidrBlock       string
+	InstanceTenancy string
+	State           string
 }

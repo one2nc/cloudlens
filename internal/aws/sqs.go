@@ -2,15 +2,17 @@ package aws
 
 import (
 	"fmt"
+	"strconv"
 	"strings"
+	"time"
 
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/sqs"
 )
 
-func GetAllQueues(sess session.Session) ([]QueueResp, error) {
-	queueResp := []QueueResp{}
+func GetAllQueues(sess session.Session) ([]SQSResp, error) {
+	queueResp := []SQSResp{}
 	sqsServ := *sqs.New(&sess)
 	res, err := sqsServ.ListQueues(nil)
 	if err != nil {
@@ -19,7 +21,6 @@ func GetAllQueues(sess session.Session) ([]QueueResp, error) {
 	}
 
 	for _, qUrl := range res.QueueUrls {
-		fmt.Println("queue url is:", *qUrl)
 		qA := strings.Split(*qUrl, "/")
 		qName := qA[len(qA)-1]
 		qAttributes, err := sqsServ.GetQueueAttributes(&sqs.GetQueueAttributesInput{
@@ -31,18 +32,20 @@ func GetAllQueues(sess session.Session) ([]QueueResp, error) {
 			return nil, err
 		}
 		mp := qAttributes.Attributes
-		qR := QueueResp{
+		launchTime, _ := strconv.Atoi(*mp["CreatedTimestamp"])
+		loc, _ := time.LoadLocation("Asia/Kolkata")
+		IST := time.Unix(int64(launchTime), 0).In(loc)
+		qR := SQSResp{
 			Name:              qName,
 			URL:               *qUrl,
 			Type:              *mp["QueueArn"],
-			Created:           *mp["CreatedTimestamp"],
+			Created:           IST.Format("Mon Jan _2 15:04:05 2006"),
 			MessagesAvailable: *mp["ApproximateNumberOfMessages"],
 			Encryption:        *mp["SqsManagedSseEnabled"],
 			MaxMessageSize:    *mp["MaximumMessageSize"],
 		}
 		queueResp = append(queueResp, qR)
 	}
-	fmt.Println("qRespp is:", queueResp)
 	return queueResp, nil
 }
 

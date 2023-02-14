@@ -196,14 +196,25 @@ func GetSingleAMI(sess session.Session, amiId string) *ec2.Image {
 	return result.Images[0]
 }
 
-func GetVPCs(sess session.Session) []*ec2.Vpc {
+func GetVPCs(sess session.Session) []VpcResp {
 	ec2Serv := *ec2.New(&sess)
 	result, err := ec2Serv.DescribeVpcs(&ec2.DescribeVpcsInput{})
 	if err != nil {
 		fmt.Println("Error in fetching VPCs: ", " err: ", err)
 		return nil
 	}
-	return result.Vpcs
+	var vpcs []VpcResp
+	for _, v := range result.Vpcs {
+		vpc := VpcResp{
+			VpcId:           *v.VpcId,
+			OwnerId:         *v.OwnerId,
+			CidrBlock:       *v.CidrBlock,
+			InstanceTenancy: *v.InstanceTenancy,
+			State:           *v.State,
+		}
+		vpcs = append(vpcs, vpc)
+	}
+	return vpcs
 }
 
 func GetSingleVPC(sess session.Session, vpcId string) *ec2.Vpc {
