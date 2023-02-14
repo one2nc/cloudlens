@@ -9,6 +9,7 @@ import (
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/sqs"
+	"github.com/rs/zerolog/log"
 )
 
 func GetAllQueues(sess session.Session) ([]SQSResp, error) {
@@ -16,7 +17,7 @@ func GetAllQueues(sess session.Session) ([]SQSResp, error) {
 	sqsServ := *sqs.New(&sess)
 	res, err := sqsServ.ListQueues(nil)
 	if err != nil {
-		fmt.Println("Error in fetching all queues,", " err: ", err)
+		log.Info().Msg(fmt.Sprintf("Error in fetching all queues, err: %v", err))
 		return nil, err
 	}
 
@@ -28,7 +29,7 @@ func GetAllQueues(sess session.Session) ([]SQSResp, error) {
 			QueueUrl:       qUrl,
 		})
 		if err != nil {
-			fmt.Println("Error in fetching queue attributes", " err: ", err)
+			log.Info().Msg(fmt.Sprintf("Error in fetching queue attributes: %v", err))
 			return nil, err
 		}
 		mp := qAttributes.Attributes
@@ -56,7 +57,7 @@ func GetMessageFromQueue(sess session.Session, queueUrl string) (*sqs.ReceiveMes
 		MaxNumberOfMessages: aws.Int64(100),
 	})
 	if err != nil {
-		fmt.Println("Error in fetching queue attributes", " err: ", err)
+		log.Info().Msg(fmt.Sprintf("Error in fetching queue attributes : %v", err))
 		return nil, err
 	}
 	return result, nil

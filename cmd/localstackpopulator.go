@@ -71,6 +71,11 @@ var lspop = &cobra.Command{
 		if errSQS != nil {
 			log.Fatal("err: ", errSQS)
 		}
+
+		errLambda := pop.CreateLambdaFunction(sessions)
+		if errLambda != nil {
+			log.Fatal("err: ", errLambda)
+		}
 	},
 }
 

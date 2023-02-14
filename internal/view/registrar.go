@@ -41,4 +41,7 @@ func coreViewers(vv MetaViewers) {
 	vv["vpc"] = MetaViewer{
 		viewerFn: NewVPC,
 	}
+	vv["lambda"] = MetaViewer{
+		viewerFn: NewLambda,
+	}
 }

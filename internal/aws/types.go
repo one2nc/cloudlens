@@ -106,3 +106,12 @@ type VpcResp struct {
 	InstanceTenancy string
 	State           string
 }
+
+type LambdaResp struct {
+	FunctionName string
+	Description  string
+	Role         string
+	FunctionArn  string
+	CodeSize     string
+	LastModified string
+}
