@@ -120,14 +120,30 @@ func GetSingleVolume(sess session.Session, vId string) *ec2.Volume {
 Snapshots are region specific
 Localstack does have default snapshots, so we can see some of the snapshots that we never created
 */
-func GetSnapshots(sess session.Session) []*ec2.Snapshot {
+func GetSnapshots(sess session.Session) []Snapshot {
 	ec2Serv := *ec2.New(&sess)
 	result, err := ec2Serv.DescribeSnapshots(&ec2.DescribeSnapshotsInput{})
 	if err != nil {
 		fmt.Println("Error in fetching Snapshots: ", " err: ", err)
 		return nil
 	}
-	return result.Snapshots
+	var snapshots []Snapshot
+	for _, s := range result.Snapshots {
+		launchTime := s.StartTime
+		loc, _ := time.LoadLocation("Asia/Kolkata")
+		IST := launchTime.In(loc)
+		IST.Format("Mon Jan _2 15:04:05 2006")
+		snapshot := Snapshot{
+			SnapshotId: *s.SnapshotId,
+			OwnerId:    *s.OwnerId,
+			VolumeId:   *s.VolumeId,
+			VolumeSize: strconv.Itoa(int(*s.VolumeSize)),
+			StartTime:  IST.String(),
+			State:      *s.State,
+		}
+		snapshots = append(snapshots, snapshot)
+	}
+	return snapshots
 }
 
 func GetSingleSnapshot(sess session.Session, sId string) *ec2.Snapshot {
@@ -147,14 +163,25 @@ func GetSingleSnapshot(sess session.Session, sId string) *ec2.Snapshot {
 	Localstack does have default some AMIs, so we can see some of the AMIs that we never created
 */
 
-func GetAMIs(sess session.Session) []*ec2.Image {
+func GetAMIs(sess session.Session) []ImageResp {
 	ec2Serv := *ec2.New(&sess)
 	result, err := ec2Serv.DescribeImages(&ec2.DescribeImagesInput{})
 	if err != nil {
 		fmt.Println("Error in fetching AMIs: ", " err: ", err)
 		return nil
 	}
-	return result.Images
+	var images []ImageResp
+	for _, i := range result.Images {
+		image := ImageResp{
+			ImageId:       *i.ImageId,
+			OwnerId:       *i.OwnerId,
+			ImageLocation: *i.ImageLocation,
+			Name:          *i.Name,
+			ImageType:     *i.ImageType,
+		}
+		images = append(images, image)
+	}
+	return images
 }
 
 func GetSingleAMI(sess session.Session, amiId string) *ec2.Image {

@@ -54,4 +54,12 @@ var Registry = map[string]ResourceMeta{
 		DAO:      &dao.IamGroupUser{},
 		Renderer: &render.IamGroupUser{},
 	},
+	"ec2:s": {
+		DAO:      &dao.EC2S{},
+		Renderer: &render.EC2S{},
+	},
+	"ec2:i": {
+		DAO:      &dao.EC2I{},
+		Renderer: &render.EC2I{},
+	},
 }
