@@ -98,3 +98,11 @@ type ImageResp struct {
 	Name          string
 	ImageType     string
 }
+
+type VpcResp struct {
+	VpcId           string
+	OwnerId         string
+	CidrBlock       string
+	InstanceTenancy string
+	State           string
+}
