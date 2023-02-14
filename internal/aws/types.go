@@ -72,7 +72,7 @@ type IamRolePolicyResponse struct {
 	PolicyName string
 }
 
-type QueueResp struct {
+type SQSResp struct {
 	Name              string
 	URL               string
 	Type              string

@@ -2,18 +2,17 @@ package aws
 
 import (
 	"fmt"
-	"io/ioutil"
-	"log"
+	"strconv"
 	"strings"
+	"time"
 
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/session"
-	"github.com/aws/aws-sdk-go/service/lambda"
 	"github.com/aws/aws-sdk-go/service/sqs"
 )
 
-func GetAllQueues(sess session.Session) ([]QueueResp, error) {
-	queueResp := []QueueResp{}
+func GetAllQueues(sess session.Session) ([]SQSResp, error) {
+	queueResp := []SQSResp{}
 	sqsServ := *sqs.New(&sess)
 	res, err := sqsServ.ListQueues(nil)
 	if err != nil {
@@ -22,7 +21,6 @@ func GetAllQueues(sess session.Session) ([]QueueResp, error) {
 	}
 
 	for _, qUrl := range res.QueueUrls {
-		fmt.Println("queue url is:", *qUrl)
 		qA := strings.Split(*qUrl, "/")
 		qName := qA[len(qA)-1]
 		qAttributes, err := sqsServ.GetQueueAttributes(&sqs.GetQueueAttributesInput{
@@ -34,18 +32,20 @@ func GetAllQueues(sess session.Session) ([]QueueResp, error) {
 			return nil, err
 		}
 		mp := qAttributes.Attributes
-		qR := QueueResp{
+		launchTime, _ := strconv.Atoi(*mp["CreatedTimestamp"])
+		loc, _ := time.LoadLocation("Asia/Kolkata")
+		IST := time.Unix(int64(launchTime), 0).In(loc)
+		qR := SQSResp{
 			Name:              qName,
 			URL:               *qUrl,
 			Type:              *mp["QueueArn"],
-			Created:           *mp["CreatedTimestamp"],
+			Created:           IST.Format("Mon Jan _2 15:04:05 2006"),
 			MessagesAvailable: *mp["ApproximateNumberOfMessages"],
 			Encryption:        *mp["SqsManagedSseEnabled"],
 			MaxMessageSize:    *mp["MaximumMessageSize"],
 		}
 		queueResp = append(queueResp, qR)
 	}
-	fmt.Println("qRespp is:", queueResp)
 	return queueResp, nil
 }
 
@@ -60,37 +60,4 @@ func GetMessageFromQueue(sess session.Session, queueUrl string) (*sqs.ReceiveMes
 		return nil, err
 	}
 	return result, nil
-}
-
-func CreateLambdaFunction(sess session.Session) {
-	lambdaServ := lambda.New(&sess)
-	codeBytes, err := ioutil.ReadFile("code.zip")
-	if err != nil {
-		log.Fatalf("Failed to read function code: %v", err)
-	}
-	fmt.Println("codebytes are:", codeBytes)
-	params := &lambda.CreateFunctionInput{
-		FunctionName: aws.String("lambdaaaTemp1"),
-		//Runtime:      aws.String(*aws.String("python3.7")),
-		//Runtime: aws.String("go1.x"),
-		Role: aws.String("arn:aws:iam::000000000000:role/Andre"),
-		Code: &lambda.FunctionCode{
-			ZipFile: codeBytes,
-		},
-	}
-	resp, err := lambdaServ.CreateFunction(params)
-	if err != nil {
-		log.Fatalf("Failed to create function: %v", err)
-	}
-
-	fmt.Printf("Function ARN: %s\n", aws.StringValue(resp.FunctionArn))
-}
-
-func GetAllLambdaFunctions(sess session.Session) {
-	lambdaServ := lambda.New(&sess)
-	response, err := lambdaServ.ListFunctions(nil)
-	if err != nil {
-		fmt.Println("Error getting list of functions: ", err)
-	}
-	fmt.Println("response is:", response)
 }

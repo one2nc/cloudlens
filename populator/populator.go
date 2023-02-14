@@ -3,6 +3,7 @@ package pop
 import (
 	"bytes"
 	"fmt"
+	"io/ioutil"
 	"log"
 	"strconv"
 
@@ -10,6 +11,7 @@ import (
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/ec2"
 	"github.com/aws/aws-sdk-go/service/iam"
+	"github.com/aws/aws-sdk-go/service/lambda"
 	"github.com/aws/aws-sdk-go/service/s3"
 	"github.com/aws/aws-sdk-go/service/sqs"
 	"github.com/brianvoe/gofakeit"
@@ -625,7 +627,7 @@ func CreateQueueAndSetMessages(sessions []*session.Session) error {
 				},
 				{
 					Id:          aws.String(strconv.Itoa(gofakeit.Number(i, 99999999))),
-					MessageBody: aws.String("Hello-world-" + strconv.Itoa(i) + "!"),
+					MessageBody: aws.String("Hello-world-" + strconv.Itoa(i+gofakeit.Number(i, 99999999)) + "!"),
 				},
 			}
 			batchRequest := &sqs.SendMessageBatchInput{
@@ -641,4 +643,28 @@ func CreateQueueAndSetMessages(sessions []*session.Session) error {
 		}
 	}
 	return nil
+}
+
+func CreateLambdaFunction(sess session.Session) {
+	lambdaServ := lambda.New(&sess)
+	codeBytes, err := ioutil.ReadFile("code.zip")
+	if err != nil {
+		log.Fatalf("Failed to read function code: %v", err)
+	}
+	fmt.Println("codebytes are:", codeBytes)
+	params := &lambda.CreateFunctionInput{
+		FunctionName: aws.String("lambdaaaTemp1"),
+		//Runtime:      aws.String(*aws.String("python3.7")),
+		//Runtime: aws.String("go1.x"),
+		Role: aws.String("arn:aws:iam::000000000000:role/Andre"),
+		Code: &lambda.FunctionCode{
+			ZipFile: codeBytes,
+		},
+	}
+	resp, err := lambdaServ.CreateFunction(params)
+	if err != nil {
+		log.Fatalf("Failed to create function: %v", err)
+	}
+
+	fmt.Printf("Function ARN: %s\n", aws.StringValue(resp.FunctionArn))
 }
