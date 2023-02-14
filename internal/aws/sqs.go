@@ -84,7 +84,6 @@ func CreateLambdaFunction(sess session.Session) {
 	}
 
 	fmt.Printf("Function ARN: %s\n", aws.StringValue(resp.FunctionArn))
-
 }
 
 func GetAllLambdaFunctions(sess session.Session) {

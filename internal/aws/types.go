@@ -81,3 +81,20 @@ type QueueResp struct {
 	Encryption        string
 	MaxMessageSize    string
 }
+
+type Snapshot struct {
+	SnapshotId string
+	OwnerId    string
+	VolumeId   string
+	VolumeSize string
+	StartTime  string
+	State      string
+}
+
+type ImageResp struct {
+	ImageId       string
+	OwnerId       string
+	ImageLocation string
+	Name          string
+	ImageType     string
+}
