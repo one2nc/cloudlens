@@ -17,6 +17,7 @@ const (
 	UserName         ContextKey = "user_name"
 	GroupName        ContextKey = "group_name"
 	RoleName         ContextKey = "role_name"
+	VpcId            ContextKey = "vpc_id"
 )
 
 // TODO rename the file name to constants.go

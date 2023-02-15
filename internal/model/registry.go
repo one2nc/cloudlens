@@ -72,6 +72,12 @@ var Registry = map[string]ResourceMeta{
 		DAO:      &dao.VPC{},
 		Renderer: &render.VPC{},
 	},
+
+	"subnet": {
+		DAO:      &dao.Subnet{},
+		Renderer: &render.Subnet{},
+	},
+
 	"lambda": {
 		DAO:      &dao.Lambda{},
 		Renderer: &render.Lambda{},

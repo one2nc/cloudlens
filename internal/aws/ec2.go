@@ -5,6 +5,7 @@ import (
 	"strconv"
 	"time"
 
+	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/ec2"
 )
@@ -229,14 +230,32 @@ func GetSingleVPC(sess session.Session, vpcId string) *ec2.Vpc {
 	return result.Vpcs[0]
 }
 
-func GetSubnets(sess session.Session) []*ec2.Subnet {
+func GetSubnets(sess session.Session, vpcId string) []SubnetResp {
 	ec2Serv := *ec2.New(&sess)
-	result, err := ec2Serv.DescribeSubnets(&ec2.DescribeSubnetsInput{})
+	result, err := ec2Serv.DescribeSubnets(&ec2.DescribeSubnetsInput{
+		Filters: []*ec2.Filter{
+			{
+				Name:   aws.String("vpc-id"),
+				Values: []*string{aws.String(vpcId)},
+			},
+		},
+	})
 	if err != nil {
 		fmt.Println("Error in fetching Subnets: ", " err: ", err)
 		return nil
 	}
-	return result.Subnets
+	var subnets []SubnetResp
+	for _, s := range result.Subnets {
+		subnet := SubnetResp{
+			SubnetId:         *s.SubnetId,
+			OwnerId:          *s.OwnerId,
+			CidrBlock:        *s.CidrBlock,
+			AvailabilityZone: *s.AvailabilityZone,
+			State:            *s.State,
+		}
+		subnets = append(subnets, subnet)
+	}
+	return subnets
 }
 
 func GetSingleSubnet(sess session.Session, sId string) *ec2.Subnet {

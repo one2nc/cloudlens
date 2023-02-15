@@ -115,3 +115,11 @@ type LambdaResp struct {
 	CodeSize     string
 	LastModified string
 }
+
+type SubnetResp struct {
+	SubnetId         string
+	OwnerId          string
+	CidrBlock        string
+	AvailabilityZone string
+	State            string
+}

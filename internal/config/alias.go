@@ -140,6 +140,7 @@ func (a *Aliases) loadDefaultAliases() {
 	a.declare("ec2:i", "EC2:I")
 	a.declare("sqs", "SQS")
 	a.declare("vpc", "VPC")
+	a.declare("subnet", "SUBNET")
 	a.declare("lambda", "LAMBDA")
 
 	a.declare("help", "h", "?")
