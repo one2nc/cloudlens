@@ -42,7 +42,7 @@ func NewApp() *App {
 }
 
 // TODO keep context param at first place always
-func (a *App) Init(profiles, regions []string, ctx context.Context) error {
+func (a *App) Init(ctx context.Context,profiles, regions []string) error {
 	ctx = context.WithValue(ctx, internal.KeyActiveProfile, profiles[0])
 	ctx = context.WithValue(ctx, internal.KeyActiveRegion, regions[0])
 	ctx = context.WithValue(ctx, internal.KeyApp, a)

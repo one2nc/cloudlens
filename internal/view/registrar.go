@@ -1,5 +1,7 @@
 package view
 
+import "github.com/one2nc/cloud-lens/internal"
+
 func loadCustomViewers() MetaViewers {
 	m := make(MetaViewers, 5)
 	coreViewers(m)
@@ -8,43 +10,43 @@ func loadCustomViewers() MetaViewers {
 
 func coreViewers(vv MetaViewers) {
 	// TODO create consts instead of hardcoded
-	vv["ec2"] = MetaViewer{
+	vv[internal.LowercaseEc2] = MetaViewer{
 		viewerFn: NewEC2,
 	}
-	vv["s3"] = MetaViewer{
+	vv[internal.LowercaseS3] = MetaViewer{
 		viewerFn: NewS3,
 	}
-	vv["sg"] = MetaViewer{
+	vv[internal.LowercaseSg] = MetaViewer{
 		viewerFn: NewSG,
 	}
-	vv["iam:u"] = MetaViewer{
+	vv[internal.LowercaseIamUser] = MetaViewer{
 		viewerFn: NewIAMU,
 	}
-	vv["ebs"] = MetaViewer{
+	vv[internal.LowercaseEBS] = MetaViewer{
 		viewerFn: NewEBS,
 	}
-	vv["iam:g"] = MetaViewer{
+	vv[internal.LowercaseIamGroup] = MetaViewer{
 		viewerFn: NewIAMUG,
 	}
-	vv["iam:r"] = MetaViewer{
+	vv[internal.LowercaseIamRole] = MetaViewer{
 		viewerFn: NewIamRole,
 	}
-	vv["ec2:s"] = MetaViewer{
+	vv[internal.LowercaseEc2Snapshot] = MetaViewer{
 		viewerFn: NewEC2S,
 	}
-	vv["ec2:i"] = MetaViewer{
+	vv[internal.LowercaseEc2Image] = MetaViewer{
 		viewerFn: NewEC2I,
 	}
-	vv["sqs"] = MetaViewer{
+	vv[internal.LowercaseSQS] = MetaViewer{
 		viewerFn: NewEC2I,
 	}
-	vv["vpc"] = MetaViewer{
+	vv[internal.LowercaseVPC] = MetaViewer{
 		viewerFn: NewVPC,
 	}
-	vv["subnet"] = MetaViewer{
+	vv[internal.LowercaseSubnet] = MetaViewer{
 		viewerFn: NewSubnet,
 	}
-	vv["lambda"] = MetaViewer{
+	vv[internal.LowercaseLamda] = MetaViewer{
 		viewerFn: NewLambda,
 	}
 }

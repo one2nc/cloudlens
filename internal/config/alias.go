@@ -5,6 +5,7 @@ import (
 	"path/filepath"
 	"sync"
 
+	"github.com/one2nc/cloud-lens/internal"
 	"github.com/rs/zerolog/log"
 	"gopkg.in/yaml.v2"
 )
@@ -128,24 +129,24 @@ func (a *Aliases) loadDefaultAliases() {
 	a.mx.Lock()
 	defer a.mx.Unlock()
 
-	a.declare("ec2", "Ec2", "EC2")
-	a.declare("s3", "S3")
-	a.declare("sg", "SG")
-	a.declare("iam:u", "IAM:U")
-	a.declare("ebs", "EBS")
-	a.declare("iam:u", "IAM:U", "iam", "IAM")
-	a.declare("iam:g", "IAM:G")
-	a.declare("iam:r", "IAM:R")
-	a.declare("ec2:s", "EC2:S")
-	a.declare("ec2:i", "EC2:I")
-	a.declare("sqs", "SQS")
-	a.declare("vpc", "VPC")
-	a.declare("subnet", "SUBNET")
-	a.declare("lambda", "LAMBDA")
+	a.declare(internal.LowercaseEc2, internal.UppercaseEc2)
+	a.declare(internal.LowercaseS3, internal.UppercaseS3)
+	a.declare(internal.LowercaseSg, internal.UppercaseSg)
+	a.declare(internal.LowercaseIamUser, internal.UppercaseIamUser)
+	a.declare(internal.LowercaseEBS, internal.UppercaseEBS)
+	a.declare(internal.LowercaseIamUser, internal.UppercaseIamUser, internal.LowercaseIam, internal.UppercaseIam)
+	a.declare(internal.LowercaseIamGroup,internal.UppercaseIamGroup)
+	a.declare(internal.LowercaseIamRole, internal.UppercaseIamRole)
+	a.declare(internal.LowercaseEc2Snapshot, internal.UppercaseEc2Snapshot)
+	a.declare(internal.LowercaseEc2Image, internal.UppercaseEc2Image)
+	a.declare(internal.LowercaseSQS, internal.UppercaseSQS)
+	a.declare(internal.LowercaseVPC, internal.UppercaseVPC)
+	a.declare(internal.LowercaseSubnet,internal.UppercaseSubnet)
+	a.declare(internal.LowercaseLamda,internal.UppercaseLamda)
 
-	a.declare("help", "h", "?")
-	a.declare("quit", "q", "q!", "Q")
-	a.declare("aliases", "alias", "a")
+	a.declare(internal.Help, internal.QuestionMark,internal.LowercaseH)
+	a.declare(internal.Quit,internal.LowercaseQ,internal.QFactorial,internal.UppercaseQ)
+	// a.declare(internal.Alias,internal.Aliases, internal.LowercaseA)
 }
 
 // Save alias to disk.

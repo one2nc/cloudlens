@@ -64,7 +64,7 @@ func run(cmd *cobra.Command, args []string) {
 	app := view.NewApp()
 
 	// TODO pass the AWS session instead of profiles and regions
-	if err := app.Init(profiles, regions, ctx); err != nil {
+	if err := app.Init(ctx, profiles, regions); err != nil {
 		panic(fmt.Sprintf("app init failed -- %v", err))
 	}
 	if err := app.Run(); err != nil {
@@ -85,9 +85,9 @@ func readAndValidateProfile() []string {
 			fmt.Printf("Profile '%v' not found, would you like to pick one from profiles[%v,..] ["+color.Colorize("y", color.Cyan)+"/"+color.Colorize("n", color.Red)+"]: ", color.Colorize(profile, color.Red), profiles[0])
 			fmt.Scanln(&input)
 			switch input {
-			case "y", "Y", "yes", "YES":
+			case internal.LowercaseY, internal.UppercaseY, internal.LowercaseYes, internal.UppercaseYes:
 				break loop
-			case "n", "N", "no", "NO":
+			case internal.LowercaseN, internal.UppercaseN, internal.LowercaseNo, internal.UppercaseNo:
 				fmt.Printf("Profile '%v' not found, exiting..", profile)
 				os.Exit(0)
 			}
@@ -106,9 +106,9 @@ func readAndValidateRegion() []string {
 			fmt.Printf("Region '%v' not found, would you like to pick one from regions[%v,..] ["+color.Colorize("y", color.Cyan)+"/"+color.Colorize("n", color.Red)+"]: ", color.Colorize(region, color.Red), regions[0])
 			fmt.Scanln(&input)
 			switch input {
-			case "y", "Y", "yes", "YES":
+			case internal.LowercaseY, internal.UppercaseY, internal.LowercaseYes, internal.UppercaseYes:
 				break loop
-			case "n", "N", "no", "NO":
+			case internal.LowercaseN, internal.UppercaseN, internal.LowercaseNo, internal.UppercaseNo:
 				fmt.Printf("Region '%v' not found, exiting..", region)
 				os.Exit(0)
 			}

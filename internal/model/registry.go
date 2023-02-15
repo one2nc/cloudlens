@@ -1,84 +1,81 @@
 package model
 
 import (
+	"github.com/one2nc/cloud-lens/internal"
 	"github.com/one2nc/cloud-lens/internal/dao"
 	"github.com/one2nc/cloud-lens/internal/render"
 )
 
 var Registry = map[string]ResourceMeta{
-	"ec2": {
+	internal.LowercaseEc2: {
 		DAO:      &dao.EC2{},
 		Renderer: &render.EC2{},
 	},
-	"s3": {
+	internal.LowercaseS3: {
 		DAO:      &dao.S3{},
 		Renderer: &render.S3{},
 	},
-	"sg": {
+	internal.LowercaseSg: {
 		DAO:      &dao.SG{},
 		Renderer: &render.SG{},
 	},
-	"OBJ": {
+	internal.Object: {
 		DAO:      &dao.BObj{},
 		Renderer: &render.BObj{},
 	},
-	"iam:u": {
+	internal.LowercaseIamUser: {
 		DAO:      &dao.IAMU{},
 		Renderer: &render.IAMU{},
 	},
-	"iam:g": {
+	internal.LowercaseIamGroup: {
 		DAO:      &dao.IAMUG{},
 		Renderer: &render.IAMUG{},
 	},
-	"iam:r": {
+	internal.LowercaseIamRole: {
 		DAO:      &dao.IamRole{},
 		Renderer: &render.IamRole{},
 	},
-	"User Policy": {
+	internal.UserPolicy: {
 		DAO:      &dao.IAMUP{},
 		Renderer: &render.IamUserPloicy{},
 	},
-	"ebs": {
+	internal.LowercaseEBS: {
 		DAO:      &dao.EBS{},
 		Renderer: &render.EBS{},
 	},
-	"User Group Policy": {
+	internal.UserGroupPolicy: {
 		DAO:      &dao.IAMUGP{},
 		Renderer: &render.IamUserGroupPloicy{},
 	},
-	"Role Policy": {
+	internal.RolePolicy: {
 		DAO:      &dao.IamRolePloicy{},
 		Renderer: &render.IamRolePloicy{},
 	},
-	"Group Users": {
+	internal.GroupUsers: {
 		DAO:      &dao.IamGroupUser{},
 		Renderer: &render.IamGroupUser{},
 	},
-	"ec2:s": {
+	internal.LowercaseEc2Snapshot: {
 		DAO:      &dao.EC2S{},
 		Renderer: &render.EC2S{},
 	},
-	"ec2:i": {
+	internal.LowercaseEc2Image: {
 		DAO:      &dao.EC2I{},
 		Renderer: &render.EC2I{},
 	},
-
-	"sqs": {
+	internal.LowercaseSQS: {
 		DAO:      &dao.SQS{},
 		Renderer: &render.SQS{},
 	},
-
-	"vpc": {
+	internal.LowercaseVPC: {
 		DAO:      &dao.VPC{},
 		Renderer: &render.VPC{},
 	},
-
-	"subnet": {
+	internal.LowercaseSubnet: {
 		DAO:      &dao.Subnet{},
 		Renderer: &render.Subnet{},
 	},
-
-	"lambda": {
+	internal.LowercaseLamda: {
 		DAO:      &dao.Lambda{},
 		Renderer: &render.Lambda{},
 	},
