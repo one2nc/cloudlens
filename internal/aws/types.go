@@ -12,7 +12,6 @@ type EC2Resp struct {
 	AvailabilityZone string
 	InstanceState    string
 	PublicDNS        string
-	PublicIPv4       string
 	MonitoringState  string
 	LaunchTime       string
 }
