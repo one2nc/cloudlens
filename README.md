@@ -38,3 +38,6 @@ Cloud-Lens uses aliases to navigate most AWS Services.
       <img src="assets/s3.png"/>
 2. S3 Details
       <img src="assets/s3Details.png"/>
+
+
+© 2023 One2N Consulting Private Limited. All materials licensed under [Apache v2.0](http://www.apache.org/licenses/LICENSE-2.0)
