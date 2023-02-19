@@ -4,6 +4,11 @@
 
 Your One-Stop Terminal Solution for Seamless AWS Service Management and Monitoring! With its intuitive UI and advanced features, it empowers you to effortlessly navigate, observe, and optimize your AWS environment, giving you more time to focus on your core business goals. Whether you're a seasoned cloud expert or just getting started, Cloud-Lens will elevate your AWS experience and take your service management to new heights.
 
+## We appreciate [localstack's](https://localstack.cloud/) assistance with the development
+
+<img src="assets/localstack.jpeg" alt="k9s">
+
+
 ## Building From Source
 
  Cloud-Lens is currently using go v0.0.1 . In order to build Cloud-Lens from source you must:
