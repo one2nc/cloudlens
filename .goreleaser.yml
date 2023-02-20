@@ -28,7 +28,6 @@ brews:
     commit_author:
       name: one2nc
       email: chinmay@one2n.in
-    folder: Formula
 
 checksum:
   name_template: 'checksums.txt'
