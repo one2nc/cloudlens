@@ -42,8 +42,9 @@ var lspop = &cobra.Command{
 			"me-south-1", "me-central-1", "sa-east-1", "us-gov-east-1", "us-gov-west-1"}
 
 		var sessions []*session.Session
-
-		for i := 0; i < 4; i++ {
+		sessDef, err := getSession(profile, pop.GetDefaultAWSRegion())
+		sessions = append(sessions, sessDef)
+		for i := 1; i < 4; i++ {
 			gofakeit.Seed(0)
 			sess, err := getSession(profile, regions[gofakeit.Number(0, len(regions)-1)])
 			if err != nil {

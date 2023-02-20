@@ -10,6 +10,7 @@ import (
 	"github.com/one2nc/cloud-lens/internal/color"
 	"github.com/one2nc/cloud-lens/internal/config"
 	"github.com/one2nc/cloud-lens/internal/view"
+	pop "github.com/one2nc/cloud-lens/populator"
 	"github.com/rs/zerolog"
 	"github.com/rs/zerolog/log"
 	"github.com/spf13/cobra"
@@ -28,7 +29,7 @@ var (
 
 func init() {
 	rootCmd.PersistentFlags().StringVarP(&profile, "profile", "p", "default", "Read aws profile")
-	rootCmd.PersistentFlags().StringVarP(&region, "region", "r", "ap-south-1", "Read aws region")
+	rootCmd.PersistentFlags().StringVarP(&region, "region", "r", "", "Read aws region")
 }
 
 func Execute() {
@@ -53,10 +54,15 @@ func run(cmd *cobra.Command, args []string) {
 
 	//TODO profiles and regions should under aws
 	profiles := readAndValidateProfile()
-	regions := readAndValidateRegion()
+	if profiles[0] == "default" && len(region) == 0 {
+		region = pop.GetDefaultAWSRegion()
+	} else {
+		region = "ap-south-1"
+	}
 
+	regions := readAndValidateRegion()
 	//TODO Move this in the AWS folder
-	sess, err := config.GetSession(profiles[0], regions[0])
+	sess, err := config.GetSession(profiles[0], pop.GetDefaultAWSRegion())
 	if err != nil {
 		panic(fmt.Sprintf("aws session init failed -- %v", err))
 	}

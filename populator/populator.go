@@ -2,11 +2,14 @@ package pop
 
 import (
 	"bytes"
+	"context"
 	"fmt"
 	"io/ioutil"
 	"log"
+	"os"
 	"strconv"
 
+	"github.com/aws/aws-sdk-go-v2/config"
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/ec2"
@@ -669,4 +672,14 @@ func CreateLambdaFunction(sessions []*session.Session) error {
 		log.Printf("Function ARN: %s\n", aws.StringValue(resp.FunctionArn))
 	}
 	return nil
+}
+
+func GetDefaultAWSRegion() string {
+	cfg, err := config.LoadDefaultConfig(context.TODO())
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "failed to load AWS SDK config: %v\n", err)
+		os.Exit(1)
+	}
+	region := cfg.Region
+	return region
 }
