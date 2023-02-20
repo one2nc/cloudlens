@@ -33,4 +33,4 @@ jobs:
           version: ${{ env.GITHUB_REF_NAME }}
           args: release --rm-dist
         env:
-          GITHUB_TOKEN: ${{ secrets.CLOUD_LENS_ACCESS_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.CLOUD_LENS }}
