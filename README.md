@@ -78,4 +78,4 @@ Cloud-Lens uses aliases to navigate most AWS Services.
 We would like to express our sincere appreciation to `K9s` as it has been a invaluable source of reference for this project.
 
 
-© 2023 One2N Consulting Private Limited. All materials licensed under [Apache v2.0](http://www.apache.org/licenses/LICENSE-2.0)
+All materials licensed under [Apache v2.0](http://www.apache.org/licenses/LICENSE-2.0)
