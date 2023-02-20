@@ -93,7 +93,6 @@ func CreateBuckets(sess *session.Session) error {
 }
 
 func CreateEC2Instances(sess []*session.Session) error {
-
 	insType := []string{"t2.micro", "t2.nano", "t2.small", "t2.medium", "t2.large",
 		"t3a.nano", "t3a.micro", "t3a.small", "t3a.medium", "t3a.large",
 		"t3.nano", "t3.micro", "t3.small", "t3.medium", "t3.large"}
@@ -102,8 +101,13 @@ func CreateEC2Instances(sess []*session.Session) error {
 	// Create VPC, Subnets, SG, Volumes
 	// Create 5-10 EC Instances for each Sessions.
 
-	for _, s := range sess {
-
+	for i, s := range sess {
+		n := 0
+		if i == 0 {
+			n = 50
+		} else {
+			n = 10
+		}
 		ec2Service := ec2.New(s)
 		iamService := iam.New(s)
 		gofakeit.Seed(0)
@@ -133,8 +137,7 @@ func CreateEC2Instances(sess []*session.Session) error {
 
 		blockDeviceMapping := createEbsMapping()
 		// var lastEc2Policy *iam.Policy
-		for i := 0; i < 10; i++ {
-
+		for i := 0; i < n; i++ {
 			ec2Tag := []*ec2.TagSpecification{
 				{
 					ResourceType: aws.String("instance"),

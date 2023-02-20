@@ -24,6 +24,9 @@ var lspop = &cobra.Command{
 		if !config.LookupForValue(profiles, profile) {
 			profile = profiles[0]
 		}
+		if len(region) == 0 {
+			region = "ap-south-1"
+		}
 		sess, err := getSession(profile, region)
 		if err != nil {
 			log.Fatal("err: ", err)
