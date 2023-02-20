@@ -90,7 +90,7 @@ func init() {
 func getSession(profile, region string) (*session.Session, error) {
 	sess, err := session.NewSessionWithOptions(session.Options{Config: aws.Config{
 		//TODO: remove hardcoded enpoint
-		Endpoint:         aws.String(localstackEndpoint),
+		//Endpoint:         aws.String(localstackEndpoint),
 		Region:           aws.String(region),
 		S3ForcePathStyle: aws.Bool(true),
 	},
