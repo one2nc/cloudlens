@@ -47,7 +47,7 @@ func CreateBuckets(sess *session.Session) error {
 	for i := 0; i < 10; i++ {
 		gofakeit.Seed(0)
 		rWord := gofakeit.Password(true, false, true, false, false, 5)
-		bName := aws.String("test-" + rWord + "-bucket" + strconv.Itoa(gofakeit.Number(0, 999999999999999999)))
+		bName := aws.String("test-" + rWord + "-bucket" + strconv.Itoa(gofakeit.Number(0, 99999999)))
 		_, err := s3Service.CreateBucket(&s3.CreateBucketInput{
 			Bucket:                     bName,
 			ObjectLockEnabledForBucket: aws.Bool(true),
