@@ -1,0 +1,33 @@
+builds:
+  - binary: cloudlens
+    goos:
+      - darwin
+      - linux
+    goarch:
+      - amd64
+      - arm64
+      - arm
+    env:
+      - CGO_ENABLED=0
+    flags:
+      - -mod=vendor
+release:
+  prerelease: auto
+
+universal_binaries:
+  - replace: true
+
+brews:
+  -
+    name: cloud-lens
+    homepage: https://github.com/one2nc/cloud-lens
+    tap:
+      owner: one2nc
+      name: homebrew-cloudlens
+    commit_author:
+      name: one2nc
+      email: chinmay.somani@one2n.in
+    folder: Formula
+
+checksum:
+  name_template: 'checksums.txt'
