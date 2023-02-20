@@ -9,8 +9,9 @@ builds:
       - arm
     env:
       - CGO_ENABLED=0
+   
     flags:
-      - -mod=vendor
+      - -trimpath
 release:
   prerelease: auto
 
@@ -26,7 +27,7 @@ brews:
       name: homebrew-cloudlens
     commit_author:
       name: one2nc
-      email: chinmay.somani@one2n.in
+      email: chinmay@one2n.in
     folder: Formula
 
 checksum:
