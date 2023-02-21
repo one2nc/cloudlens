@@ -27,13 +27,13 @@ func ListBuckets(sess session.Session) ([]BucketResp, error) {
 	s3Serv := *s3.New(&sess)
 	lbop, err := s3Serv.ListBuckets(&s3.ListBucketsInput{})
 	if err != nil {
-		fmt.Println("Error in listing buckets")
+		log.Info().Msg(fmt.Sprintf("Error in listing buckets. err: %v", err))
 		return nil, err
 	}
 	for _, buc := range lbop.Buckets {
 		reg, err := s3Serv.GetBucketLocationWithContext(context.Background(), &s3.GetBucketLocationInput{Bucket: aws.String(*buc.Name)})
 		if err != nil {
-			fmt.Println("error getting bucket location")
+			log.Info().Msg(fmt.Sprintf("error getting bucket location. err: %v", err))
 			return nil, err
 		}
 		launchTime := buc.CreationDate
@@ -52,7 +52,7 @@ func GetInfoAboutBucket(sess session.Session, bucketName string, delimiter strin
 		Delimiter: aws.String(delimiter),
 		Prefix:    aws.String(prefix)})
 	if err != nil {
-		fmt.Println("Error is:", err)
+		log.Info().Msg(fmt.Sprintf("Error is: %v", err))
 		return nil
 	}
 	return result
@@ -112,9 +112,9 @@ func PutObjects(sess session.Session) {
 		Body:   body,
 	})
 	if err != nil {
-		fmt.Println(err)
+		log.Info().Msg(fmt.Sprintf("err: %v", err))
 	}
-	fmt.Println("uploaded object")
+	log.Info().Msg("uploaded object")
 }
 
 func GetBuckEncryption(sess session.Session, bucketName string) *s3.ServerSideEncryptionConfiguration {

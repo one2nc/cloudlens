@@ -8,6 +8,7 @@ import (
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/ec2"
+	"github.com/rs/zerolog/log"
 )
 
 func GetInstances(sess session.Session) ([]EC2Resp, error) {
@@ -15,7 +16,7 @@ func GetInstances(sess session.Session) ([]EC2Resp, error) {
 	ec2Serv := *ec2.New(&sess)
 	result, err := ec2Serv.DescribeInstances(nil)
 	if err != nil {
-		//fmt.Println("Error fetching instances:", err)
+		log.Info().Msg(fmt.Sprintf("Error fetching instances: %v", err))
 		return nil, err
 	}
 	// Iterate through the instances and print their ID and state
@@ -45,7 +46,7 @@ func GetSingleInstance(sess session.Session, insId string) *ec2.DescribeInstance
 		InstanceIds: []*string{&insId},
 	})
 	if err != nil {
-		fmt.Println("Error fetching instance with id: ", insId, " err: ", err)
+		log.Info().Msg(fmt.Sprintf("Error fetching instance with id: %s, err: %v", insId, err))
 		return nil
 	}
 	return result
@@ -55,7 +56,7 @@ func GetSecGrps(sess session.Session) []*ec2.SecurityGroup {
 	ec2Serv := *ec2.New(&sess)
 	result, err := ec2Serv.DescribeSecurityGroups(&ec2.DescribeSecurityGroupsInput{})
 	if err != nil {
-		fmt.Println("Error in fetching Security Groups: ", " err: ", err)
+		log.Info().Msg(fmt.Sprintf("Error in fetching Security Groups. err: %v ", err))
 		return nil
 	}
 	return result.SecurityGroups
@@ -67,7 +68,7 @@ func GetSingleSecGrp(sess session.Session, sgId string) *ec2.DescribeSecurityGro
 		GroupIds: []*string{&sgId},
 	})
 	if err != nil {
-		fmt.Println("Error in fetching Security Group: ", sgId, " err: ", err)
+		log.Info().Msg(fmt.Sprintf("Error in fetching Security Group: %s err: %v ", sgId, err))
 		return nil
 	}
 	return result
@@ -82,7 +83,7 @@ func GetVolumes(sess session.Session) ([]EBSResp, error) {
 	ec2Serv := *ec2.New(&sess)
 	result, err := ec2Serv.DescribeVolumes(&ec2.DescribeVolumesInput{})
 	if err != nil {
-		fmt.Println("Error in fetching Volumes: ", " err: ", err)
+		log.Info().Msg(fmt.Sprintf("Error in fetching Volumes. err: %v", err))
 		return nil, err
 	}
 	for _, v := range result.Volumes {
@@ -110,7 +111,7 @@ func GetSingleVolume(sess session.Session, vId string) *ec2.Volume {
 		VolumeIds: []*string{&vId},
 	})
 	if err != nil {
-		fmt.Println("Error in fetching Volume: ", vId, " err: ", err)
+		log.Info().Msg(fmt.Sprintf("Error in fetching Volume: %s err: %v", vId, err))
 		return nil
 	}
 	return result.Volumes[0]
@@ -124,7 +125,7 @@ func GetSnapshots(sess session.Session) []Snapshot {
 	ec2Serv := *ec2.New(&sess)
 	result, err := ec2Serv.DescribeSnapshots(&ec2.DescribeSnapshotsInput{})
 	if err != nil {
-		fmt.Println("Error in fetching Snapshots: ", " err: ", err)
+		log.Info().Msg(fmt.Sprintf("Error in fetching Snapshots, err: %v", err))
 		return nil
 	}
 	var snapshots []Snapshot
@@ -152,7 +153,7 @@ func GetSingleSnapshot(sess session.Session, sId string) *ec2.Snapshot {
 		SnapshotIds: []*string{&sId},
 	})
 	if err != nil {
-		fmt.Println("Error in fetching Snapshot: ", sId, " err: ", err)
+		log.Info().Msg(fmt.Sprintf("Error in fetching Snapshot: %s err: %v", sId, err))
 		return nil
 	}
 	return result.Snapshots[0]
@@ -167,7 +168,7 @@ func GetAMIs(sess session.Session) []ImageResp {
 	ec2Serv := *ec2.New(&sess)
 	result, err := ec2Serv.DescribeImages(&ec2.DescribeImagesInput{})
 	if err != nil {
-		fmt.Println("Error in fetching AMIs: ", " err: ", err)
+		log.Info().Msg(fmt.Sprintf("Error in fetching AMIs, err: %v", err))
 		return nil
 	}
 	var images []ImageResp
@@ -190,7 +191,7 @@ func GetSingleAMI(sess session.Session, amiId string) *ec2.Image {
 		ImageIds: []*string{&amiId},
 	})
 	if err != nil {
-		fmt.Println("Error in fetching AMI: ", amiId, " err: ", err)
+		log.Info().Msg(fmt.Sprintf("Error in fetching AMI: %s err: %v ", amiId, err))
 		return nil
 	}
 	return result.Images[0]
@@ -200,7 +201,7 @@ func GetVPCs(sess session.Session) []VpcResp {
 	ec2Serv := *ec2.New(&sess)
 	result, err := ec2Serv.DescribeVpcs(&ec2.DescribeVpcsInput{})
 	if err != nil {
-		fmt.Println("Error in fetching VPCs: ", " err: ", err)
+		log.Info().Msg(fmt.Sprintf("Error in fetching VPCs. err: %v ", err))
 		return nil
 	}
 	var vpcs []VpcResp
@@ -223,7 +224,7 @@ func GetSingleVPC(sess session.Session, vpcId string) *ec2.Vpc {
 		VpcIds: []*string{&vpcId},
 	})
 	if err != nil {
-		fmt.Println("Error in fetching VPC: ", vpcId, " err: ", err)
+		log.Info().Msg(fmt.Sprintf("Error in fetching VPC: %s, err: %v", vpcId, err))
 		return nil
 	}
 	return result.Vpcs[0]
@@ -240,7 +241,7 @@ func GetSubnets(sess session.Session, vpcId string) []SubnetResp {
 		},
 	})
 	if err != nil {
-		fmt.Println("Error in fetching Subnets: ", " err: ", err)
+		log.Info().Msg(fmt.Sprintf("Error in fetching Subnets. err: %v", err))
 		return nil
 	}
 	var subnets []SubnetResp
@@ -263,7 +264,7 @@ func GetSingleSubnet(sess session.Session, sId string) *ec2.Subnet {
 		SubnetIds: []*string{&sId},
 	})
 	if err != nil {
-		fmt.Println("Error in fetching Subnet: ", sId, " err: ", err)
+		log.Info().Msg(fmt.Sprintf("Error in fetching Subnet: %s, err: %v", sId, err))
 		return nil
 	}
 	return result.Subnets[0]
