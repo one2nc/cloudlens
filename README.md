@@ -1,4 +1,6 @@
-<img src="assets/cloudlens.png" alt="Cloudlens" width="225" height="150">
+<p align="center">
+      <img src="assets/cloudlens.png" alt="Cloudlens" width="225" height="150" >
+</p>
 
 ## Cloud-Lens - A Sophisticated Command Line Interface for Effortless AWS Service Management!
 
