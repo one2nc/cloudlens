@@ -7,9 +7,9 @@
 Your One-Stop Terminal Solution for Seamless AWS Service Management and Monitoring! With its intuitive UI and advanced features, it empowers you to effortlessly navigate, observe, and optimize your AWS environment, giving you more time to focus on your core business goals. Whether you're a seasoned cloud expert or just getting started, Cloud-Lens will elevate your AWS experience and take your service management to new heights.
 
 ## Note
-**Cloudlens reads your ~/.aws/config file, but it does not store or send your access and secret key anywhere. The access and secret key is used only to securely connect to AWS API via AWS SDK.
+**Cloudlens reads your ~/.aws/config file, but it does not store or send your access and secret key anywhere. The access and secret key is used only to securely connect to AWS API via AWS SDK.**
 
-Since cloudlens is in readonly mode, we recommend you create an access and secret key that only has readonly permissions to the AWS services.**
+**Since cloudlens is in readonly mode, we recommend you create an access and secret key that only has readonly permissions to the AWS services.**
 
 
 ## We appreciate [localstack's](https://localstack.cloud/) assistance with the development
