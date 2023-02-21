@@ -1,6 +1,5 @@
 builds:
-  - binary: cloudlens
-    goos:
+  - goos:
       - darwin
       - linux
     goarch:
@@ -21,7 +20,7 @@ universal_binaries:
 brews:
   -
     name: cloudlens
-    homepage: https://github.com/one2nc/cloud-lens
+    homepage: https://github.com/one2nc/cloudlens
     tap:
       owner: one2nc
       name: homebrew-cloudlens
