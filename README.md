@@ -2,9 +2,9 @@
       <img src="assets/cloudlens.png" alt="Cloudlens" width="225" height="150" >
 </p>
 
-## Cloud-Lens - A Sophisticated Command Line Interface for Effortless AWS Service Management!
+## Cloudlens - A Sophisticated Command Line Interface for Effortless AWS Service Management!
 
-Your One-Stop Terminal Solution for Seamless AWS Service Management and Monitoring! With its intuitive UI and advanced features, it empowers you to effortlessly navigate, observe, and optimize your AWS environment, giving you more time to focus on your core business goals. Whether you're a seasoned cloud expert or just getting started, Cloud-Lens will elevate your AWS experience and take your service management to new heights.
+Your One-Stop Terminal Solution for Seamless AWS Service Management and Monitoring! With its intuitive UI and advanced features, it empowers you to effortlessly navigate, observe, and optimize your AWS environment, giving you more time to focus on your core business goals. Whether you're a seasoned cloud expert or just getting started, cloudlens will elevate your AWS experience and take your service management to new heights.
 
 ## Note
 **Cloudlens reads your ~/.aws/config file, but it does not store or send your access and secret key anywhere. The access and secret key is used only to securely connect to AWS API via AWS SDK.**
@@ -19,7 +19,7 @@ Your One-Stop Terminal Solution for Seamless AWS Service Management and Monitori
 
 ## Building From Source
 
- Cloud-Lens is currently using go v0.0.1 . In order to build Cloud-Lens from source you must:
+ Cloudlens is currently using go v0.0.1 . In order to build cloudlens from source you must:
 
  1. Clone the repo
  2. Build and run the executable
@@ -30,12 +30,12 @@ Your One-Stop Terminal Solution for Seamless AWS Service Management and Monitori
 
 ## Key Bindings
 
-Cloud-Lens uses aliases to navigate most AWS Services.
+Cloudlens uses aliases to navigate most AWS Services.
 
 | Action                                                         | Command                       | Comment                                                                |
 |----------------------------------------------------------------|-------------------------------|------------------------------------------------------------------------|
 | Show active keyboard mnemonics and help                        | `?`                           |                                                                        |                                                                      |
-| To bail out of Cloud-Lens                                             | `:q`, `ctrl-c`                |                                                                        |
+| To bail out of cloudlens                                             | `:q`, `ctrl-c`                |                                                                        |
 | Bails out of view/command/filter mode                          | `<esc>`                       |                                                                        |
 | To view and switch to another AWS Service               | `:`ctx⏎                       |                                                                        |
 
