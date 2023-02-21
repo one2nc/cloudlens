@@ -20,7 +20,7 @@ universal_binaries:
 
 brews:
   -
-    name: cloud-lens
+    name: cloudlens
     homepage: https://github.com/one2nc/cloud-lens
     tap:
       owner: one2nc
