@@ -4,6 +4,8 @@
 
 ## Cloudlens - A Sophisticated Command Line Interface for Effortless AWS Service Management!
 
+https://user-images.githubusercontent.com/87517248/220538926-05f6f8bb-e987-4000-98f1-64d1236c5dda.mov
+
 Your One-Stop Terminal Solution for Seamless AWS Service Management and Monitoring! With its intuitive UI and advanced features, it empowers you to effortlessly navigate, observe, and optimize your AWS environment, giving you more time to focus on your core business goals. Whether you're a seasoned cloud expert or just getting started, cloudlens will elevate your AWS experience and take your service management to new heights.
 
 ## Note
