@@ -6,8 +6,6 @@ import (
 	"github.com/spf13/cobra"
 )
 
-//var short bool
-
 var command = &cobra.Command{
 	Use:   "version",
 	Short: "Print version/build info",
@@ -16,8 +14,6 @@ var command = &cobra.Command{
 		printVersion("version")
 	},
 }
-
-//command.PersistentFlags().BoolVarP(&short, "short", "s", false, "Prints K9s version info in short format")
 
 func init() {
 	rootCmd.AddCommand(command)
