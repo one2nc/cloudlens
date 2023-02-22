@@ -20,5 +20,5 @@ func init() {
 }
 
 func printVersion(fmat string) {
-	fmt.Println("v0.1.0")
+	fmt.Println(version)
 }

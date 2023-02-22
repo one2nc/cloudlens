@@ -24,7 +24,8 @@ var rootCmd = &cobra.Command{
 }
 
 var (
-	profile, region, version string
+	profile, region string
+	version         = "v0.1.0"
 )
 
 func init() {
