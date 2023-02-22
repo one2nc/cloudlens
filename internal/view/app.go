@@ -29,6 +29,7 @@ type App struct {
 	cancelFn            context.CancelFunc
 	showHeader          bool
 	IsPageContentSorted bool
+	version             string
 }
 
 func NewApp() *App {
@@ -42,7 +43,8 @@ func NewApp() *App {
 }
 
 // TODO keep context param at first place always
-func (a *App) Init(ctx context.Context,profiles, regions []string) error {
+func (a *App) Init(ctx context.Context, profiles, regions []string, version string) error {
+	a.version = version
 	ctx = context.WithValue(ctx, internal.KeyActiveProfile, profiles[0])
 	ctx = context.WithValue(ctx, internal.KeyActiveRegion, regions[0])
 	ctx = context.WithValue(ctx, internal.KeyApp, a)

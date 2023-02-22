@@ -24,7 +24,7 @@ var rootCmd = &cobra.Command{
 }
 
 var (
-	profile, region string
+	profile, region, version string
 )
 
 func init() {
@@ -70,7 +70,7 @@ func run(cmd *cobra.Command, args []string) {
 	app := view.NewApp()
 
 	// TODO pass the AWS session instead of profiles and regions
-	if err := app.Init(ctx, profiles, regions); err != nil {
+	if err := app.Init(ctx, profiles, regions, version); err != nil {
 		panic(fmt.Sprintf("app init failed -- %v", err))
 	}
 	if err := app.Run(); err != nil {
