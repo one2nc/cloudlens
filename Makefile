@@ -4,7 +4,7 @@ OUTPUT_BIN ?= execs/${NAME}
 PACKAGE    := github.com/one2nc/$(NAME)
 VERSION    = v0.1.0
 
-ßsetup:
+setup:
 	docker-compose up -d
 
 setup-down:
