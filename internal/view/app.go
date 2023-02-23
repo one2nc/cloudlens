@@ -9,11 +9,11 @@ import (
 
 	"github.com/derailed/tview"
 	"github.com/gdamore/tcell/v2"
-	"github.com/one2nc/cloud-lens/internal"
-	"github.com/one2nc/cloud-lens/internal/config"
-	"github.com/one2nc/cloud-lens/internal/model"
-	"github.com/one2nc/cloud-lens/internal/ui"
-	"github.com/one2nc/cloud-lens/internal/ui/dialog"
+	"github.com/one2nc/cloudlens/internal"
+	"github.com/one2nc/cloudlens/internal/config"
+	"github.com/one2nc/cloudlens/internal/model"
+	"github.com/one2nc/cloudlens/internal/ui"
+	"github.com/one2nc/cloudlens/internal/ui/dialog"
 	"github.com/rs/zerolog/log"
 )
 

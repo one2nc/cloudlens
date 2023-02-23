@@ -10,7 +10,7 @@ import (
 	"time"
 
 	backoff "github.com/cenkalti/backoff/v4"
-	"github.com/one2nc/cloud-lens/internal/dao"
+	"github.com/one2nc/cloudlens/internal/dao"
 	"github.com/rs/zerolog/log"
 	"github.com/sahilm/fuzzy"
 )

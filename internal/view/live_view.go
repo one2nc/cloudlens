@@ -8,9 +8,9 @@ import (
 	"github.com/atotto/clipboard"
 	"github.com/derailed/tview"
 	"github.com/gdamore/tcell/v2"
-	"github.com/one2nc/cloud-lens/internal"
-	"github.com/one2nc/cloud-lens/internal/model"
-	"github.com/one2nc/cloud-lens/internal/ui"
+	"github.com/one2nc/cloudlens/internal"
+	"github.com/one2nc/cloudlens/internal/model"
+	"github.com/one2nc/cloudlens/internal/ui"
 	"github.com/rs/zerolog/log"
 	"github.com/sahilm/fuzzy"
 )

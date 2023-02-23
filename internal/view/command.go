@@ -6,8 +6,8 @@ import (
 	"strings"
 	"sync"
 
-	"github.com/one2nc/cloud-lens/internal/dao"
-	"github.com/one2nc/cloud-lens/internal/model"
+	"github.com/one2nc/cloudlens/internal/dao"
+	"github.com/one2nc/cloudlens/internal/model"
 	"github.com/rs/zerolog/log"
 )
 

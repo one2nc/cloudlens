@@ -75,7 +75,7 @@ func DownloadObject(sess session.Session, bucketName, key string) string {
 	if err != nil {
 		log.Info().Msg(fmt.Sprintf("error in getting the machine's user: %v", err))
 	}
-	path := usr.HomeDir + "/cloud-lens/s3objects/"
+	path := usr.HomeDir + "/cloudlens/s3objects/"
 	err = os.MkdirAll(path, os.ModePerm)
 	if err != nil {
 		log.Info().Msg(fmt.Sprintf("error in creating s3 Object directory: %v", err))

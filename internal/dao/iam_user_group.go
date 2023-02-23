@@ -5,8 +5,8 @@ import (
 	"fmt"
 
 	"github.com/aws/aws-sdk-go/aws/session"
-	"github.com/one2nc/cloud-lens/internal"
-	"github.com/one2nc/cloud-lens/internal/aws"
+	"github.com/one2nc/cloudlens/internal"
+	"github.com/one2nc/cloudlens/internal/aws"
 	"github.com/rs/zerolog/log"
 )
 

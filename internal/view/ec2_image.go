@@ -2,7 +2,7 @@ package view
 
 import (
 	"github.com/gdamore/tcell/v2"
-	"github.com/one2nc/cloud-lens/internal/ui"
+	"github.com/one2nc/cloudlens/internal/ui"
 )
 
 type EC2I struct {

@@ -7,8 +7,8 @@ import (
 
 	"github.com/derailed/tview"
 	"github.com/gdamore/tcell/v2"
-	"github.com/one2nc/cloud-lens/internal/model"
-	"github.com/one2nc/cloud-lens/internal/ui"
+	"github.com/one2nc/cloudlens/internal/model"
+	"github.com/one2nc/cloudlens/internal/ui"
 )
 
 // Cow represents a bomb viewer.
@@ -96,7 +96,6 @@ func (c *Cow) keyboard(evt *tcell.EventKey) *tcell.EventKey {
 
 	return evt
 }
-
 
 func (c *Cow) resetCmd(evt *tcell.EventKey) *tcell.EventKey {
 	return c.app.PrevCmd(evt)

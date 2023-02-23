@@ -1,7 +1,7 @@
 package main
 
 import (
-	"github.com/one2nc/cloud-lens/cmd"
+	"github.com/one2nc/cloudlens/cmd"
 )
 
 func main() {

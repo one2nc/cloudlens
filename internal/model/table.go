@@ -8,8 +8,8 @@ import (
 	"time"
 
 	"github.com/cenkalti/backoff"
-	"github.com/one2nc/cloud-lens/internal/dao"
-	"github.com/one2nc/cloud-lens/internal/render"
+	"github.com/one2nc/cloudlens/internal/dao"
+	"github.com/one2nc/cloudlens/internal/render"
 	"github.com/rs/zerolog/log"
 )
 

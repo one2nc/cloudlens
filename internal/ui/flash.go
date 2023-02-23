@@ -5,7 +5,7 @@ import (
 
 	"github.com/derailed/tview"
 	"github.com/gdamore/tcell/v2"
-	"github.com/one2nc/cloud-lens/internal/model"
+	"github.com/one2nc/cloudlens/internal/model"
 	"github.com/rs/zerolog/log"
 )
 

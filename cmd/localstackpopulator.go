@@ -7,8 +7,8 @@ import (
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/brianvoe/gofakeit"
-	"github.com/one2nc/cloud-lens/internal/config"
-	pop "github.com/one2nc/cloud-lens/populator"
+	"github.com/one2nc/cloudlens/internal/config"
+	pop "github.com/one2nc/cloudlens/populator"
 	"github.com/spf13/cobra"
 )
 
@@ -90,7 +90,7 @@ func init() {
 func getSession(profile, region string) (*session.Session, error) {
 	sess, err := session.NewSessionWithOptions(session.Options{Config: aws.Config{
 		//TODO: remove hardcoded enpoint
-		//Endpoint:         aws.String(localstackEndpoint),
+		Endpoint:         aws.String(localstackEndpoint),
 		Region:           aws.String(region),
 		S3ForcePathStyle: aws.Bool(true),
 	},

@@ -13,7 +13,7 @@ import (
 
 	"github.com/atotto/clipboard"
 	"github.com/gdamore/tcell/v2"
-	"github.com/one2nc/cloud-lens/internal/ui"
+	"github.com/one2nc/cloudlens/internal/ui"
 	"github.com/rs/zerolog/log"
 )
 
@@ -123,7 +123,7 @@ func (t *Table) importAsCSV(evt *tcell.EventKey) *tcell.EventKey {
 	if err != nil {
 		log.Info().Msg(fmt.Sprintf("error in getting the machine's user: %v", err))
 	}
-	path := usr.HomeDir + "/cloud-lens/csv/"
+	path := usr.HomeDir + "/cloudlens/csv/"
 	err = os.MkdirAll(path, os.ModePerm)
 	if err != nil {
 		log.Info().Msg(fmt.Sprintf("error in creating csv directory: %v", err))

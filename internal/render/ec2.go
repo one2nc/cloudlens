@@ -4,7 +4,7 @@ import (
 	"fmt"
 
 	"github.com/derailed/tview"
-	"github.com/one2nc/cloud-lens/internal/aws"
+	"github.com/one2nc/cloudlens/internal/aws"
 )
 
 type EC2 struct {

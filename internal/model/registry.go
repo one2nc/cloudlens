@@ -1,9 +1,9 @@
 package model
 
 import (
-	"github.com/one2nc/cloud-lens/internal"
-	"github.com/one2nc/cloud-lens/internal/dao"
-	"github.com/one2nc/cloud-lens/internal/render"
+	"github.com/one2nc/cloudlens/internal"
+	"github.com/one2nc/cloudlens/internal/dao"
+	"github.com/one2nc/cloudlens/internal/render"
 )
 
 var Registry = map[string]ResourceMeta{

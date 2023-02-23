@@ -8,7 +8,7 @@ import (
 	"strings"
 
 	"github.com/derailed/tview"
-	"github.com/one2nc/cloud-lens/internal/model"
+	"github.com/one2nc/cloudlens/internal/model"
 )
 
 const (

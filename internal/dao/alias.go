@@ -6,9 +6,9 @@ import (
 	"fmt"
 	"sort"
 
-	"github.com/one2nc/cloud-lens/internal"
-	"github.com/one2nc/cloud-lens/internal/config"
-	"github.com/one2nc/cloud-lens/internal/render"
+	"github.com/one2nc/cloudlens/internal"
+	"github.com/one2nc/cloudlens/internal/config"
+	"github.com/one2nc/cloudlens/internal/render"
 )
 
 var _ Accessor = (*Alias)(nil)

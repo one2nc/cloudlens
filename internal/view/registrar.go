@@ -1,6 +1,6 @@
 package view
 
-import "github.com/one2nc/cloud-lens/internal"
+import "github.com/one2nc/cloudlens/internal"
 
 func loadCustomViewers() MetaViewers {
 	m := make(MetaViewers, 5)

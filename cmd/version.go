@@ -1,31 +1,9 @@
 package cmd
 
-// import (
-// 	"fmt"
-
-// 	"github.com/spf13/cobra"
-// )
-
-// func versionCmd() *cobra.Command {
-// 	var command = &cobra.Command{
-// 		Use:   "version",
-// 		Short: "Print version/build info",
-// 		Long:  "Print version/build information",
-// 		Run: func(cmd *cobra.Command, args []string) {
-// 			printVersion()
-// 		},
-// 	}
-// 	return command
-// }
-
-// func printVersion() {
-// 	fmt.Println(version)
-// }
-
 import (
 	"fmt"
 
-	"github.com/one2nc/cloud-lens/internal/color"
+	"github.com/one2nc/cloudlens/internal/color"
 	"github.com/spf13/cobra"
 )
 

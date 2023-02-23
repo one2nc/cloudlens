@@ -5,8 +5,8 @@ import (
 	"time"
 
 	"github.com/derailed/tview"
-	"github.com/one2nc/cloud-lens/internal/dao"
-	"github.com/one2nc/cloud-lens/internal/render"
+	"github.com/one2nc/cloudlens/internal/dao"
+	"github.com/one2nc/cloudlens/internal/render"
 	"github.com/sahilm/fuzzy"
 )
 

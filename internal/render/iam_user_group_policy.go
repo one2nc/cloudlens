@@ -4,7 +4,7 @@ import (
 	"fmt"
 
 	"github.com/derailed/tview"
-	"github.com/one2nc/cloud-lens/internal/aws"
+	"github.com/one2nc/cloudlens/internal/aws"
 )
 
 type IamUserGroupPloicy struct {
@@ -27,7 +27,6 @@ func (iugp IamUserGroupPloicy) Render(o interface{}, ns string, row *Row) error 
 	row.Fields = Fields{
 		usrGroupPolicy.PolicyArn,
 		usrGroupPolicy.PolicyName,
-		
 	}
 	return nil
 }

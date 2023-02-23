@@ -5,7 +5,7 @@ import (
 	"path/filepath"
 	"sync"
 
-	"github.com/one2nc/cloud-lens/internal"
+	"github.com/one2nc/cloudlens/internal"
 	"github.com/rs/zerolog/log"
 	"gopkg.in/yaml.v2"
 )
@@ -135,17 +135,17 @@ func (a *Aliases) loadDefaultAliases() {
 	a.declare(internal.LowercaseIamUser, internal.UppercaseIamUser)
 	a.declare(internal.LowercaseEBS, internal.UppercaseEBS)
 	a.declare(internal.LowercaseIamUser, internal.UppercaseIamUser, internal.LowercaseIam, internal.UppercaseIam)
-	a.declare(internal.LowercaseIamGroup,internal.UppercaseIamGroup)
+	a.declare(internal.LowercaseIamGroup, internal.UppercaseIamGroup)
 	a.declare(internal.LowercaseIamRole, internal.UppercaseIamRole)
 	a.declare(internal.LowercaseEc2Snapshot, internal.UppercaseEc2Snapshot)
 	a.declare(internal.LowercaseEc2Image, internal.UppercaseEc2Image)
 	a.declare(internal.LowercaseSQS, internal.UppercaseSQS)
 	a.declare(internal.LowercaseVPC, internal.UppercaseVPC)
-	a.declare(internal.LowercaseSubnet,internal.UppercaseSubnet)
-	a.declare(internal.LowercaseLamda,internal.UppercaseLamda)
+	a.declare(internal.LowercaseSubnet, internal.UppercaseSubnet)
+	a.declare(internal.LowercaseLamda, internal.UppercaseLamda)
 
-	a.declare(internal.Help, internal.QuestionMark,internal.LowercaseH)
-	a.declare(internal.Quit,internal.LowercaseQ,internal.QFactorial,internal.UppercaseQ)
+	a.declare(internal.Help, internal.QuestionMark, internal.LowercaseH)
+	a.declare(internal.Quit, internal.LowercaseQ, internal.QFactorial, internal.UppercaseQ)
 	// a.declare(internal.Alias,internal.Aliases, internal.LowercaseA)
 }
 

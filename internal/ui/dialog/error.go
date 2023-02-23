@@ -6,7 +6,7 @@ import (
 
 	"github.com/derailed/tview"
 	"github.com/gdamore/tcell/v2"
-	"github.com/one2nc/cloud-lens/internal/ui"
+	"github.com/one2nc/cloudlens/internal/ui"
 )
 
 // ShowConfirm pops a confirmation dialog.

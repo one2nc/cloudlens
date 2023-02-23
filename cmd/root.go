@@ -6,12 +6,12 @@ import (
 	"os"
 
 	"github.com/mattn/go-colorable"
-	"github.com/one2nc/cloud-lens/internal"
-	"github.com/one2nc/cloud-lens/internal/aws"
-	"github.com/one2nc/cloud-lens/internal/color"
-	"github.com/one2nc/cloud-lens/internal/config"
-	"github.com/one2nc/cloud-lens/internal/view"
-	pop "github.com/one2nc/cloud-lens/populator"
+	"github.com/one2nc/cloudlens/internal"
+	"github.com/one2nc/cloudlens/internal/aws"
+	"github.com/one2nc/cloudlens/internal/color"
+	"github.com/one2nc/cloudlens/internal/config"
+	"github.com/one2nc/cloudlens/internal/view"
+	pop "github.com/one2nc/cloudlens/populator"
 	"github.com/rs/zerolog"
 	"github.com/rs/zerolog/log"
 	"github.com/spf13/cobra"
@@ -19,7 +19,7 @@ import (
 
 var (
 	profile, region string
-	version         = "dev"
+	version         = ""
 	rootCmd         = &cobra.Command{
 		Use:   `cloudlens`,
 		Short: `cli for aws services`,
@@ -30,7 +30,6 @@ var (
 )
 
 func init() {
-	fmt.Println("version val is:", version)
 	rootCmd.AddCommand(versionCmd())
 	rootCmd.PersistentFlags().StringVarP(&profile, "profile", "p", "default", "Read aws profile")
 	rootCmd.PersistentFlags().StringVarP(&region, "region", "r", "", "Read aws region")
