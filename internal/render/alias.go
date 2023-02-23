@@ -17,7 +17,6 @@ func (Alias) Header(ns string) Header {
 	}
 }
 
-// Render renders a K8s resource to screen.
 // BOZO!! Pass in a row with pre-alloc fields??
 func (Alias) Render(o interface{}, ns string, r *Row) error {
 	a, ok := o.(AliasRes)

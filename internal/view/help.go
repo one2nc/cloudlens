@@ -60,12 +60,12 @@ func (h *Help) bindKeys() {
 func (h *Help) build() {
 	h.Clear()
 
-	sections := []string{"RESOURCE", "GENERAL", "NAVIGATION"}
+	sections := []string{"SERVICES", "GENERAL", "NAVIGATION"}
 	h.maxRows = len(h.showGeneral())
 	ff := []HelpFunc{
+		h.showServices,
 		h.hints,
 		h.showGeneral,
-		h.showNav,
 	}
 
 	var col int
@@ -79,8 +79,74 @@ func (h *Help) build() {
 	}
 }
 
-func (h *Help) showNav() model.MenuHints {
+func (h *Help) showServices() model.MenuHints {
 	return model.MenuHints{
+		{
+			Mnemonic:    "s3",
+			Description: "view s3",
+		},
+		{
+			Mnemonic:    "ec2",
+			Description: "View Ec2",
+		},
+		{
+			Mnemonic:    "vpc",
+			Description: "View VPC",
+		},
+		{
+			Mnemonic:    "subnet",
+			Description: "View Subnet",
+		},
+		{
+			Mnemonic:    "iam:u",
+			Description: "View IAM User",
+		},
+		{
+			Mnemonic:    "iam:r",
+			Description: "View IAM Role",
+		},
+		{
+			Mnemonic:    "iam:g",
+			Description: "View IAM User group",
+		},
+		{
+			Mnemonic:    "sg",
+			Description: "View Security Group",
+		},
+	}
+}
+
+func (h *Help) showGeneral() model.MenuHints {
+	return model.MenuHints{
+		{
+			Mnemonic:    "?",
+			Description: "Help",
+		},
+		{
+			Mnemonic:    "esc",
+			Description: "Back/Clear",
+		},
+		{
+			Mnemonic:    "tab",
+			Description: "toggle dropdown",
+		},
+		{
+			Mnemonic:    "Ctrl-u",
+			Description: "Command Clear",
+		},
+		{
+			Mnemonic:    "Ctrl-e",
+			Description: "Toggle Header",
+		},
+
+		{
+			Mnemonic:    ":q",
+			Description: "Quit",
+		},
+		{
+			Mnemonic:    "z",
+			Description: "Save csv",
+		},
 		{
 			Mnemonic:    "g",
 			Description: "Goto Top",
@@ -112,75 +178,6 @@ func (h *Help) showNav() model.MenuHints {
 		{
 			Mnemonic:    "j",
 			Description: "Down",
-		},
-	}
-}
-
-func (h *Help) showGeneral() model.MenuHints {
-	return model.MenuHints{
-		{
-			Mnemonic:    "?",
-			Description: "Help",
-		},
-		{
-			Mnemonic:    "Ctrl-a",
-			Description: "Aliases",
-		},
-		{
-			Mnemonic:    ":cmd",
-			Description: "Command mode",
-		},
-		{
-			Mnemonic:    "/term",
-			Description: "Filter mode",
-		},
-		{
-			Mnemonic:    "esc",
-			Description: "Back/Clear",
-		},
-		{
-			Mnemonic:    "tab",
-			Description: "Field Next",
-		},
-		{
-			Mnemonic:    "backtab",
-			Description: "Field Previous",
-		},
-		{
-			Mnemonic:    "Ctrl-r",
-			Description: "Reload",
-		},
-		{
-			Mnemonic:    "Ctrl-u",
-			Description: "Command Clear",
-		},
-		{
-			Mnemonic:    "Ctrl-e",
-			Description: "Toggle Header",
-		},
-		{
-			Mnemonic:    "Ctrl-g",
-			Description: "Toggle Crumbs",
-		},
-		{
-			Mnemonic:    ":q",
-			Description: "Quit",
-		},
-		{
-			Mnemonic:    "space",
-			Description: "Mark",
-		},
-		{
-			Mnemonic:    "Ctrl-space",
-			Description: "Mark Range",
-		},
-		{
-			Mnemonic:    "Ctrl-\\",
-			Description: "Mark Clear",
-		},
-		{
-			Mnemonic:    "Ctrl-s",
-			Description: "Save",
 		},
 	}
 }
