@@ -90,6 +90,14 @@ func (h *Help) showServices() model.MenuHints {
 			Description: "View Ec2",
 		},
 		{
+			Mnemonic:    "ec2:i",
+			Description: "View EC2 snapshots",
+		},
+		{
+			Mnemonic:    "ec2:s",
+			Description: "View EC2 images",
+		},
+		{
 			Mnemonic:    "vpc",
 			Description: "View VPC",
 		},
@@ -112,6 +120,18 @@ func (h *Help) showServices() model.MenuHints {
 		{
 			Mnemonic:    "sg",
 			Description: "View Security Group",
+		},
+		{
+			Mnemonic:    "ebs",
+			Description: "View EBS volumes",
+		},
+		{
+			Mnemonic:    "sqs",
+			Description: "View sqs queues",
+		},
+		{
+			Mnemonic:    "lambda",
+			Description: "View Lamda functions",
 		},
 	}
 }

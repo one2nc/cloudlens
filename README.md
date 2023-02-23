@@ -13,6 +13,13 @@ Your One-Stop Terminal Solution for Seamless AWS Service Management and Monitori
 
 **Since cloudlens is in readonly mode, we recommend you create an access and secret key that only has readonly permissions to the AWS services.**
 
+## Features
+
+Our terminal application supports various features, allowing users to view EC2 instances, S3 buckets, EBS volumes, VPCs, SQS queues, Lambda functions, subnets, security groups, and IAM roles, making their work faster and more efficient.
+
+## Documentation
+
+Please refer to our [Cloudlens documentation](https://one2n.gitbook.io/docs/) to know more.
 
 ## We appreciate [localstack's](https://localstack.cloud/) assistance with the development
 
@@ -29,6 +36,15 @@ Your One-Stop Terminal Solution for Seamless AWS Service Management and Monitori
       ```shell
       make run
       ```
+## Installation
+
+Cloudlens is available on Linux and macOS.
+
+* Via [Homebrew](https://brew.sh/) for macOS or Linux
+
+   ```shell
+   brew install one2nc/cloudlens/cloudlens
+   ```
 
 ## Key Bindings
 
@@ -53,34 +69,6 @@ Cloudlens uses aliases to navigate most AWS Services.
       <img src="assets/s3.png"/>
 2. S3 Details
       <img src="assets/s3Details.png"/>
-
-3. IAM:G
-      <img src="assets/iamg.png"/>
-3. IAM:G Details
-      <img src="assets/iamg-details.png"/>
-
-4. IAM:U
-      <img src="assets/iamu.png"/>
-4. IAM:U Details
-      <img src="assets/iamu-details.png"/>
-
-5. IAM:R
-      <img src="assets/iamr.png"/>
-5. IAM:R Details
-      <img src="assets/iamr-details.png"/>
-
-6. SQS
-      <img src="assets/sqs.png"/>
-6. SQS Details:
-       <img src="assets/sqs-details.png"/>
-
-7. Lambda: 
-      <img src="assets/lambda.png"/>
-
-8. VPC:
-      <img src="assets/vpc.png"/>
-8. VPC Details:
-      <img src="assets/vpc-details.png"/>
 
 
 ## Acknowledgements
