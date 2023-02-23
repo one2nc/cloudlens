@@ -44,7 +44,7 @@ func NewApp() *App {
 
 // TODO keep context param at first place always
 func (a *App) Init(ctx context.Context, profiles, regions []string, version string) error {
-	a.version = version
+	a.version = model.NormalizeVersion(version)
 	ctx = context.WithValue(ctx, internal.KeyActiveProfile, profiles[0])
 	ctx = context.WithValue(ctx, internal.KeyActiveRegion, regions[0])
 	ctx = context.WithValue(ctx, internal.KeyApp, a)
