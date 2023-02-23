@@ -32,8 +32,8 @@ func printVersion(short bool) {
 		outputColor = -1
 	}
 	printTuple(fmat, "Version", version, outputColor)
-	// printTuple(fmat, "Commit", commit, outputColor)
-	// printTuple(fmat, "Date", date, outputColor)
+	printTuple(fmat, "Commit", commit, outputColor)
+	printTuple(fmat, "Date", date, outputColor)
 }
 
 func printTuple(fmat, section, value string, outputColor color.Paint) {

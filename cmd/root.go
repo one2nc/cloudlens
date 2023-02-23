@@ -19,7 +19,9 @@ import (
 
 var (
 	profile, region string
-	version         = ""
+	version         = "dev"
+	commit          = "dev"
+	date            = "today"
 	rootCmd         = &cobra.Command{
 		Use:   `cloudlens`,
 		Short: `cli for aws services`,
