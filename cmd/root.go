@@ -5,13 +5,13 @@ import (
 	"fmt"
 	"os"
 
+	cfg "github.com/aws/aws-sdk-go-v2/config"
 	"github.com/mattn/go-colorable"
 	"github.com/one2nc/cloudlens/internal"
 	"github.com/one2nc/cloudlens/internal/aws"
 	"github.com/one2nc/cloudlens/internal/color"
 	"github.com/one2nc/cloudlens/internal/config"
 	"github.com/one2nc/cloudlens/internal/view"
-	pop "github.com/one2nc/cloudlens/populator"
 	"github.com/rs/zerolog"
 	"github.com/rs/zerolog/log"
 	"github.com/spf13/cobra"
@@ -60,14 +60,14 @@ func run(cmd *cobra.Command, args []string) {
 	//TODO profiles and regions should under aws
 	profiles := readAndValidateProfile()
 	if profiles[0] == "default" && len(region) == 0 {
-		region = pop.GetDefaultAWSRegion()
+		region = getDefaultAWSRegion()
 	} else {
 		region = "ap-south-1"
 	}
 
 	regions := readAndValidateRegion()
 	//TODO Move this in the AWS folder
-	sess, err := config.GetSession(profiles[0], pop.GetDefaultAWSRegion())
+	sess, err := config.GetSession(profiles[0], getDefaultAWSRegion())
 	if err != nil {
 		panic(fmt.Sprintf("aws session init failed -- %v", err))
 	}
@@ -126,4 +126,14 @@ func readAndValidateRegion() []string {
 		}
 	}
 	return regions
+}
+
+func getDefaultAWSRegion() string {
+	cfg, err := cfg.LoadDefaultConfig(context.TODO())
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "failed to load AWS SDK config: %v\n", err)
+		os.Exit(1)
+	}
+	region := cfg.Region
+	return region
 }

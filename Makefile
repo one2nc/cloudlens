@@ -11,12 +11,6 @@ else
 DATE       ?= $(shell date -u -d @${SOURCE_DATE_EPOCH} +"%Y-%m-%dT%H:%M:%SZ")
 endif
 
-setup:
-	docker-compose up -d
-
-setup-down:
-	docker ps -a --format "{{.ID}} {{.Names}}" | grep cloudlens| awk '{print $$1}'| xargs docker stop | xargs docker rm -v
-
 build:
 	go build ${GO_FLAGS} \
 	-ldflags "-w -s -X ${PACKAGE}/cmd.version=${VERSION} -X ${PACKAGE}/cmd.commit=${GIT_REV} -X ${PACKAGE}/cmd.date=${DATE}" \
@@ -24,6 +18,3 @@ build:
 	
 run: build
 	./execs/cloudlens
-
-populate: build
-	./execs/cloudlens lspop
