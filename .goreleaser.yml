@@ -12,6 +12,9 @@ builds:
    
     flags:
       - -trimpath
+
+    ldflags:
+      - -s -w -X github.com/one2nc/cloudlens/cmd.version=v{{.Version}} -X github.com/one2nc/cloudlens/cmd.commit={{.Commit}} -X github.com/one2nc/cloudlens/cmd.date={{.Date}}
 release:
   prerelease: auto
 
