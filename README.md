@@ -4,7 +4,7 @@
 
 ## Cloudlens - k9s like CLI for AWS. 
 
-![]()
+![](assets/cloudlensdemo.gif)
 
 Your One-Stop Terminal Solution for Seamless AWS Service Management and Monitoring! With its intuitive UI and advanced features, it empowers you to effortlessly navigate, observe, and optimize your AWS environment, giving you more time to focus on your core business goals. Whether you're a seasoned cloud expert or just getting started, cloudlens will elevate your AWS experience and take your service management to new heights.
 
