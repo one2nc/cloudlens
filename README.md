@@ -4,7 +4,7 @@
 
 ## Cloudlens - k9s like CLI for AWS. 
 
-https://user-images.githubusercontent.com/87517248/220539848-f20b9791-29f9-4c09-b733-3fdf779d4911.mov
+![]()
 
 Your One-Stop Terminal Solution for Seamless AWS Service Management and Monitoring! With its intuitive UI and advanced features, it empowers you to effortlessly navigate, observe, and optimize your AWS environment, giving you more time to focus on your core business goals. Whether you're a seasoned cloud expert or just getting started, cloudlens will elevate your AWS experience and take your service management to new heights.
 
@@ -24,9 +24,22 @@ Cloudlens is available on Linux and macOS.
        1. Clone the repo
        2. Build and run the executable
 
-      ```shell
-      make run
-      ```
+  ```shell
+   make run
+   ```
+
+## Usage
+
+For the simple usage, just run the command without any options.
+
+```shell
+cloudlens
+```
+
+For knowing all the options available, use:
+```shell
+cloudlens help
+```
 
 ## Features
 
@@ -40,9 +53,9 @@ Please refer to our [Cloudlens documentation](https://one2n.gitbook.io/docs/) to
 
 ## Key Bindings
 
-Cloudlens uses k9s like shortcuts for navigation. aliases to navigate most AWS Services.
+Cloudlens uses k9s like shortcuts for navigation. Listed below are few of the shortcuts:
 
-| Action                                                         | Command                       | Comment                                                                |
+| Action                                                         | Command                       |                                                                 |
 |----------------------------------------------------------------|-------------------------------|------------------------------------------------------------------------|
 | Show active keyboard mnemonics and help                        | `?`                           |                                                                        |                                                                      |
 | To bail out of cloudlens                                             | `:q`, `ctrl-c`                |                                                                        |
