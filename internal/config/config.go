@@ -103,6 +103,17 @@ func GetSession(profile, region string) (*session.Session, error) {
 		fmt.Println("Error creating session:", err)
 		return nil, err
 	}
+
+	//comment this if using localstack
+	isExp := sess.Config.Credentials.IsExpired()
+	if err != nil {
+		fmt.Println("Error creating session:", err)
+		return nil, err
+	}
+	if isExp {
+		fmt.Println("Credentials have expired")
+		return nil, errors.New("AWS Credentials expired")
+	}
 	return sess, nil
 }
 
