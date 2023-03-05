@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"os"
+	"time"
 
 	cfg "github.com/aws/aws-sdk-go-v2/config"
 	"github.com/mattn/go-colorable"
@@ -90,19 +91,8 @@ func readAndValidateProfile() []string {
 	}
 	profiles, isSwapped := config.SwapFirstIndexWithValue(profiles, profile)
 	if !isSwapped {
-	loop:
-		for {
-			var input string
-			fmt.Printf("Profile '%v' not found, would you like to pick one from profiles[%v,..] ["+color.Colorize("y", color.Cyan)+"/"+color.Colorize("n", color.Red)+"]: ", color.Colorize(profile, color.Red), profiles[0])
-			fmt.Scanln(&input)
-			switch input {
-			case internal.LowercaseY, internal.UppercaseY, internal.LowercaseYes, internal.UppercaseYes:
-				break loop
-			case internal.LowercaseN, internal.UppercaseN, internal.LowercaseNo, internal.UppercaseNo:
-				fmt.Printf("Profile '%v' not found, exiting..", profile)
-				os.Exit(0)
-			}
-		}
+		fmt.Printf("Profile '%v' not found, using profile '%v'... ", color.Colorize(profile, color.Red), color.Colorize(profiles[0], color.Green))
+		time.Sleep(5 * time.Second)
 	}
 	return profiles
 }
