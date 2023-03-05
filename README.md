@@ -6,7 +6,7 @@
 
 ![](./assets/cloudlensdemo.gif)
 
-Your One-Stop Terminal Solution for Seamless AWS Service Management and Monitoring! With its intuitive UI and advanced features, it empowers you to effortlessly navigate, observe, and optimize your AWS environment, giving you more time to focus on your core business goals. Whether you're a seasoned cloud expert or just getting started, cloudlens will elevate your AWS experience and take your service management to new heights.
+Cloudlens provides a terminal UI for AWS Service Management and Monitoring! With its easy to use UI and advanced features, you can easily navigate, observe, and optimize your AWS environment. Whether you're a cloud expert or just getting started, cloudlens will elevate your AWS experience and take your service management to new heights.
 
 ## Installation
 
@@ -24,9 +24,10 @@ Cloudlens is available on Linux and macOS.
        1. Clone the repo
        2. Build and run the executable
 
+  To Run:
   ```shell
-   make run
-   ```
+  make run
+  ```
 
 ## Usage
 
@@ -45,10 +46,21 @@ cloudlens help
 
 Our terminal application supports various features, allowing users to view EC2 instances, S3 buckets, EBS volumes, VPCs, SQS queues, Lambda functions, subnets, security groups, and IAM roles, making their work faster and more efficient.
 
+## Screenshots
+
+1. EC2
+      <img src="assets/ec2.png"/>
+1. EC2 Details
+      <img src="assets/ec2Details.png"/>
+
+2. S3
+      <img src="assets/S3.png"/>
+2. S3 Details
+      <img src="assets/S3Details.png"/>
+
 ## Documentation
 
 Please refer to our [Cloudlens documentation](https://one2n.gitbook.io/docs/) to know more.
-
 
 
 ## Key Bindings
@@ -60,20 +72,7 @@ Cloudlens uses k9s like shortcuts for navigation. Listed below are few of the sh
 | Show active keyboard mnemonics and help                        | `?`                           |                                                                        |                                                                      |
 | To bail out of cloudlens                                             | `:q`, `ctrl-c`                |                                                                        |
 | Bails out of view/command/filter mode                          | `<esc>`                       |                                                                        |
-| To view and switch to another AWS Service               | `:`ctx⏎                       |                                                                        |
-
-
-## Screenshots
-
-1. EC2
-      <img src="assets/ec2.png"/>
-1. EC2 Details
-      <img src="assets/Ec2Json.png"/>
-
-2. S3
-      <img src="assets/s3.png"/>
-2. S3 Details
-      <img src="assets/s3Details.png"/>
+| To view and switch to another AWS Service               | `:`S3/EC2/VPC⏎                       |                                                                        |
 
 ## Note
 **Cloudlens reads your ~/.aws/config file, but it does not store or send your access and secret key anywhere. The access and secret key is used only to securely connect to AWS API via AWS SDK.**
