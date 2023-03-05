@@ -67,12 +67,12 @@ Please refer to our [Cloudlens documentation](https://one2n.gitbook.io/docs/) to
 
 Cloudlens uses k9s like shortcuts for navigation. Listed below are few of the shortcuts:
 
-| Action                                                         | Command                       |                                                                 |
-|----------------------------------------------------------------|-------------------------------|------------------------------------------------------------------------|
-| Show active keyboard mnemonics and help                        | `?`                           |                                                                        |                                                                      |
-| To bail out of cloudlens                                             | `:q`, `ctrl-c`                |                                                                        |
-| Bails out of view/command/filter mode                          | `<esc>`                       |                                                                        |
-| To view and switch to another AWS Service               | `:`S3/EC2/VPC⏎                       |                                                                        |
+| **Action**                                | **Command**   |
+|-------------------------------------------|---------------|
+| Show active keyboard mnemonics and help   | ?             |
+| To bail out of cloudlens                  | :q ,   ctrl-c |
+| Bails out of view/command/filter mode     | esc         |
+| To view and switch to another AWS Service | :S3/EC2/VPC⏎  |
 
 ## Note
 **Cloudlens reads your ~/.aws/config file, but it does not store or send your access and secret key anywhere. The access and secret key is used only to securely connect to AWS API via AWS SDK.**
