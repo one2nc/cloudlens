@@ -6,11 +6,15 @@ description: >-
 
 # 👋 Cloudlens
 
-<figure><img src=".gitbook/assets/sketch1676904071702.png" alt="cloudlens"><figcaption><p>Cloudlens</p></figcaption></figure>
+![](<.gitbook/assets/cloudlens (2).png>)
 
 ## Terminal-ate Your Cloud Worries!
 
-Cloudlens is a terminal-based UI that lets you interact with your cloud services with ease. Our mission is to make it easier for you to navigate, observe, and manage your cloud services, so you can focus on what really matters - your business. With cloudlens, you get an intuitive UI and powerful commands that make navigating your cloud services a breeze.
+Cloudlens provides a terminal UI for AWS Service Management and Monitoring! With its easy to use UI and advanced features, you can easily navigate, observe, and optimize your AWS environment. Whether you're a cloud expert or just getting started, cloudlens will elevate your AWS experience and take your service management to new heights.
+
+### Got 2 minutes? Check out a video overview of cloudlens:
+
+
 
 {% content-ref url="overview/what-we-do.md" %}
 [what-we-do.md](overview/what-we-do.md)
