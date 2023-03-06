@@ -44,7 +44,7 @@ cloudlens help
 
 ## Features
 
-Our terminal application supports various features, allowing users to view EC2 instances, S3 buckets, EBS volumes, VPCs, SQS queues, Lambda functions, subnets, security groups, and IAM roles, making their work faster and more efficient.
+Cloudlens supports viewing EC2 instances, S3 buckets, EBS volumes, VPCs, SQS queues, Lambda functions, Subnets, Security Groups, and IAM roles. Read the [cloudlens documentation](https://one2n.gitbook.io/docs/) to know more.
 
 ## Screenshots
 
@@ -60,7 +60,7 @@ Our terminal application supports various features, allowing users to view EC2 i
 
 ## Documentation
 
-Please refer to our [Cloudlens documentation](https://one2n.gitbook.io/docs/) to know more.
+Please refer to our [cloudlens documentation](https://one2n.gitbook.io/docs/) to know more.
 
 
 ## Key Bindings
