@@ -6,7 +6,7 @@
 
 ![](./assets/cloudlensdemo.gif)
 
-Cloudlens provides a terminal UI for AWS Service Management and Monitoring! With its easy to use UI and advanced features, you can easily navigate, observe, and optimize your AWS environment. Whether you're a cloud expert or just getting started, cloudlens will elevate your AWS experience and take your service management to new heights.
+AWS Console in your terminal! well, almost. Explore AWS services like EC2, S3, IAM, VPC, etc. from your terminal. If you like k9s for Kubernetes, you'll love cloudlens.
 
 ## Installation
 
@@ -54,9 +54,9 @@ Our terminal application supports various features, allowing users to view EC2 i
       <img src="assets/ec2Details.png"/>
 
 2. S3
-      <img src="assets/S3.png"/>
+      <img src="assets/s3.png"/>
 2. S3 Details
-      <img src="assets/S3Details.png"/>
+      <img src="assets/s3Details.png"/>
 
 ## Documentation
 
@@ -87,4 +87,4 @@ All materials licensed under [Apache v2.0](http://www.apache.org/licenses/LICENS
 
 ## We appreciate [localstack's](https://localstack.cloud/) assistance with the development
 
-<img src="assets/localstack.jpeg" alt="k9s">
+<img src="assets/localstack.jpeg" alt="localstack">
