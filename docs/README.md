@@ -40,20 +40,20 @@ cloudlens
 
 ### Features
 
-| Services                             | Description                                                           | Alias   |
-| ------------------------------------ | --------------------------------------------------------------------- | ------- |
-| [S3](./#s3)                          | View all S3 buckets and their contents                                | `s3`    |
-| [EC2](./#ec2)                        | view all instances and their associated metadata, including JSON data | `ec2`   |
-| [EC2 Snapshot](./#ec2-snapshot)      | view a list of all EC2 snapshots                                      | `ec2:s` |
-| [EC2 Image](./#ec2-image)            | See a list of all EC2 images                                          | `ec2:i` |
-| [VPC](./#vpc)                        | view all  VPC's and their associated metadata, including JSON data    | `vpc`   |
-| [Security Group](./#security-group)  | Security Groups and their associated metadata                         | `sg`    |
-| [IAM users](./#iam-users)            | view all IAM users and their associated metadata                      | `iam:u` |
-| [IAM user groups](./#iam-user-group) | view all IAM users groups                                             | `iam:g` |
-| [IAM Roles](./#iam-roles)            | view all IAM Roles                                                    | `iam:r` |
-| [EBS](./#ebs)                        | View all available EBS volumes                                        | `ebs`   |
-| [SQS](./#sqs)                        | view a list of all SQS queues                                         | `sqs`   |
-| [Lambda](./#lambda)                  | view a list of all Lambda functions                                   | `lamda` |
+| Services                            | Description                                                           | Alias   |
+| ----------------------------------- | --------------------------------------------------------------------- | ------- |
+| [S3](./#s3)                         | View all S3 buckets and their contents                                | `s3`    |
+| [EC2](./#ec2)                       | view all instances and their associated metadata, including JSON data | `ec2`   |
+| [EC2 Snapshot](./#ec2-snapshot)     | view a list of all EC2 snapshots                                      | `ec2:s` |
+| [EC2 Image](./#ec2-image)           | See a list of all EC2 images                                          | `ec2:i` |
+| [VPC](./#vpc)                       | view all  VPC's and their associated metadata, including JSON data    | `vpc`   |
+| [Security Group](./#security-group) | Security Groups and their associated metadata                         | `sg`    |
+| [IAM users](./#iam-users)           | view all IAM users and their associated metadata                      | `iam:u` |
+| [IAM Groups](./#iam-group)          | view all IAM users groups                                             | `iam:g` |
+| [IAM Roles](./#iam-roles)           | view all IAM Roles                                                    | `iam:r` |
+| [EBS](./#ebs)                       | View all available EBS volumes                                        | `ebs`   |
+| [SQS](./#sqs)                       | view a list of all SQS queues                                         | `sqs`   |
+| [Lambda](./#lambda)                 | view a list of all Lambda functions                                   | `lamda` |
 
 ### Prompt
 
@@ -172,15 +172,3 @@ To view <mark style="color:orange;">SQS queues</mark>, enter `sqs` in the comman
 View all your Lambda functions easily by entering 'lambda' command in your terminal prompt.
 
 <figure><img src=".gitbook/assets/image (12).png" alt=""><figcaption></figcaption></figure>
-
-{% content-ref url="broken-reference" %}
-[Broken link](broken-reference)
-{% endcontent-ref %}
-
-## Get Started
-
-We've put together some helpful guides for you to get setup with cloudlens quickly and easily.
-
-{% content-ref url="broken-reference" %}
-[Broken link](broken-reference)
-{% endcontent-ref %}
