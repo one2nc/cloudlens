@@ -173,14 +173,14 @@ View all your Lambda functions easily by entering 'lambda' command in your termi
 
 <figure><img src=".gitbook/assets/image (12).png" alt=""><figcaption></figcaption></figure>
 
-{% content-ref url="overview/features.md" %}
-[features.md](overview/features.md)
+{% content-ref url="broken-reference" %}
+[Broken link](broken-reference)
 {% endcontent-ref %}
 
 ## Get Started
 
 We've put together some helpful guides for you to get setup with cloudlens quickly and easily.
 
-{% content-ref url="overview/getting-set-up.md" %}
-[getting-set-up.md](overview/getting-set-up.md)
+{% content-ref url="broken-reference" %}
+[Broken link](broken-reference)
 {% endcontent-ref %}
