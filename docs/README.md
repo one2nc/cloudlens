@@ -1,7 +1,5 @@
 ---
-description: >-
-  Your One-Stop Terminal Solution for Seamless AWS Service Management and
-  Monitoring!
+description: k9s like CLI for AWS
 ---
 
 # 👋 Cloudlens
