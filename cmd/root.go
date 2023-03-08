@@ -67,7 +67,7 @@ func run(cmd *cobra.Command, args []string) {
 	}
 
 	regions := readAndValidateRegion()
-	sess, err := aws.GetSession(profiles[0], region)
+	sess, err := aws.GetSession(profiles[0], regions[0])
 	if err != nil {
 		panic(fmt.Sprintf("aws session init failed -- %v", err))
 	}
