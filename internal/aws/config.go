@@ -38,17 +38,14 @@ func GetSession(profile, region string) (*session.Session, error) {
 		return nil, err
 	}
 	creds, err := cfg.Credentials.Retrieve(context.TODO())
-	credentialProvider := credentialProvider{Credentials: creds}
-	if credentialProvider.IsExpired() {
-		fmt.Println("Credentials have expired")
-		return nil, errors.New("AWS Credentials expired")
-	}
 	if err != nil {
 		fmt.Printf("failed to read credentials")
 		return nil, err
 	}
-	if err != nil {
-		panic(fmt.Sprintf("failed to load SDK configuration, %v", err))
+	credentialProvider := credentialProvider{Credentials: creds}
+	if credentialProvider.IsExpired() {
+		fmt.Println("Credentials have expired")
+		return nil, errors.New("AWS Credentials expired")
 	}
 
 	// create session
