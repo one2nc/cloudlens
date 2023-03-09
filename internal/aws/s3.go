@@ -60,7 +60,6 @@ func GetInfoAboutBucket(sess session.Session, bucketName string, delimiter strin
 		log.Info().Msg(fmt.Sprintf("Error is here: %v", err))
 		return nil, err
 	}
-	fmt.Println("Result is:", result)
 	return result, nil
 }
 
