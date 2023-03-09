@@ -23,7 +23,12 @@ func GetInstances(sess session.Session) ([]EC2Resp, error) {
 	for _, reservation := range result.Reservations {
 		for _, instance := range reservation.Instances {
 			launchTime := instance.LaunchTime
-			loc, _ := time.LoadLocation("Asia/Kolkata")
+			localZone, err := GetLocalTimeZone() // Empty string loads the local timezone
+			if err != nil {
+				fmt.Println("Error loading local timezone:", err)
+				return nil, err
+			}
+			loc, _ := time.LoadLocation(localZone)
 			IST := launchTime.In(loc)
 			ec2Resp := &EC2Resp{
 				Instance:         *instance,
@@ -88,7 +93,12 @@ func GetVolumes(sess session.Session) ([]EBSResp, error) {
 	}
 	for _, v := range result.Volumes {
 		launchTime := v.CreateTime
-		loc, _ := time.LoadLocation("Asia/Kolkata")
+		localZone, err := GetLocalTimeZone() // Empty string loads the local timezone
+		if err != nil {
+			fmt.Println("Error loading local timezone:", err)
+			return nil, err
+		}
+		loc, _ := time.LoadLocation(localZone)
 		IST := launchTime.In(loc)
 		IST.Format("Mon Jan _2 15:04:05 2006")
 		volume := EBSResp{
@@ -131,7 +141,12 @@ func GetSnapshots(sess session.Session) []Snapshot {
 	var snapshots []Snapshot
 	for _, s := range result.Snapshots {
 		launchTime := s.StartTime
-		loc, _ := time.LoadLocation("Asia/Kolkata")
+		localZone, err := GetLocalTimeZone() // Empty string loads the local timezone
+		if err != nil {
+			fmt.Println("Error loading local timezone:", err)
+			return nil
+		}
+		loc, _ := time.LoadLocation(localZone)
 		IST := launchTime.In(loc)
 		IST.Format("Mon Jan _2 15:04:05 2006")
 		snapshot := Snapshot{
@@ -268,4 +283,13 @@ func GetSingleSubnet(sess session.Session, sId string) *ec2.Subnet {
 		return nil
 	}
 	return result.Subnets[0]
+}
+
+func GetLocalTimeZone() (string, error) {
+	localZone, err := time.LoadLocation("") // Empty string loads the local timezone
+	if err != nil {
+		fmt.Println("Error loading local timezone:", err)
+		return "", err
+	}
+	return localZone.String(), nil
 }

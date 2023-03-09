@@ -37,7 +37,12 @@ func ListBuckets(sess session.Session) ([]BucketResp, error) {
 			return nil, err
 		}
 		launchTime := buc.CreationDate
-		loc, _ := time.LoadLocation("Asia/Kolkata")
+		localZone, err := GetLocalTimeZone() // Empty string loads the local timezone
+		if err != nil {
+			fmt.Println("Error loading local timezone:", err)
+			return nil, err
+		}
+		loc, _ := time.LoadLocation(localZone)
 		IST := launchTime.In(loc)
 		bucketresp := &BucketResp{BucketName: *buc.Name, CreationTime: IST.Format("Mon Jan _2 15:04:05 2006"), Region: aws.StringValue(reg.LocationConstraint)}
 		bucketInfo = append(bucketInfo, *bucketresp)
@@ -45,17 +50,17 @@ func ListBuckets(sess session.Session) ([]BucketResp, error) {
 	return bucketInfo, nil
 }
 
-func GetInfoAboutBucket(sess session.Session, bucketName string, delimiter string, prefix string) *s3.ListObjectsV2Output {
+func GetInfoAboutBucket(sess session.Session, bucketName string, delimiter string, prefix string) (*s3.ListObjectsV2Output, error) {
 	s3Serv := *s3.New(&sess)
 	result, err := s3Serv.ListObjectsV2(&s3.ListObjectsV2Input{
 		Bucket:    aws.String(bucketName),
 		Delimiter: aws.String(delimiter),
 		Prefix:    aws.String(prefix)})
 	if err != nil {
-		log.Info().Msg(fmt.Sprintf("Error is: %v", err))
-		return nil
+		log.Info().Msg(fmt.Sprintf("Error is here: %v", err))
+		return nil, err
 	}
-	return result
+	return result, nil
 }
 
 func GetPreSignedUrl(sess session.Session, bucketName, key string) string {

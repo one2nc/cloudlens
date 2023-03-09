@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"strings"
+	"time"
 
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/s3"
@@ -24,12 +25,9 @@ func (bo *BObj) List(ctx context.Context) ([]Object, error) {
 	}
 	bucketName := fmt.Sprintf("%v", ctx.Value(internal.BucketName))
 	fn := fmt.Sprintf("%v", ctx.Value(internal.FolderName))
-	log.Info().Msg(fmt.Sprintf("In Dao Bucket Name: %v", bucketName))
-	log.Info().Msg(fmt.Sprintf("In Dao Folder Name: %v", fn))
-	bucketInfo := aws.GetInfoAboutBucket(*sess, bucketName, "/", fn)
-	folderArrayInfo, fileArrayInfo := getBucLevelInfo(bucketInfo)
 	var s3Objects []aws.S3Object
-	if len(folderArrayInfo) == 0 && len(fileArrayInfo) == 0 {
+	bucketInfo, err := aws.GetInfoAboutBucket(*sess, bucketName, "/", fn)
+	if err != nil {
 		s3Objects = append(s3Objects, aws.S3Object{
 			Name: "No objects found",
 		})
@@ -65,6 +63,7 @@ func getBucLevelInfo(bucketInfo *s3.ListObjectsV2Output) ([]string, []string) {
 func setFoldersAndFiles(folders []*s3.CommonPrefix, files []*s3.Object) []aws.S3Object {
 	var s3Objects []aws.S3Object
 	indx := 0
+
 	if len(folders) != 0 {
 		for _, bi := range folders {
 			keyA := strings.Split(*bi.Prefix, "/")
@@ -82,18 +81,36 @@ func setFoldersAndFiles(folders []*s3.CommonPrefix, files []*s3.Object) []aws.S3
 
 	if len(files) != 0 {
 		for _, fi := range files {
-			keyA := strings.Split(*fi.Key, "/")
-			o := aws.S3Object{
-				Name:         keyA[len(keyA)-1],
-				ObjectType:   "File",
-				LastModified: fi.LastModified.String(),
-				Size:         humanize.Bytes(uint64(*fi.Size)),
-				StorageClass: *fi.StorageClass,
+			localZone, err := GetLocalTimeZone() // Empty string loads the local timezone
+			if err != nil {
+				fmt.Println("Error loading local timezone:", err)
+				return nil
 			}
-			s3Objects = append(s3Objects, o)
-			indx++
+			loc, _ := time.LoadLocation(localZone)
+			launchTime := fi.LastModified
+			IST := launchTime.In(loc)
+			keyA := strings.Split(*fi.Key, "/")
+			if keyA[len(keyA)-1] != "" {
+				o := aws.S3Object{
+					Name:         keyA[len(keyA)-1],
+					ObjectType:   "File",
+					LastModified: IST.Format("Mon Jan _2 15:04:05 2006"),
+					Size:         humanize.Bytes(uint64(*fi.Size)),
+					StorageClass: *fi.StorageClass,
+				}
+				s3Objects = append(s3Objects, o)
+				indx++
+			}
 		}
 	}
-
 	return s3Objects
+}
+
+func GetLocalTimeZone() (string, error) {
+	localZone, err := time.LoadLocation("") // Empty string loads the local timezone
+	if err != nil {
+		fmt.Println("Error loading local timezone:", err)
+		return "", err
+	}
+	return localZone.String(), nil
 }

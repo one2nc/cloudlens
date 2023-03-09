@@ -4,7 +4,6 @@ import (
 	"context"
 	"fmt"
 	"os"
-	"time"
 
 	cfg "github.com/aws/aws-sdk-go-v2/config"
 	"github.com/mattn/go-colorable"
@@ -47,17 +46,19 @@ func Execute() {
 
 func run(cmd *cobra.Command, args []string) {
 	mod := os.O_CREATE | os.O_APPEND | os.O_WRONLY
-	file, err := os.OpenFile("./log.txt", mod, 0644)
+	file, err := os.OpenFile("./cloudlens.log", mod, 0644)
 	if err != nil {
-		panic(err)
+		log.Printf("Could not open cloudlens.log. Writing logs to stdout instead.")
+		log.Logger = log.Output(zerolog.ConsoleWriter{Out: os.Stdout})
 	}
 	defer func() {
 		if file != nil {
 			_ = file.Close()
 		}
 	}()
-	log.Logger = log.Output(zerolog.ConsoleWriter{Out: file})
-
+	if err == nil {
+		log.Logger = log.Output(zerolog.ConsoleWriter{Out: file})
+	}
 	//TODO profiles and regions should under aws
 	profiles := readAndValidateProfile()
 	if profiles[0] == "default" && len(region) == 0 {
@@ -91,7 +92,6 @@ func readAndValidateProfile() []string {
 	profiles, isSwapped := config.SwapFirstIndexWithValue(profiles, profile)
 	if !isSwapped {
 		fmt.Printf("Profile '%v' not found, using profile '%v'... ", color.Colorize(profile, color.Red), color.Colorize(profiles[0], color.Green))
-		time.Sleep(5 * time.Second)
 	}
 	return profiles
 }
@@ -100,19 +100,7 @@ func readAndValidateRegion() []string {
 	regions := aws.GetAllRegions()
 	regions, isSwapped := config.SwapFirstIndexWithValue(regions, region)
 	if !isSwapped {
-	loop:
-		for {
-			var input string
-			fmt.Printf("Region '%v' not found, would you like to pick one from regions[%v,..] ["+color.Colorize("y", color.Cyan)+"/"+color.Colorize("n", color.Red)+"]: ", color.Colorize(region, color.Red), regions[0])
-			fmt.Scanln(&input)
-			switch input {
-			case internal.LowercaseY, internal.UppercaseY, internal.LowercaseYes, internal.UppercaseYes:
-				break loop
-			case internal.LowercaseN, internal.UppercaseN, internal.LowercaseNo, internal.UppercaseNo:
-				fmt.Printf("Region '%v' not found, exiting..", region)
-				os.Exit(0)
-			}
-		}
+		fmt.Printf("Region '%v' not found, using %v..", color.Colorize(region, color.Red), color.Colorize(regions[0], color.Green))
 	}
 	return regions
 }
