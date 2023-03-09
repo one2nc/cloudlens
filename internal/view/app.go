@@ -10,7 +10,7 @@ import (
 	"github.com/derailed/tview"
 	"github.com/gdamore/tcell/v2"
 	"github.com/one2nc/cloudlens/internal"
-	"github.com/one2nc/cloudlens/internal/config"
+	"github.com/one2nc/cloudlens/internal/aws"
 	"github.com/one2nc/cloudlens/internal/model"
 	"github.com/one2nc/cloudlens/internal/ui"
 	"github.com/one2nc/cloudlens/internal/ui/dialog"
@@ -252,7 +252,7 @@ func (a *App) regionChanged(region string, index int) {
 }
 
 func (a *App) refreshSession(profile string, region string) {
-	sess, err := config.GetSession(profile, region)
+	sess, err := aws.GetSession(profile, region)
 	if err != nil {
 		a.App.Flash().Err(err)
 		return

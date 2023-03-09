@@ -61,13 +61,12 @@ func run(cmd *cobra.Command, args []string) {
 	profiles := readAndValidateProfile()
 	if profiles[0] == "default" && len(region) == 0 {
 		region = getDefaultAWSRegion()
-	} else {
+	} else if len(region) == 0 {
 		region = "ap-south-1"
 	}
 
 	regions := readAndValidateRegion()
-	//TODO Move this in the AWS folder
-	sess, err := config.GetSession(profiles[0], getDefaultAWSRegion())
+	sess, err := aws.GetSession(profiles[0], regions[0])
 	if err != nil {
 		panic(fmt.Sprintf("aws session init failed -- %v", err))
 	}
@@ -84,7 +83,7 @@ func run(cmd *cobra.Command, args []string) {
 }
 
 func readAndValidateProfile() []string {
-	profiles, err := config.GetProfiles()
+	profiles, err := aws.GetProfiles()
 	if err != nil {
 		panic(fmt.Sprintf("failed to read profiles -- %v", err))
 	}

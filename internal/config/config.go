@@ -1,21 +1,12 @@
 package config
 
 import (
-	"context"
-	"errors"
 	"fmt"
-	"io/ioutil"
 	"os"
 	"path/filepath"
-	"reflect"
-	"strings"
 
 	"github.com/adrg/xdg"
 	awsV2 "github.com/aws/aws-sdk-go-v2/aws"
-	awsV2Config "github.com/aws/aws-sdk-go-v2/config"
-	"github.com/aws/aws-sdk-go/aws"
-	"github.com/aws/aws-sdk-go/aws/defaults"
-	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/rs/zerolog/log"
 	"gopkg.in/yaml.v2"
 )
@@ -41,7 +32,6 @@ func CloudlensHome() string {
 		//log.Debug().Msg("env CL: " + env)
 		return env
 	}
-
 	xdgCLHome, err := xdg.ConfigFile("cloudlens")
 	//log.Debug().Msg("xdgsclhome: " + xdgCLHome)
 
@@ -89,71 +79,26 @@ func (c *Config) SaveFile(path string) error {
 	return os.WriteFile(path, cfg, 0644)
 }
 
-var config Config
+// Unsed for now
 
-func GetSession(profile, region string) (*session.Session, error) {
-	sess, err := session.NewSessionWithOptions(session.Options{Config: aws.Config{
-		//TODO: remove hardcoded enpoint
-		// Endpoint:         aws.String(localstackEndpoint),
-		Region:           aws.String(region),
-		S3ForcePathStyle: aws.Bool(true),
-	},
-		Profile: profile})
-	if err != nil {
-		fmt.Println("Error creating session:", err)
-		return nil, err
-	}
+// var config Config
 
-	//comment this if using localstack
-	isExp := sess.Config.Credentials.IsExpired()
-	if err != nil {
-		fmt.Println("Error creating session:", err)
-		return nil, err
-	}
-	if isExp {
-		fmt.Println("Credentials have expired")
-		return nil, errors.New("AWS Credentials expired")
-	}
-	return sess, nil
-}
-
-func Get() (Config, error) {
-	emptyCfg := Config{}
-	if reflect.DeepEqual(emptyCfg, config) {
-		profiles, err := GetProfiles()
-		if err != nil {
-			return emptyCfg, err
-		}
-		config.Profiles = profiles
-		if LookupForValue(config.Profiles, "default") {
-			// Load the Shared AWS Configuration (~/.aws/config)
-			awsLocalCfg, err := awsV2Config.LoadDefaultConfig(context.TODO())
-			if err != nil {
-				return emptyCfg, err
-			}
-			config.AwsConfig = awsLocalCfg
-		}
-	}
-	return config, nil
-}
-
-func GetProfiles() (profiles []string, err error) {
-	filepath := defaults.SharedCredentialsFilename()
-	fileContent, err := ioutil.ReadFile(filepath)
-	if err != nil {
-		return profiles, err
-	}
-	lines := strings.Split(string(fileContent), "\n")
-	for _, line := range lines {
-		if strings.HasPrefix(line, "[") && strings.HasSuffix(line, "]") {
-			profile := line[1 : len(line)-1]
-			profiles = append(profiles, profile)
-		}
-	}
-	if len(profiles) < 1 {
-		err = errors.New("NO PROFILES FOUND")
-		return nil, err
-	}
-
-	return profiles, nil
-}
+// func Get() (Config, error) {
+// 	emptyCfg := Config{}
+// 	if reflect.DeepEqual(emptyCfg, config) {
+// 		profiles, err := GetProfiles()
+// 		if err != nil {
+// 			return emptyCfg, err
+// 		}
+// 		config.Profiles = profiles
+// 		if LookupForValue(config.Profiles, "default") {
+// 			// Load the Shared AWS Configuration (~/.aws/config)
+// 			awsLocalCfg, err := awsV2Config.LoadDefaultConfig(context.TODO())
+// 			if err != nil {
+// 				return emptyCfg, err
+// 			}
+// 			config.AwsConfig = awsLocalCfg
+// 		}
+// 	}
+// 	return config, nil
+// }
