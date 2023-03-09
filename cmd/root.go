@@ -46,17 +46,19 @@ func Execute() {
 
 func run(cmd *cobra.Command, args []string) {
 	mod := os.O_CREATE | os.O_APPEND | os.O_WRONLY
-	file, err := os.OpenFile("./log.txt", mod, 0644)
+	file, err := os.OpenFile("./cloudlens.log", mod, 0644)
 	if err != nil {
-		panic(err)
+		log.Printf("Could not open cloudlens.log. Writing logs to stdout instead.")
+		log.Logger = log.Output(zerolog.ConsoleWriter{Out: os.Stdout})
 	}
 	defer func() {
 		if file != nil {
 			_ = file.Close()
 		}
 	}()
-	log.Logger = log.Output(zerolog.ConsoleWriter{Out: file})
-
+	if err == nil {
+		log.Logger = log.Output(zerolog.ConsoleWriter{Out: file})
+	}
 	//TODO profiles and regions should under aws
 	profiles := readAndValidateProfile()
 	if profiles[0] == "default" && len(region) == 0 {
