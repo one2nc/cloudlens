@@ -4,7 +4,6 @@ import (
 	"context"
 	"fmt"
 	"os"
-	"time"
 
 	cfg "github.com/aws/aws-sdk-go-v2/config"
 	"github.com/mattn/go-colorable"
@@ -92,7 +91,6 @@ func readAndValidateProfile() []string {
 	profiles, isSwapped := config.SwapFirstIndexWithValue(profiles, profile)
 	if !isSwapped {
 		fmt.Printf("Profile '%v' not found, using profile '%v'... ", color.Colorize(profile, color.Red), color.Colorize(profiles[0], color.Green))
-		time.Sleep(5 * time.Second)
 	}
 	return profiles
 }

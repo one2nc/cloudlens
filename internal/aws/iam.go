@@ -20,7 +20,12 @@ func GetUsers(sess session.Session) []IAMUSerResp {
 	var users []IAMUSerResp
 	for _, u := range result.Users {
 		launchTime := u.CreateDate
-		loc, _ := time.LoadLocation("Asia/Kolkata")
+		localZone, err := GetLocalTimeZone() // Empty string loads the local timezone
+		if err != nil {
+			fmt.Println("Error loading local timezone:", err)
+			return nil
+		}
+		loc, _ := time.LoadLocation(localZone)
 		IST := launchTime.In(loc)
 		user := &IAMUSerResp{
 			UserId:       *u.UserId,
@@ -128,7 +133,12 @@ func GetIamRoles(sess session.Session) []IamRoleResp {
 	var roles []IamRoleResp
 	for _, r := range result.Roles {
 		launchTime := r.CreateDate
-		loc, _ := time.LoadLocation("Asia/Kolkata")
+		localZone, err := GetLocalTimeZone() // Empty string loads the local timezone
+		if err != nil {
+			fmt.Println("Error loading local timezone:", err)
+			return nil
+		}
+		loc, _ := time.LoadLocation(localZone)
 		IST := launchTime.In(loc)
 		role := &IamRoleResp{
 			RoleId:       *r.RoleId,

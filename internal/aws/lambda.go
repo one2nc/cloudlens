@@ -24,7 +24,12 @@ func GetAllLambdaFunctions(sess session.Session) ([]LambdaResp, error) {
 			log.Info().Msg(fmt.Sprintf("error in converting 8601 %v", err))
 			return nil, err
 		}
-		loc, _ := time.LoadLocation("Asia/Kolkata")
+		localZone, err := GetLocalTimeZone() // Empty string loads the local timezone
+		if err != nil {
+			fmt.Println("Error loading local timezone:", err)
+			return nil, err
+		}
+		loc, _ := time.LoadLocation(localZone)
 		t := lastModTime.In(loc)
 		IST := t.In(loc)
 		log.Info().Msg(fmt.Sprintf("IST IS %v", IST))

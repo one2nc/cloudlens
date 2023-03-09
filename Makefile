@@ -14,7 +14,7 @@ endif
 build:
 	go build ${GO_FLAGS} \
 	-ldflags "-w -s -X ${PACKAGE}/cmd.version=${VERSION} -X ${PACKAGE}/cmd.commit=${GIT_REV} -X ${PACKAGE}/cmd.date=${DATE}" \
-	-a -tags netgo -o ${OUTPUT_BIN} main.go
+	-o ${OUTPUT_BIN} main.go
 	
 run: build
 	./execs/cloudlens

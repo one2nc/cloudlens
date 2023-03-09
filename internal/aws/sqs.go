@@ -34,7 +34,12 @@ func GetAllQueues(sess session.Session) ([]SQSResp, error) {
 		}
 		mp := qAttributes.Attributes
 		launchTime, _ := strconv.Atoi(*mp["CreatedTimestamp"])
-		loc, _ := time.LoadLocation("Asia/Kolkata")
+		localZone, err := GetLocalTimeZone() // Empty string loads the local timezone
+		if err != nil {
+			fmt.Println("Error loading local timezone:", err)
+			return nil, err
+		}
+		loc, _ := time.LoadLocation(localZone)
 		IST := time.Unix(int64(launchTime), 0).In(loc)
 		qR := SQSResp{
 			Name:              qName,
