@@ -98,19 +98,7 @@ func readAndValidateRegion() []string {
 	regions := aws.GetAllRegions()
 	regions, isSwapped := config.SwapFirstIndexWithValue(regions, region)
 	if !isSwapped {
-	loop:
-		for {
-			var input string
-			fmt.Printf("Region '%v' not found, would you like to pick one from regions[%v,..] ["+color.Colorize("y", color.Cyan)+"/"+color.Colorize("n", color.Red)+"]: ", color.Colorize(region, color.Red), regions[0])
-			fmt.Scanln(&input)
-			switch input {
-			case internal.LowercaseY, internal.UppercaseY, internal.LowercaseYes, internal.UppercaseYes:
-				break loop
-			case internal.LowercaseN, internal.UppercaseN, internal.LowercaseNo, internal.UppercaseNo:
-				fmt.Printf("Region '%v' not found, exiting..", region)
-				os.Exit(0)
-			}
-		}
+		fmt.Printf("Region '%v' not found, using %v..", color.Colorize(region, color.Red), color.Colorize(regions[0], color.Green))
 	}
 	return regions
 }
