@@ -71,22 +71,12 @@ func GetSessionUsingEnvVariables(region, profile string) (*session.Session, erro
 	if *akid == "" || *secKey == "" {
 		return nil, errors.New("Cannot find AWS_ACCESS_KEY_ID or AWS_SECRET_ACCESS_KEY")
 	}
-	cfg, err := awsV2Config.LoadDefaultConfig(context.TODO(),
-		awsV2Config.WithSharedConfigProfile(profile),
-		awsV2Config.WithRegion(region),
-	)
-
-	creds, err := cfg.Credentials.Retrieve(context.TODO())
-	if err != nil {
-		fmt.Printf("failed to read credentials")
-		return nil, err
-	}
+	creds := awsV2.Credentials{AccessKeyID: *akid, SecretAccessKey: *secKey}
 	credentialProvider := credentialProvider{Credentials: creds}
 	if credentialProvider.IsExpired() {
 		fmt.Println("Credentials have expired")
 		return nil, errors.New("AWS Credentials expired")
 	}
-
 	sess, err := session.NewSession(&aws.Config{
 		Region:      aws.String(region),
 		Credentials: credentials.NewStaticCredentials(*akid, *secKey, ""),
