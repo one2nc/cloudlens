@@ -6,6 +6,8 @@ import (
 	"os"
 
 	cfg "github.com/aws/aws-sdk-go-v2/config"
+	awsS "github.com/aws/aws-sdk-go/aws"
+	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/mattn/go-colorable"
 	"github.com/one2nc/cloudlens/internal"
 	"github.com/one2nc/cloudlens/internal/aws"
@@ -60,40 +62,58 @@ func run(cmd *cobra.Command, args []string) {
 		log.Logger = log.Output(zerolog.ConsoleWriter{Out: file})
 	}
 	//TODO profiles and regions should under aws
-	profiles := readAndValidateProfile()
-	if profiles[0] == "default" && len(region) == 0 {
-		region = getDefaultAWSRegion()
-	} else if len(region) == 0 {
-		region = "ap-south-1"
-	}
-
-	regions := readAndValidateRegion()
-	sess, err := aws.GetSession(profiles[0], regions[0])
-	if err != nil {
-		panic(fmt.Sprintf("aws session init failed -- %v", err))
-	}
-	ctx := context.WithValue(context.Background(), internal.KeySession, sess)
+	var sess *session.Session
+	var regions []string
 	app := view.NewApp()
+	profiles, err := readAndValidateProfile()
+	if len(profiles) > 0 {
+		if profiles[0] == "default" && len(region) == 0 {
+			region = getDefaultAWSRegion()
+		} else if len(region) == 0 {
+			region = "ap-south-1"
+		}
 
-	// TODO pass the AWS session instead of profiles and regions
-	if err := app.Init(ctx, profiles, regions, version); err != nil {
-		panic(fmt.Sprintf("app init failed -- %v", err))
+		regions = readAndValidateRegion()
+		sess, err = aws.GetSession(profiles[0], regions[0])
+		if err != nil {
+			panic(fmt.Sprintf("aws session init failed -- %v", err))
+		}
+
+		ctx := context.WithValue(context.Background(), internal.KeySession, sess)
+		// TODO pass the AWS session instead of profiles and regions
+		if err := app.Init(ctx, profiles, regions, version); err != nil {
+			panic(fmt.Sprintf("app init failed -- %v", err))
+		}
+	} else {
+		profile := awsS.String(os.Getenv(AWS_PROFILE))
+		profiles := []string{*profile}
+		region := awsS.String(os.Getenv(AWS_DEFAULT_REGION))
+		regions := []string{*region}
+		sess, err = aws.GetSessionUsingEnvVariables(*region, *profile)
+		if err != nil {
+			panic(fmt.Sprintf("aws session init failed -- %v", err))
+		}
+		ctx := context.WithValue(context.Background(), internal.KeySession, sess)
+		if err := app.Init(ctx, profiles, regions, version); err != nil {
+			panic(fmt.Sprintf("app init failed -- %v", err))
+		}
 	}
 	if err := app.Run(); err != nil {
 		panic(fmt.Sprintf("app run failed %v", err))
 	}
 }
 
-func readAndValidateProfile() []string {
+func readAndValidateProfile() ([]string, error) {
 	profiles, err := aws.GetProfiles()
 	if err != nil {
-		panic(fmt.Sprintf("failed to read profiles -- %v", err))
+		fmt.Sprintf("failed to read profiles -- %v", err)
+		return nil, err
 	}
 	profiles, isSwapped := config.SwapFirstIndexWithValue(profiles, profile)
 	if !isSwapped {
 		fmt.Printf("Profile '%v' not found, using profile '%v'... ", color.Colorize(profile, color.Red), color.Colorize(profiles[0], color.Green))
 	}
-	return profiles
+	return profiles, nil
 }
 
 func readAndValidateRegion() []string {
@@ -114,3 +134,5 @@ func getDefaultAWSRegion() string {
 	region := cfg.Region
 	return region
 }
+
+//ini file reading [-- name --] is there a parser in golang

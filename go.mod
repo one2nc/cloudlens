@@ -20,7 +20,10 @@ require (
 	github.com/atotto/clipboard v0.1.4
 )
 
-require github.com/kylelemons/godebug v1.1.0 // indirect
+require (
+	github.com/kylelemons/godebug v1.1.0 // indirect
+	gopkg.in/ini.v1 v1.67.0 // indirect
+)
 
 require (
 	github.com/aws/aws-sdk-go-v2/credentials v1.13.8 // indirect

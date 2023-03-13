@@ -64,6 +64,39 @@ func GetSession(profile, region string) (*session.Session, error) {
 	return sess, nil
 }
 
+func GetSessionUsingEnvVariables(region, profile string) (*session.Session, error) {
+	akid := aws.String(os.Getenv(AWS_ACCESS_KEY_ID))
+	secKey := aws.String(os.Getenv(AWS_SECRET_ACCESS_KEY))
+	//~/.aws/config and ~/.aws/credentials file are not present and even the env variables are not set.
+	if *akid == "" || *secKey == "" {
+		return nil, errors.New("Cannot find AWS_ACCESS_KEY_ID or AWS_SECRET_ACCESS_KEY")
+	}
+	cfg, err := awsV2Config.LoadDefaultConfig(context.TODO(),
+		awsV2Config.WithSharedConfigProfile(profile),
+		awsV2Config.WithRegion(region),
+	)
+
+	creds, err := cfg.Credentials.Retrieve(context.TODO())
+	if err != nil {
+		fmt.Printf("failed to read credentials")
+		return nil, err
+	}
+	credentialProvider := credentialProvider{Credentials: creds}
+	if credentialProvider.IsExpired() {
+		fmt.Println("Credentials have expired")
+		return nil, errors.New("AWS Credentials expired")
+	}
+
+	sess, err := session.NewSession(&aws.Config{
+		Region:      aws.String(region),
+		Credentials: credentials.NewStaticCredentials(*akid, *secKey, ""),
+	})
+	if err != nil {
+		return nil, err
+	}
+	return sess, nil
+}
+
 func GetProfiles() (profiles []string, err error) {
 	filepath := defaults.SharedCredentialsFilename()
 	fileContent, err := ioutil.ReadFile(filepath)
@@ -84,3 +117,6 @@ func GetProfiles() (profiles []string, err error) {
 
 	return profiles, nil
 }
+
+//can read from env variables.
+//
