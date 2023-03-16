@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 
+	awsV2 "github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/s3"
 	"github.com/one2nc/cloudlens/internal"
@@ -22,11 +23,11 @@ func (s3 *S3) Init(ctx context.Context) {
 }
 
 func (s3 *S3) List(ctx context.Context) ([]Object, error) {
-	sess, ok := ctx.Value(internal.KeySession).(*session.Session)
+	cfg, ok := ctx.Value(internal.KeySession).(awsV2.Config)
 	if !ok {
-		log.Err(fmt.Errorf("conversion err: Expected session.session but got %v", sess))
+		log.Err(fmt.Errorf("conversion err: Expected awsV2.Config but got %v", cfg))
 	}
-	buckResp, err := aws.ListBuckets(*sess)
+	buckResp, err := aws.ListBuckets(cfg)
 	objs := make([]Object, len(buckResp))
 	for i, obj := range buckResp {
 		objs[i] = obj

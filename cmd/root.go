@@ -75,11 +75,14 @@ func run(cmd *cobra.Command, args []string) {
 
 		regions = readAndValidateRegion()
 		sess, err = aws.GetSession(profiles[0], regions[0])
+
+		cfg, err := aws.GetCfg(profiles[0], regions[0])
+		//}
 		if err != nil {
 			panic(fmt.Sprintf("aws session init failed -- %v", err))
 		}
 
-		ctx := context.WithValue(context.Background(), internal.KeySession, sess)
+		ctx := context.WithValue(context.Background(), internal.KeySession, cfg)
 		// TODO pass the AWS session instead of profiles and regions
 		if err := app.Init(ctx, profiles, regions, version); err != nil {
 			panic(fmt.Sprintf("app init failed -- %v", err))
@@ -134,5 +137,3 @@ func getDefaultAWSRegion() string {
 	region := cfg.Region
 	return region
 }
-
-//ini file reading [-- name --] is there a parser in golang

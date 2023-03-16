@@ -1,26 +1,63 @@
 package aws
 
 import (
+	"context"
 	"fmt"
 	"strconv"
 	"time"
 
+	awsV2 "github.com/aws/aws-sdk-go-v2/aws"
+	ecc "github.com/aws/aws-sdk-go-v2/service/ec2"
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/ec2"
 	"github.com/rs/zerolog/log"
 )
 
-func GetInstances(sess session.Session) ([]EC2Resp, error) {
+//	func GetInstances(sess session.Session) ([]EC2Resp, error) {
+//		var ec2Info []EC2Resp
+//		ec2Serv := *ec2.New(&sess)
+//		result, err := ec2Serv.DescribeInstances(nil)
+//		if err != nil {
+//			log.Info().Msg(fmt.Sprintf("Error fetching instances: %v", err))
+//			return nil, err
+//		}
+//		// Iterate through the instances and print their ID and state
+//		for _, reservation := range result.Reservations {
+//			for _, instance := range reservation.Instances {
+//				launchTime := instance.LaunchTime
+//				localZone, err := GetLocalTimeZone() // Empty string loads the local timezone
+//				if err != nil {
+//					fmt.Println("Error loading local timezone:", err)
+//					return nil, err
+//				}
+//				loc, _ := time.LoadLocation(localZone)
+//				IST := launchTime.In(loc)
+//				ec2Resp := &EC2Resp{
+//					Instance:         *instance,
+//					InstanceId:       *instance.InstanceId,
+//					InstanceType:     *instance.InstanceType,
+//					AvailabilityZone: *instance.Placement.AvailabilityZone,
+//					InstanceState:    *instance.State.Name,
+//					PublicDNS:        *instance.PublicDnsName,
+//					MonitoringState:  *instance.Monitoring.State,
+//					LaunchTime:       IST.Format("Mon Jan _2 15:04:05 2006")}
+//				ec2Info = append(ec2Info, *ec2Resp)
+//			}
+//		}
+//		return ec2Info, nil
+//	}
+func GetInstances(cfg awsV2.Config) ([]EC2Resp, error) {
 	var ec2Info []EC2Resp
-	ec2Serv := *ec2.New(&sess)
-	result, err := ec2Serv.DescribeInstances(nil)
+	ec2Client := ecc.NewFromConfig(cfg)
+	resultec2, err := ec2Client.DescribeInstances(context.TODO(), nil)
 	if err != nil {
 		log.Info().Msg(fmt.Sprintf("Error fetching instances: %v", err))
 		return nil, err
 	}
+
 	// Iterate through the instances and print their ID and state
-	for _, reservation := range result.Reservations {
+	for _, reservation := range resultec2.Reservations {
 		for _, instance := range reservation.Instances {
 			launchTime := instance.LaunchTime
 			localZone, err := GetLocalTimeZone() // Empty string loads the local timezone
@@ -31,13 +68,13 @@ func GetInstances(sess session.Session) ([]EC2Resp, error) {
 			loc, _ := time.LoadLocation(localZone)
 			IST := launchTime.In(loc)
 			ec2Resp := &EC2Resp{
-				Instance:         *instance,
+				Instance:         ec2.Instance{},
 				InstanceId:       *instance.InstanceId,
-				InstanceType:     *instance.InstanceType,
+				InstanceType:     string(instance.InstanceType),
 				AvailabilityZone: *instance.Placement.AvailabilityZone,
-				InstanceState:    *instance.State.Name,
+				InstanceState:    string(instance.State.Name),
 				PublicDNS:        *instance.PublicDnsName,
-				MonitoringState:  *instance.Monitoring.State,
+				MonitoringState:  string(instance.Monitoring.State),
 				LaunchTime:       IST.Format("Mon Jan _2 15:04:05 2006")}
 			ec2Info = append(ec2Info, *ec2Resp)
 		}

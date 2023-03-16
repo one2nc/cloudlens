@@ -9,6 +9,8 @@ import (
 	"time"
 
 	"github.com/atotto/clipboard"
+	awsV2 "github.com/aws/aws-sdk-go-v2/aws"
+	ss3 "github.com/aws/aws-sdk-go-v2/service/s3"
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/s3"
@@ -22,16 +24,55 @@ type BucketResp struct {
 	Region       string
 }
 
-func ListBuckets(sess session.Session) ([]BucketResp, error) {
+// func ListBuckets(sess session.Session) ([]BucketResp, error) {
+// 	var bucketInfo []BucketResp
+// 	s3Serv := *s3.New(&sess)
+// 	lbop, err := s3Serv.ListBuckets(&s3.ListBucketsInput{})
+// 	if err != nil {
+// 		log.Info().Msg(fmt.Sprintf("Error in listing buckets. err: %v", err))
+// 		return nil, err
+// 	}
+// 	for _, buc := range lbop.Buckets {
+// 		reg, err := s3Serv.GetBucketLocationWithContext(context.Background(), &s3.GetBucketLocationInput{Bucket: aws.String(*buc.Name)})
+// 		if err != nil {
+// 			log.Info().Msg(fmt.Sprintf("error getting bucket location. err: %v", err))
+// 			return nil, err
+// 		}
+// 		launchTime := buc.CreationDate
+// 		localZone, err := GetLocalTimeZone() // Empty string loads the local timezone
+// 		if err != nil {
+// 			fmt.Println("Error loading local timezone:", err)
+// 			return nil, err
+// 		}
+// 		loc, _ := time.LoadLocation(localZone)
+// 		IST := launchTime.In(loc)
+// 		bucketresp := &BucketResp{BucketName: *buc.Name, CreationTime: IST.Format("Mon Jan _2 15:04:05 2006"), Region: aws.StringValue(reg.LocationConstraint)}
+// 		bucketInfo = append(bucketInfo, *bucketresp)
+// 	}
+// 	return bucketInfo, nil
+// }
+
+func ListBuckets(cfg awsV2.Config) ([]BucketResp, error) {
 	var bucketInfo []BucketResp
-	s3Serv := *s3.New(&sess)
-	lbop, err := s3Serv.ListBuckets(&s3.ListBucketsInput{})
+	s3Client := ss3.NewFromConfig(cfg)
+	// result, err := s3Client.ListBuckets(context.Background(), &ss3.ListBucketsInput{})
+	// if err != nil {
+	// 	fmt.Printf("Couldn't list buckets for your account. Reason: %v\n", err)
+	// }
+	// if len(result.Buckets) == 0 {
+	// 	fmt.Println("don't have any buckets!")
+	// } else {
+	// 	for _, bucket := range result.Buckets {
+	// 		log.Info().Msgf("\t%v\n", *bucket.Name)
+	// 	}
+	// }
+	lbop, err := s3Client.ListBuckets(context.Background(), &ss3.ListBucketsInput{})
 	if err != nil {
 		log.Info().Msg(fmt.Sprintf("Error in listing buckets. err: %v", err))
 		return nil, err
 	}
 	for _, buc := range lbop.Buckets {
-		reg, err := s3Serv.GetBucketLocationWithContext(context.Background(), &s3.GetBucketLocationInput{Bucket: aws.String(*buc.Name)})
+		reg, err := s3Client.GetBucketLocation(context.Background(), &ss3.GetBucketLocationInput{Bucket: aws.String(*buc.Name)})
 		if err != nil {
 			log.Info().Msg(fmt.Sprintf("error getting bucket location. err: %v", err))
 			return nil, err
@@ -44,7 +85,7 @@ func ListBuckets(sess session.Session) ([]BucketResp, error) {
 		}
 		loc, _ := time.LoadLocation(localZone)
 		IST := launchTime.In(loc)
-		bucketresp := &BucketResp{BucketName: *buc.Name, CreationTime: IST.Format("Mon Jan _2 15:04:05 2006"), Region: aws.StringValue(reg.LocationConstraint)}
+		bucketresp := &BucketResp{BucketName: *buc.Name, CreationTime: IST.Format("Mon Jan _2 15:04:05 2006"), Region: aws.StringValue((*string)(&reg.LocationConstraint))}
 		bucketInfo = append(bucketInfo, *bucketresp)
 	}
 	return bucketInfo, nil

@@ -4,7 +4,6 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"io/ioutil"
 	"os"
 	"strings"
 
@@ -14,8 +13,13 @@ import (
 	"github.com/aws/aws-sdk-go/aws/credentials"
 	"github.com/aws/aws-sdk-go/aws/defaults"
 	"github.com/aws/aws-sdk-go/aws/session"
+	"gopkg.in/ini.v1"
 )
 
+type Profiles struct {
+	Data  []string
+	Error string
+}
 type credentialProvider struct {
 	awsV2.Credentials
 }
@@ -28,8 +32,48 @@ func (c credentialProvider) IsExpired() bool {
 	return c.Expired()
 }
 
+// func GetSession(profile, region string) (*session.Session, error) {
+// 	log.Info().Msg("Profiles inside GetSession:" + profile + " and region inside GetSession:" + region)
+// 	cfg, err := awsV2Config.LoadDefaultConfig(context.Background(),
+// 		awsV2Config.WithSharedConfigProfile(profile),
+// 		awsV2Config.WithRegion(region),
+// 	)
+// 	if err != nil {
+// 		fmt.Printf("failed to load config")
+// 		return nil, err
+// 	}
+// 	creds, err := cfg.Credentials.Retrieve(context.Background())
+// 	if err != nil {
+// 		log.Info().Msg("Failed to read credentials.")
+// 		return nil, err
+// 	}
+// 	log.Info().Msg("Access key id is:" + creds.AccessKeyID)
+// 	log.Info().Msg("Secret Key id is:" + creds.SecretAccessKey)
+// 	credentialProvider := credentialProvider{Credentials: creds}
+// 	if credentialProvider.IsExpired() {
+// 		fmt.Println("Credentials have expired")
+// 		return nil, errors.New("AWS Credentials expired")
+// 	}
+
+// 	// create session
+// 	sess, err := session.NewSessionWithOptions(session.Options{Config: aws.Config{
+// 		//TODO: remove hardcoded enpoint
+// 		//Endpoint:         aws.String(localstackEndpoint),
+// 		Credentials:      credentials.NewCredentials(credentialProvider),
+// 		Region:           aws.String(region),
+// 		S3ForcePathStyle: aws.Bool(true),
+// 	},
+// 		Profile: profile})
+// 	if err != nil {
+// 		fmt.Println("Failed to create session", err)
+// 		os.Exit(1)
+// 	}
+// 	return sess, nil
+// }
+
 func GetSession(profile, region string) (*session.Session, error) {
-	cfg, err := awsV2Config.LoadDefaultConfig(context.TODO(),
+	cfg, err := awsV2Config.LoadDefaultConfig(
+		context.TODO(),
 		awsV2Config.WithSharedConfigProfile(profile),
 		awsV2Config.WithRegion(region),
 	)
@@ -37,11 +81,52 @@ func GetSession(profile, region string) (*session.Session, error) {
 		fmt.Printf("failed to load config")
 		return nil, err
 	}
+
+	// s3Client := s3.NewFromConfig(cfg)
+	// result, err := s3Client.ListBuckets(context.TODO(), &s3.ListBucketsInput{})
+	// if err != nil {
+	// 	fmt.Printf("Couldn't list buckets for your account. Reason: %v\n", err)
+	// }
+	// if len(result.Buckets) == 0 {
+	// 	fmt.Println("don't have any buckets!")
+	// } else {
+	// 	for _, bucket := range result.Buckets {
+	// 		log.Info().Msgf("\t%v\n", *bucket.Name)
+	// 	}
+	// }
+
+	// ec2Client := ec2.NewFromConfig(cfg)
+	// var ec2Info []EC2Resp
+	// resultEc2, err := ec2Client.DescribeInstances(context.Background(), nil)
+	// log.Info().Msgf("LEngth of ec2 array: %s", len(resultEc2.Reservations))
+	// for _, reservation := range resultEc2.Reservations {
+	// 	for _, instance := range reservation.Instances {
+	// 		launchTime := instance.LaunchTime
+	// 		localZone, err := GetLocalTimeZone() // Empty string loads the local timezone
+	// 		if err != nil {
+	// 			fmt.Println("Error loading local timezone:", err)
+	// 			return nil, err
+	// 		}
+	// 		loc, _ := time.LoadLocation(localZone)
+	// 		IST := launchTime.In(loc)
+	// 		ec2Resp := &EC2Resp{
+	// 			InstanceId:       *instance.InstanceId,
+	// 			InstanceType:     string(instance.InstanceType),
+	// 			AvailabilityZone: string(*instance.Placement.AvailabilityZone),
+	// 			InstanceState:    string(instance.State.Name),
+	// 			PublicDNS:        *instance.PublicDnsName,
+	// 			MonitoringState:  string(instance.Monitoring.State),
+	// 			LaunchTime:       IST.Format("Mon Jan _2 15:04:05 2006")}
+	// 		ec2Info = append(ec2Info, *ec2Resp)
+	// 	}
+	// }
+
 	creds, err := cfg.Credentials.Retrieve(context.TODO())
 	if err != nil {
 		fmt.Printf("failed to read credentials")
 		return nil, err
 	}
+
 	credentialProvider := credentialProvider{Credentials: creds}
 	if credentialProvider.IsExpired() {
 		fmt.Println("Credentials have expired")
@@ -61,7 +146,99 @@ func GetSession(profile, region string) (*session.Session, error) {
 		fmt.Println("Error creating session:", err)
 		return nil, err
 	}
+
+	// token, err := cfg.BearerAuthTokenProvider.RetrieveBearerToken(context.Background())
+	// if err != nil {
+	// 	return nil, err
+	// }
+	// log.Info().Msg("Token is: " + token.Value)
+
+	// credsS := credentials.Value{
+	// 	AccessKeyID:     creds.AccessKeyID,
+	// 	SecretAccessKey: creds.SecretAccessKey,
+	// 	SessionToken:    token.Value,
+	// }
+
+	// credential := credentials.NewStaticCredentialsFromCreds(credsS)
+
+	// config := aws.NewConfig().WithCredentials(credential).WithRegion("ap-south-1")
+	// sess1, err := session.NewSession(config)
+	// if err != nil {
+	// 	panic(err)
+	// }
+
+	// sssoStartURL := "https://my-sso-portal.awsapps.com/start"
+	// ssoRegion := "us-east-1"
+	// ssoAccountID := "123456789012"
+
+	// sess, err = session.NewSessionWithOptions(session.Options{
+	// 	Config: aws.Config{
+	// 		Region: aws.String(ssoRegion),
+	// 		Credentials: credentials.NewCredentials(&credentials.{
+	// 			StartURL:  ssoStartURL,
+	// 			AccountID: ssoAccountID,
+	// 		}),
+	// 	},
+	// })
+
+	// if err != nil {
+	// 	fmt.Println("Error creating session: ", err)
+	// 	return
+	// }
+
 	return sess, nil
+}
+
+func GetCfg(profile, region string) (awsV2.Config, error) {
+	cfg, err := awsV2Config.LoadDefaultConfig(
+		context.TODO(),
+		awsV2Config.WithSharedConfigProfile(profile),
+		awsV2Config.WithRegion(region),
+	)
+	if err != nil {
+		fmt.Printf("failed to load config")
+		return cfg, err
+	}
+
+	// s3Client := s3.NewFromConfig(cfg)
+	// result, err := s3Client.ListBuckets(context.TODO(), &s3.ListBucketsInput{})
+	// if err != nil {
+	// 	fmt.Printf("Couldn't list buckets for your account. Reason: %v\n", err)
+	// }
+	// if len(result.Buckets) == 0 {
+	// 	fmt.Println("don't have any buckets!")
+	// } else {
+	// 	for _, bucket := range result.Buckets {
+	// 		log.Info().Msgf("\t%v\n", *bucket.Name)
+	// 	}
+	// }
+
+	// ec2Client := ec2.NewFromConfig(cfg)
+	// var ec2Info []EC2Resp
+	// resultEc2, err := ec2Client.DescribeInstances(context.Background(), nil)
+	// log.Info().Msgf("LEngth of ec2 array: %s", len(resultEc2.Reservations))
+	// for _, reservation := range resultEc2.Reservations {
+	// 	for _, instance := range reservation.Instances {
+	// 		launchTime := instance.LaunchTime
+	// 		localZone, err := GetLocalTimeZone() // Empty string loads the local timezone
+	// 		if err != nil {
+	// 			fmt.Println("Error loading local timezone:", err)
+	// 			return cfg, err
+	// 		}
+	// 		loc, _ := time.LoadLocation(localZone)
+	// 		IST := launchTime.In(loc)
+	// 		ec2Resp := &EC2Resp{
+	// 			InstanceId:       *instance.InstanceId,
+	// 			InstanceType:     string(instance.InstanceType),
+	// 			AvailabilityZone: string(*instance.Placement.AvailabilityZone),
+	// 			InstanceState:    string(instance.State.Name),
+	// 			PublicDNS:        *instance.PublicDnsName,
+	// 			MonitoringState:  string(instance.Monitoring.State),
+	// 			LaunchTime:       IST.Format("Mon Jan _2 15:04:05 2006")}
+	// 		ec2Info = append(ec2Info, *ec2Resp)
+	// 	}
+	//}
+	return cfg, err
 }
 
 func GetSessionUsingEnvVariables(region, profile string) (*session.Session, error) {
@@ -88,25 +265,39 @@ func GetSessionUsingEnvVariables(region, profile string) (*session.Session, erro
 }
 
 func GetProfiles() (profiles []string, err error) {
-	filepath := defaults.SharedCredentialsFilename()
-	fileContent, err := ioutil.ReadFile(filepath)
-	if err != nil {
-		return profiles, err
+	fpCred := defaults.SharedCredentialsFilename()
+	_, errCred := os.Stat(fpCred)
+	fpConf := defaults.SharedConfigFilename()
+	_, errConf := os.Stat(fpConf)
+	if os.IsNotExist(errCred) && os.IsNotExist(errConf) {
+		return nil, errConf
 	}
-	lines := strings.Split(string(fileContent), "\n")
-	for _, line := range lines {
-		if strings.HasPrefix(line, "[") && strings.HasSuffix(line, "]") {
-			profile := line[1 : len(line)-1]
-			profiles = append(profiles, profile)
+	var ret []string
+	defaultReturn := &Profiles{Data: nil, Error: ""}
+	fp := defaults.SharedCredentialsFilename()
+	_, err = os.Stat(fp)
+	if os.IsNotExist(err) {
+		fp = defaults.SharedConfigFilename()
+	}
+	f, err := ini.Load(fp) // Load ini file
+	if err != nil {
+		defaultReturn.Error = err.Error()
+	} else {
+		arr := []string{}
+		for _, v := range f.Sections() {
+			if len(v.Keys()) != 0 {
+				arr = append(arr, v.Name())
+			}
+		}
+		defaultReturn.Data = arr
+	}
+	for i := 0; i < len(defaultReturn.Data); i++ {
+		spltiArr := strings.Split(defaultReturn.Data[i], " ")
+		if len(spltiArr) == 1 {
+			ret = append(ret, spltiArr[len(spltiArr)-1])
+		} else if len(spltiArr) > 1 && spltiArr[0] == "profile" {
+			ret = append(ret, spltiArr[len(spltiArr)-1])
 		}
 	}
-	if len(profiles) < 1 {
-		err = errors.New("NO PROFILES FOUND")
-		return nil, err
-	}
-
-	return profiles, nil
+	return ret, nil
 }
-
-//can read from env variables.
-//
