@@ -68,26 +68,16 @@ func GetInfoAboutBucket(cfg aws.Config, bucketName string, delimiter string, pre
 }
 
 func GetPreSignedUrl(cfg aws.Config, bucketName, key string) string {
-	// log.Info().Msg("Bucket name izzzz:" + bucketName)
-	// log.Info().Msg("Key name izzzz:" + key)
-	// s3Serv := ss3.NewFromConfig(cfg)
-	// req, _ := s3Serv.GetObjectRetention(context.Background(), &ss3.GetObjectAttributesInput{
-	// 	Bucket: &bucketName,
-	// 	Key:    &key,
-	// })
-	var presigner Presigner
-	request, err := presigner.PresignClient.PresignGetObject(context.TODO(), &s3.GetObjectInput{
-		Bucket: &bucketName,
-		Key:    &key,
-	}, func(opts *s3.PresignOptions) {
-		opts.Expires = time.Duration(15 * time.Minute)
-	})
-	if err != nil {
-		log.Printf("Couldn't get a presigned request to get %v:%v. Here's why: %v\n",
-			bucketName, key, err)
+
+	s3Serv := *s3.NewFromConfig(cfg)
+	input := &s3.GetObjectInput{
+		Bucket: aws.String(bucketName),
+		Key:    aws.String(key),
 	}
-	log.Info().Msgf("Presigned URL is: %v", request.URL)
-	return request.URL
+
+	psClient := s3.NewPresignClient(&s3Serv, s3.WithPresignExpires(15*time.Minute))
+	res, _ := psClient.PresignGetObject(context.Background(), input)
+	return res.URL
 
 }
 
