@@ -4,7 +4,7 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/aws/aws-sdk-go/aws/session"
+	awsV2 "github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/one2nc/cloudlens/internal"
 	"github.com/one2nc/cloudlens/internal/aws"
 	"github.com/rs/zerolog/log"
@@ -20,11 +20,11 @@ func (v *VPC) Init(ctx context.Context) {
 }
 
 func (v *VPC) List(ctx context.Context) ([]Object, error) {
-	sess, ok := ctx.Value(internal.KeySession).(*session.Session)
+	cfg, ok := ctx.Value(internal.KeySession).(awsV2.Config)
 	if !ok {
-		log.Err(fmt.Errorf("conversion err: Expected session.session but got %v", sess))
+		log.Err(fmt.Errorf("conversion err: Expected awsV2.Config but got %v", cfg))
 	}
-	vpcs := aws.GetVPCs(*sess)
+	vpcs := aws.GetVPCs(cfg)
 	objs := make([]Object, len(vpcs))
 	for i, obj := range vpcs {
 		objs[i] = obj
@@ -37,10 +37,10 @@ func (v *VPC) Get(ctx context.Context, path string) (Object, error) {
 }
 
 func (v *VPC) Describe(vpcId string) (string, error) {
-	sess, ok := v.ctx.Value(internal.KeySession).(*session.Session)
+	cfg, ok := v.ctx.Value(internal.KeySession).(awsV2.Config)
 	if !ok {
-		log.Err(fmt.Errorf("conversion err: Expected session.session but got %v", sess))
+		log.Err(fmt.Errorf("conversion err: Expected awsV2.Config but got %v", cfg))
 	}
-	res := aws.GetSingleVPC(*sess, vpcId).GoString()
-	return res, nil
+	res := aws.GetSingleVPC(cfg, vpcId)
+	return fmt.Sprintf("%v", res), nil
 }

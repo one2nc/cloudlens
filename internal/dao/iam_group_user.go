@@ -4,7 +4,7 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/aws/aws-sdk-go/aws/session"
+	awsV2 "github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/one2nc/cloudlens/internal"
 	"github.com/one2nc/cloudlens/internal/aws"
 	"github.com/rs/zerolog/log"
@@ -20,12 +20,12 @@ func (igu *IamGroupUser) Init(ctx context.Context) {
 }
 
 func (igu *IamGroupUser) List(ctx context.Context) ([]Object, error) {
-	sess, ok := ctx.Value(internal.KeySession).(*session.Session)
+	cfg, ok := ctx.Value(internal.KeySession).(awsV2.Config)
 	if !ok {
-		log.Err(fmt.Errorf("conversion err: Expected session.session but got %v", sess))
+		log.Err(fmt.Errorf("conversion err: Expected awsV2.Config but got %v", cfg))
 	}
 	gp := fmt.Sprintf("%v", ctx.Value(internal.GroupName))
-	groupUsers := aws.GetGroupUsers(*sess, gp)
+	groupUsers := aws.GetGroupUsers(cfg, gp)
 	objs := make([]Object, len(groupUsers))
 	for i, obj := range groupUsers {
 		objs[i] = obj

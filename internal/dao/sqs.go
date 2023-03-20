@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 
+	awsV2 "github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/one2nc/cloudlens/internal"
 	"github.com/one2nc/cloudlens/internal/aws"
@@ -20,11 +21,11 @@ func (sqs *SQS) Init(ctx context.Context) {
 }
 
 func (sqs *SQS) List(ctx context.Context) ([]Object, error) {
-	sess, ok := ctx.Value(internal.KeySession).(*session.Session)
+	cfg, ok := ctx.Value(internal.KeySession).(awsV2.Config)
 	if !ok {
-		log.Err(fmt.Errorf("conversion err: Expected session.session but got %v", sess))
+		log.Err(fmt.Errorf("conversion err: Expected awsV2.Config but got %v", cfg))
 	}
-	ins, err := aws.GetAllQueues(*sess)
+	ins, err := aws.GetAllQueues(cfg)
 	objs := make([]Object, len(ins))
 	for i, obj := range ins {
 		objs[i] = obj

@@ -1,8 +1,8 @@
 package aws
 
 import (
+	"github.com/aws/aws-sdk-go-v2/service/s3/types"
 	"github.com/aws/aws-sdk-go/service/ec2"
-	"github.com/aws/aws-sdk-go/service/s3"
 )
 
 type EC2Resp struct {
@@ -21,8 +21,8 @@ type S3Object struct {
 }
 
 type BucketInfo struct {
-	EncryptionConfiguration *s3.ServerSideEncryptionConfiguration
-	LifeCycleRules          []*s3.LifecycleRule
+	EncryptionConfiguration types.ServerSideEncryptionConfiguration
+	LifeCycleRules          []types.LifecycleRule
 }
 
 type IAMUSerResp struct {

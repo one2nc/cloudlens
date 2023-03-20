@@ -3,7 +3,7 @@ package view
 import (
 	"context"
 
-	"github.com/aws/aws-sdk-go/aws/session"
+	awsV2 "github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/one2nc/cloudlens/internal/model"
 	"github.com/one2nc/cloudlens/internal/ui"
 )
@@ -67,6 +67,6 @@ type MetaViewer struct {
 type MetaViewers map[string]MetaViewer
 
 type ObjectParams struct {
-	sess            *session.Session
+	cfg             awsV2.Config
 	bucketName, key string
 }

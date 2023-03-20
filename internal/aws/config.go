@@ -82,45 +82,6 @@ func GetSession(profile, region string) (*session.Session, error) {
 		return nil, err
 	}
 
-	// s3Client := s3.NewFromConfig(cfg)
-	// result, err := s3Client.ListBuckets(context.TODO(), &s3.ListBucketsInput{})
-	// if err != nil {
-	// 	fmt.Printf("Couldn't list buckets for your account. Reason: %v\n", err)
-	// }
-	// if len(result.Buckets) == 0 {
-	// 	fmt.Println("don't have any buckets!")
-	// } else {
-	// 	for _, bucket := range result.Buckets {
-	// 		log.Info().Msgf("\t%v\n", *bucket.Name)
-	// 	}
-	// }
-
-	// ec2Client := ec2.NewFromConfig(cfg)
-	// var ec2Info []EC2Resp
-	// resultEc2, err := ec2Client.DescribeInstances(context.Background(), nil)
-	// log.Info().Msgf("LEngth of ec2 array: %s", len(resultEc2.Reservations))
-	// for _, reservation := range resultEc2.Reservations {
-	// 	for _, instance := range reservation.Instances {
-	// 		launchTime := instance.LaunchTime
-	// 		localZone, err := GetLocalTimeZone() // Empty string loads the local timezone
-	// 		if err != nil {
-	// 			fmt.Println("Error loading local timezone:", err)
-	// 			return nil, err
-	// 		}
-	// 		loc, _ := time.LoadLocation(localZone)
-	// 		IST := launchTime.In(loc)
-	// 		ec2Resp := &EC2Resp{
-	// 			InstanceId:       *instance.InstanceId,
-	// 			InstanceType:     string(instance.InstanceType),
-	// 			AvailabilityZone: string(*instance.Placement.AvailabilityZone),
-	// 			InstanceState:    string(instance.State.Name),
-	// 			PublicDNS:        *instance.PublicDnsName,
-	// 			MonitoringState:  string(instance.Monitoring.State),
-	// 			LaunchTime:       IST.Format("Mon Jan _2 15:04:05 2006")}
-	// 		ec2Info = append(ec2Info, *ec2Resp)
-	// 	}
-	// }
-
 	creds, err := cfg.Credentials.Retrieve(context.TODO())
 	if err != nil {
 		fmt.Printf("failed to read credentials")
@@ -197,47 +158,20 @@ func GetCfg(profile, region string) (awsV2.Config, error) {
 	)
 	if err != nil {
 		fmt.Printf("failed to load config")
-		return cfg, err
+		return awsV2.Config{}, err
 	}
 
-	// s3Client := s3.NewFromConfig(cfg)
-	// result, err := s3Client.ListBuckets(context.TODO(), &s3.ListBucketsInput{})
-	// if err != nil {
-	// 	fmt.Printf("Couldn't list buckets for your account. Reason: %v\n", err)
-	// }
-	// if len(result.Buckets) == 0 {
-	// 	fmt.Println("don't have any buckets!")
-	// } else {
-	// 	for _, bucket := range result.Buckets {
-	// 		log.Info().Msgf("\t%v\n", *bucket.Name)
-	// 	}
-	// }
+	creds, err := cfg.Credentials.Retrieve(context.TODO())
+	if err != nil {
+		fmt.Printf("failed to read credentials")
+		return awsV2.Config{}, err
+	}
 
-	// ec2Client := ec2.NewFromConfig(cfg)
-	// var ec2Info []EC2Resp
-	// resultEc2, err := ec2Client.DescribeInstances(context.Background(), nil)
-	// log.Info().Msgf("LEngth of ec2 array: %s", len(resultEc2.Reservations))
-	// for _, reservation := range resultEc2.Reservations {
-	// 	for _, instance := range reservation.Instances {
-	// 		launchTime := instance.LaunchTime
-	// 		localZone, err := GetLocalTimeZone() // Empty string loads the local timezone
-	// 		if err != nil {
-	// 			fmt.Println("Error loading local timezone:", err)
-	// 			return cfg, err
-	// 		}
-	// 		loc, _ := time.LoadLocation(localZone)
-	// 		IST := launchTime.In(loc)
-	// 		ec2Resp := &EC2Resp{
-	// 			InstanceId:       *instance.InstanceId,
-	// 			InstanceType:     string(instance.InstanceType),
-	// 			AvailabilityZone: string(*instance.Placement.AvailabilityZone),
-	// 			InstanceState:    string(instance.State.Name),
-	// 			PublicDNS:        *instance.PublicDnsName,
-	// 			MonitoringState:  string(instance.Monitoring.State),
-	// 			LaunchTime:       IST.Format("Mon Jan _2 15:04:05 2006")}
-	// 		ec2Info = append(ec2Info, *ec2Resp)
-	// 	}
-	//}
+	credentialProvider := credentialProvider{Credentials: creds}
+	if credentialProvider.IsExpired() {
+		fmt.Println("Credentials have expired")
+		return awsV2.Config{}, errors.New("AWS Credentials expired")
+	}
 	return cfg, err
 }
 

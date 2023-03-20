@@ -77,7 +77,6 @@ func run(cmd *cobra.Command, args []string) {
 		sess, err = aws.GetSession(profiles[0], regions[0])
 
 		cfg, err := aws.GetCfg(profiles[0], regions[0])
-		//}
 		if err != nil {
 			panic(fmt.Sprintf("aws session init failed -- %v", err))
 		}

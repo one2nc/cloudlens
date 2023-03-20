@@ -1,19 +1,20 @@
 package aws
 
 import (
+	"context"
 	"fmt"
 	"strconv"
 	"time"
 
-	"github.com/aws/aws-sdk-go/aws/session"
-	"github.com/aws/aws-sdk-go/service/lambda"
+	awsV2 "github.com/aws/aws-sdk-go-v2/aws"
+	lambdaa "github.com/aws/aws-sdk-go-v2/service/lambda"
 	"github.com/rs/zerolog/log"
 )
 
-func GetAllLambdaFunctions(sess session.Session) ([]LambdaResp, error) {
+func GetAllLambdaFunctions(cfg awsV2.Config) ([]LambdaResp, error) {
 	responseA := []LambdaResp{}
-	lambdaServ := lambda.New(&sess)
-	response, err := lambdaServ.ListFunctions(nil)
+	lambdaServ := lambdaa.NewFromConfig(cfg)
+	response, err := lambdaServ.ListFunctions(context.Background(), nil)
 	if err != nil {
 		log.Info().Msg(fmt.Sprintf("Error getting Lambda functions : %v", err))
 		return nil, err
@@ -38,7 +39,7 @@ func GetAllLambdaFunctions(sess session.Session) ([]LambdaResp, error) {
 			Description:  *r.Description,
 			Role:         *r.Role,
 			FunctionArn:  *r.FunctionArn,
-			CodeSize:     strconv.Itoa(int(*r.CodeSize)),
+			CodeSize:     strconv.Itoa(int(r.CodeSize)),
 			LastModified: IST.Format("Mon Jan _2 15:04:05 2006"),
 		}
 		responseA = append(responseA, lr)

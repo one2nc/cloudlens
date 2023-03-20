@@ -8,8 +8,8 @@ import (
 
 	awsV2 "github.com/aws/aws-sdk-go-v2/aws"
 	ecc "github.com/aws/aws-sdk-go-v2/service/ec2"
+	"github.com/aws/aws-sdk-go-v2/service/ec2/types"
 	"github.com/aws/aws-sdk-go/aws"
-	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/ec2"
 	"github.com/rs/zerolog/log"
 )
@@ -82,10 +82,10 @@ func GetInstances(cfg awsV2.Config) ([]EC2Resp, error) {
 	return ec2Info, nil
 }
 
-func GetSingleInstance(sess session.Session, insId string) *ec2.DescribeInstancesOutput {
-	ec2Serv := *ec2.New(&sess)
-	result, err := ec2Serv.DescribeInstances(&ec2.DescribeInstancesInput{
-		InstanceIds: []*string{&insId},
+func GetSingleInstance(cfg awsV2.Config, insId string) *ecc.DescribeInstancesOutput {
+	ec2Client := ecc.NewFromConfig(cfg)
+	result, err := ec2Client.DescribeInstances(context.Background(), &ecc.DescribeInstancesInput{
+		InstanceIds: []string{insId},
 	})
 	if err != nil {
 		log.Info().Msg(fmt.Sprintf("Error fetching instance with id: %s, err: %v", insId, err))
@@ -94,20 +94,23 @@ func GetSingleInstance(sess session.Session, insId string) *ec2.DescribeInstance
 	return result
 }
 
-func GetSecGrps(sess session.Session) []*ec2.SecurityGroup {
-	ec2Serv := *ec2.New(&sess)
-	result, err := ec2Serv.DescribeSecurityGroups(&ec2.DescribeSecurityGroupsInput{})
+func GetSecGrps(cfg awsV2.Config) ([]types.SecurityGroup, error) {
+	ec2Client := ecc.NewFromConfig(cfg)
+	result, err := ec2Client.DescribeSecurityGroups(context.Background(), &ecc.DescribeSecurityGroupsInput{})
 	if err != nil {
 		log.Info().Msg(fmt.Sprintf("Error in fetching Security Groups. err: %v ", err))
-		return nil
+		return nil, err
 	}
-	return result.SecurityGroups
+	for _, sg := range result.SecurityGroups {
+		log.Info().Msgf("Security Group ID: %s, Name: %s\n", *sg.GroupId, *sg.GroupName)
+	}
+	return result.SecurityGroups, nil
 }
 
-func GetSingleSecGrp(sess session.Session, sgId string) *ec2.DescribeSecurityGroupsOutput {
-	ec2Serv := *ec2.New(&sess)
-	result, err := ec2Serv.DescribeSecurityGroups(&ec2.DescribeSecurityGroupsInput{
-		GroupIds: []*string{&sgId},
+func GetSingleSecGrp(cfg awsV2.Config, sgId string) *ecc.DescribeSecurityGroupsOutput {
+	ec2Serv := *ecc.NewFromConfig(cfg)
+	result, err := ec2Serv.DescribeSecurityGroups(context.Background(), &ecc.DescribeSecurityGroupsInput{
+		GroupIds: []string{sgId},
 	})
 	if err != nil {
 		log.Info().Msg(fmt.Sprintf("Error in fetching Security Group: %s err: %v ", sgId, err))
@@ -120,10 +123,10 @@ func GetSingleSecGrp(sess session.Session, sgId string) *ec2.DescribeSecurityGro
 Volumes(ebs) are region specific
 Localstack doesn't have default volumes, so at some regions, there won't be any volumes.
 */
-func GetVolumes(sess session.Session) ([]EBSResp, error) {
+func GetVolumes(cfg awsV2.Config) ([]EBSResp, error) {
 	var volumes []EBSResp
-	ec2Serv := *ec2.New(&sess)
-	result, err := ec2Serv.DescribeVolumes(&ec2.DescribeVolumesInput{})
+	ec2Client := ecc.NewFromConfig(cfg)
+	result, err := ec2Client.DescribeVolumes(context.Background(), &ecc.DescribeVolumesInput{})
 	if err != nil {
 		log.Info().Msg(fmt.Sprintf("Error in fetching Volumes. err: %v", err))
 		return nil, err
@@ -141,8 +144,8 @@ func GetVolumes(sess session.Session) ([]EBSResp, error) {
 		volume := EBSResp{
 			VolumeId:         *v.VolumeId,
 			Size:             strconv.Itoa(int(*v.Size)) + " GB",
-			VolumeType:       *v.VolumeType,
-			State:            *v.State,
+			VolumeType:       string(v.VolumeType),
+			State:            string(v.State),
 			AvailabilityZone: *v.AvailabilityZone,
 			Snapshot:         *v.SnapshotId,
 			CreationTime:     IST.String(),
@@ -152,14 +155,13 @@ func GetVolumes(sess session.Session) ([]EBSResp, error) {
 	return volumes, nil
 }
 
-func GetSingleVolume(sess session.Session, vId string) *ec2.Volume {
-	ec2Serv := *ec2.New(&sess)
-	result, err := ec2Serv.DescribeVolumes(&ec2.DescribeVolumesInput{
-		VolumeIds: []*string{&vId},
+func GetSingleVolume(cfg awsV2.Config, vId string) types.Volume {
+	ec2Client := ecc.NewFromConfig(cfg)
+	result, err := ec2Client.DescribeVolumes(context.Background(), &ecc.DescribeVolumesInput{
+		VolumeIds: []string{vId},
 	})
 	if err != nil {
 		log.Info().Msg(fmt.Sprintf("Error in fetching Volume: %s err: %v", vId, err))
-		return nil
 	}
 	return result.Volumes[0]
 }
@@ -168,9 +170,9 @@ func GetSingleVolume(sess session.Session, vId string) *ec2.Volume {
 Snapshots are region specific
 Localstack does have default snapshots, so we can see some of the snapshots that we never created
 */
-func GetSnapshots(sess session.Session) []Snapshot {
-	ec2Serv := *ec2.New(&sess)
-	result, err := ec2Serv.DescribeSnapshots(&ec2.DescribeSnapshotsInput{})
+func GetSnapshots(cfg awsV2.Config) []Snapshot {
+	ec2Client := ecc.NewFromConfig(cfg)
+	result, err := ec2Client.DescribeSnapshots(context.Background(), &ecc.DescribeSnapshotsInput{})
 	if err != nil {
 		log.Info().Msg(fmt.Sprintf("Error in fetching Snapshots, err: %v", err))
 		return nil
@@ -192,21 +194,20 @@ func GetSnapshots(sess session.Session) []Snapshot {
 			VolumeId:   *s.VolumeId,
 			VolumeSize: strconv.Itoa(int(*s.VolumeSize)),
 			StartTime:  IST.String(),
-			State:      *s.State,
+			State:      string(s.State),
 		}
 		snapshots = append(snapshots, snapshot)
 	}
 	return snapshots
 }
 
-func GetSingleSnapshot(sess session.Session, sId string) *ec2.Snapshot {
-	ec2Serv := *ec2.New(&sess)
-	result, err := ec2Serv.DescribeSnapshots(&ec2.DescribeSnapshotsInput{
-		SnapshotIds: []*string{&sId},
+func GetSingleSnapshot(cfg awsV2.Config, sId string) types.Snapshot {
+	ec2Serv := ecc.NewFromConfig(cfg)
+	result, err := ec2Serv.DescribeSnapshots(context.Background(), &ecc.DescribeSnapshotsInput{
+		SnapshotIds: []string{sId},
 	})
 	if err != nil {
 		log.Info().Msg(fmt.Sprintf("Error in fetching Snapshot: %s err: %v", sId, err))
-		return nil
 	}
 	return result.Snapshots[0]
 }
@@ -216,9 +217,9 @@ func GetSingleSnapshot(sess session.Session, sId string) *ec2.Snapshot {
 	Localstack does have default some AMIs, so we can see some of the AMIs that we never created
 */
 
-func GetAMIs(sess session.Session) []ImageResp {
-	ec2Serv := *ec2.New(&sess)
-	result, err := ec2Serv.DescribeImages(&ec2.DescribeImagesInput{})
+func GetAMIs(cfg awsV2.Config) []ImageResp {
+	ec2Serv := ecc.NewFromConfig(cfg)
+	result, err := ec2Serv.DescribeImages(context.Background(), &ecc.DescribeImagesInput{})
 	if err != nil {
 		log.Info().Msg(fmt.Sprintf("Error in fetching AMIs, err: %v", err))
 		return nil
@@ -230,28 +231,27 @@ func GetAMIs(sess session.Session) []ImageResp {
 			OwnerId:       *i.OwnerId,
 			ImageLocation: *i.ImageLocation,
 			Name:          *i.Name,
-			ImageType:     *i.ImageType,
+			ImageType:     string(i.ImageType),
 		}
 		images = append(images, image)
 	}
 	return images
 }
 
-func GetSingleAMI(sess session.Session, amiId string) *ec2.Image {
-	ec2Serv := *ec2.New(&sess)
-	result, err := ec2Serv.DescribeImages(&ec2.DescribeImagesInput{
-		ImageIds: []*string{&amiId},
+func GetSingleAMI(cfg awsV2.Config, amiId string) types.Image {
+	ec2Serv := ecc.NewFromConfig(cfg)
+	result, err := ec2Serv.DescribeImages(context.Background(), &ecc.DescribeImagesInput{
+		ImageIds: []string{amiId},
 	})
 	if err != nil {
 		log.Info().Msg(fmt.Sprintf("Error in fetching AMI: %s err: %v ", amiId, err))
-		return nil
 	}
 	return result.Images[0]
 }
 
-func GetVPCs(sess session.Session) []VpcResp {
-	ec2Serv := *ec2.New(&sess)
-	result, err := ec2Serv.DescribeVpcs(&ec2.DescribeVpcsInput{})
+func GetVPCs(cfg awsV2.Config) []VpcResp {
+	ec2Serv := ecc.NewFromConfig(cfg)
+	result, err := ec2Serv.DescribeVpcs(context.Background(), &ecc.DescribeVpcsInput{})
 	if err != nil {
 		log.Info().Msg(fmt.Sprintf("Error in fetching VPCs. err: %v ", err))
 		return nil
@@ -262,36 +262,37 @@ func GetVPCs(sess session.Session) []VpcResp {
 			VpcId:           *v.VpcId,
 			OwnerId:         *v.OwnerId,
 			CidrBlock:       *v.CidrBlock,
-			InstanceTenancy: *v.InstanceTenancy,
-			State:           *v.State,
+			InstanceTenancy: string(v.InstanceTenancy),
+			State:           string(v.State),
 		}
 		vpcs = append(vpcs, vpc)
 	}
 	return vpcs
 }
 
-func GetSingleVPC(sess session.Session, vpcId string) *ec2.Vpc {
-	ec2Serv := *ec2.New(&sess)
-	result, err := ec2Serv.DescribeVpcs(&ec2.DescribeVpcsInput{
-		VpcIds: []*string{&vpcId},
+func GetSingleVPC(cfg awsV2.Config, vpcId string) types.Vpc {
+	ec2Serv := ecc.NewFromConfig(cfg)
+	result, err := ec2Serv.DescribeVpcs(context.Background(), &ecc.DescribeVpcsInput{
+		VpcIds: []string{vpcId},
 	})
 	if err != nil {
 		log.Info().Msg(fmt.Sprintf("Error in fetching VPC: %s, err: %v", vpcId, err))
-		return nil
+		return result.Vpcs[0]
 	}
 	return result.Vpcs[0]
 }
 
-func GetSubnets(sess session.Session, vpcId string) []SubnetResp {
-	ec2Serv := *ec2.New(&sess)
-	result, err := ec2Serv.DescribeSubnets(&ec2.DescribeSubnetsInput{
-		Filters: []*ec2.Filter{
-			{
-				Name:   aws.String("vpc-id"),
-				Values: []*string{aws.String(vpcId)},
+func GetSubnets(cfg awsV2.Config, vpcId string) []SubnetResp {
+	ec2Serv := ecc.NewFromConfig(cfg)
+	result, err := ec2Serv.DescribeSubnets(context.Background(),
+		&ecc.DescribeSubnetsInput{
+			Filters: []types.Filter{
+				{
+					Name:   aws.String("vpc-id"),
+					Values: []string{(vpcId)},
+				},
 			},
-		},
-	})
+		})
 	if err != nil {
 		log.Info().Msg(fmt.Sprintf("Error in fetching Subnets. err: %v", err))
 		return nil
@@ -303,21 +304,21 @@ func GetSubnets(sess session.Session, vpcId string) []SubnetResp {
 			OwnerId:          *s.OwnerId,
 			CidrBlock:        *s.CidrBlock,
 			AvailabilityZone: *s.AvailabilityZone,
-			State:            *s.State,
+			State:            string(s.State),
 		}
 		subnets = append(subnets, subnet)
 	}
 	return subnets
 }
 
-func GetSingleSubnet(sess session.Session, sId string) *ec2.Subnet {
-	ec2Serv := *ec2.New(&sess)
-	result, err := ec2Serv.DescribeSubnets(&ec2.DescribeSubnetsInput{
-		SubnetIds: []*string{&sId},
+func GetSingleSubnet(cfg awsV2.Config, sId string) types.Subnet {
+	ec2Serv := ecc.NewFromConfig(cfg)
+	result, err := ec2Serv.DescribeSubnets(context.Background(), &ecc.DescribeSubnetsInput{
+		SubnetIds: []string{sId},
 	})
 	if err != nil {
 		log.Info().Msg(fmt.Sprintf("Error in fetching Subnet: %s, err: %v", sId, err))
-		return nil
+		return result.Subnets[0]
 	}
 	return result.Subnets[0]
 }

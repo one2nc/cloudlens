@@ -5,7 +5,7 @@ import (
 	"fmt"
 
 	"github.com/atotto/clipboard"
-	"github.com/aws/aws-sdk-go/aws/session"
+	awsV2 "github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/gdamore/tcell/v2"
 	"github.com/one2nc/cloudlens/internal"
 	"github.com/one2nc/cloudlens/internal/aws"
@@ -77,7 +77,7 @@ func (obj *S3FileViewer) downloadCmd(evt *tcell.EventKey) *tcell.EventKey {
 	if fileType == "File" {
 		ctx := obj.App().GetContext()
 		op := getObjectParams(ctx, objName)
-		res := aws.DownloadObject(*op.sess, op.bucketName, op.key)
+		res := aws.DownloadObject(op.cfg, op.bucketName, op.key)
 		obj.App().Flash().Info(res)
 	}
 
@@ -91,7 +91,7 @@ func (obj *S3FileViewer) preSignedUrlCmd(evt *tcell.EventKey) *tcell.EventKey {
 	if fileType == "File" {
 		ctx := obj.App().GetContext()
 		op := getObjectParams(ctx, objNmae)
-		url := aws.GetPreSignedUrl(*op.sess, op.bucketName, op.key)
+		url := aws.GetPreSignedUrl(op.cfg, op.bucketName, op.key)
 		log.Info().Msg(fmt.Sprintf("In view Presigned URL: %v", url))
 		clipboard.WriteAll(url)
 		obj.App().Flash().Info("Presigned URL Copied to Clipboard.")
@@ -101,10 +101,11 @@ func (obj *S3FileViewer) preSignedUrlCmd(evt *tcell.EventKey) *tcell.EventKey {
 }
 
 func getObjectParams(ctx context.Context, objName string) ObjectParams {
-	sess, ok := ctx.Value(internal.KeySession).(*session.Session)
+	cfg, ok := ctx.Value(internal.KeySession).(awsV2.Config)
 	if !ok {
-		log.Err(fmt.Errorf("conversion err: Expected session.session but got %v", sess))
+		log.Err(fmt.Errorf("conversion err: Expected awsV2.Config but got %v", cfg))
 	}
+
 	bn := fmt.Sprintf("%v", ctx.Value(internal.BucketName))
 	fn := fmt.Sprintf("%v", ctx.Value(internal.FolderName))
 	log.Info().Msg(fmt.Sprintf("In view Bucket Name: %v", bn))
@@ -113,7 +114,7 @@ func getObjectParams(ctx context.Context, objName string) ObjectParams {
 	key := fn + objName
 	log.Info().Msg(fmt.Sprintf("In view key: %v", key))
 	return ObjectParams{
-		sess:       sess,
+		cfg:        cfg,
 		bucketName: bn,
 		key:        key,
 	}

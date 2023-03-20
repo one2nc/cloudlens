@@ -4,7 +4,7 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/aws/aws-sdk-go/aws/session"
+	awsV2 "github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/one2nc/cloudlens/internal"
 	"github.com/one2nc/cloudlens/internal/aws"
 	"github.com/rs/zerolog/log"
@@ -20,11 +20,11 @@ func (ebs *EBS) Init(ctx context.Context) {
 }
 
 func (ebs *EBS) List(ctx context.Context) ([]Object, error) {
-	sess, ok := ctx.Value(internal.KeySession).(*session.Session)
+	cfg, ok := ctx.Value(internal.KeySession).(awsV2.Config)
 	if !ok {
-		log.Err(fmt.Errorf("conversion err: Expected session.session but got %v", sess))
+		log.Err(fmt.Errorf("conversion err: Expected awsV2.Config but got %v", cfg))
 	}
-	vols, err := aws.GetVolumes(*sess)
+	vols, err := aws.GetVolumes(cfg)
 	if err != nil {
 		return nil, err
 	}
@@ -40,10 +40,10 @@ func (ebs *EBS) Get(ctx context.Context, path string) (Object, error) {
 }
 
 func (ebs *EBS) Describe(volId string) (string, error) {
-	sess, ok := ebs.ctx.Value(internal.KeySession).(*session.Session)
+	cfg, ok := ebs.ctx.Value(internal.KeySession).(awsV2.Config)
 	if !ok {
-		log.Err(fmt.Errorf("conversion err: Expected session.session but got %v", sess))
+		log.Err(fmt.Errorf("conversion err: Expected awsV2.Config but got %v", cfg))
 	}
-	res := aws.GetSingleVolume(*sess, volId)
-	return res.GoString(), nil
+	res := aws.GetSingleVolume(cfg, volId)
+	return fmt.Sprintf("%v", res), nil
 }
