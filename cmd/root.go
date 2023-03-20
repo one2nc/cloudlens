@@ -7,7 +7,6 @@ import (
 
 	cfg "github.com/aws/aws-sdk-go-v2/config"
 	awsS "github.com/aws/aws-sdk-go/aws"
-	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/mattn/go-colorable"
 	"github.com/one2nc/cloudlens/internal"
 	"github.com/one2nc/cloudlens/internal/aws"
@@ -62,7 +61,7 @@ func run(cmd *cobra.Command, args []string) {
 		log.Logger = log.Output(zerolog.ConsoleWriter{Out: file})
 	}
 	//TODO profiles and regions should under aws
-	var sess *session.Session
+	//var sess *session.Session
 	var regions []string
 	app := view.NewApp()
 	profiles, err := readAndValidateProfile()
@@ -74,7 +73,7 @@ func run(cmd *cobra.Command, args []string) {
 		}
 
 		regions = readAndValidateRegion()
-		sess, err = aws.GetSession(profiles[0], regions[0])
+		//sess, err = aws.GetSession(profiles[0], regions[0])
 
 		cfg, err := aws.GetCfg(profiles[0], regions[0])
 		if err != nil {
@@ -91,11 +90,15 @@ func run(cmd *cobra.Command, args []string) {
 		profiles := []string{*profile}
 		region := awsS.String(os.Getenv(AWS_DEFAULT_REGION))
 		regions := []string{*region}
-		sess, err = aws.GetSessionUsingEnvVariables(*region, *profile)
+		//sess, err = aws.GetSessionUsingEnvVariables(*region, *profile)
+		// if err != nil {
+		// 	panic(fmt.Sprintf("aws session init failed -- %v", err))
+		// }
+		cfg, err := aws.GetCfgUsingEnvVariables(profiles[0], regions[0])
 		if err != nil {
 			panic(fmt.Sprintf("aws session init failed -- %v", err))
 		}
-		ctx := context.WithValue(context.Background(), internal.KeySession, sess)
+		ctx := context.WithValue(context.Background(), internal.KeySession, cfg)
 		if err := app.Init(ctx, profiles, regions, version); err != nil {
 			panic(fmt.Sprintf("app init failed -- %v", err))
 		}

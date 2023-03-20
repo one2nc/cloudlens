@@ -8,11 +8,12 @@ import (
 	"strings"
 
 	awsV2 "github.com/aws/aws-sdk-go-v2/aws"
+	"github.com/aws/aws-sdk-go-v2/config"
 	awsV2Config "github.com/aws/aws-sdk-go-v2/config"
+	creds "github.com/aws/aws-sdk-go-v2/credentials"
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/credentials"
 	"github.com/aws/aws-sdk-go/aws/defaults"
-	"github.com/aws/aws-sdk-go/aws/session"
 	"gopkg.in/ini.v1"
 )
 
@@ -71,84 +72,84 @@ func (c credentialProvider) IsExpired() bool {
 // 	return sess, nil
 // }
 
-func GetSession(profile, region string) (*session.Session, error) {
-	cfg, err := awsV2Config.LoadDefaultConfig(
-		context.TODO(),
-		awsV2Config.WithSharedConfigProfile(profile),
-		awsV2Config.WithRegion(region),
-	)
-	if err != nil {
-		fmt.Printf("failed to load config")
-		return nil, err
-	}
+// func GetSession(profile, region string) (*session.Session, error) {
+// 	cfg, err := awsV2Config.LoadDefaultConfig(
+// 		context.TODO(),
+// 		awsV2Config.WithSharedConfigProfile(profile),
+// 		awsV2Config.WithRegion(region),
+// 	)
+// 	if err != nil {
+// 		fmt.Printf("failed to load config")
+// 		return nil, err
+// 	}
 
-	creds, err := cfg.Credentials.Retrieve(context.TODO())
-	if err != nil {
-		fmt.Printf("failed to read credentials")
-		return nil, err
-	}
+// 	creds, err := cfg.Credentials.Retrieve(context.TODO())
+// 	if err != nil {
+// 		fmt.Printf("failed to read credentials")
+// 		return nil, err
+// 	}
 
-	credentialProvider := credentialProvider{Credentials: creds}
-	if credentialProvider.IsExpired() {
-		fmt.Println("Credentials have expired")
-		return nil, errors.New("AWS Credentials expired")
-	}
+// 	credentialProvider := credentialProvider{Credentials: creds}
+// 	if credentialProvider.IsExpired() {
+// 		fmt.Println("Credentials have expired")
+// 		return nil, errors.New("AWS Credentials expired")
+// 	}
 
-	// create session
-	sess, err := session.NewSessionWithOptions(session.Options{Config: aws.Config{
-		//TODO: remove hardcoded enpoint
-		//Endpoint:         aws.String(localstackEndpoint),
-		Credentials:      credentials.NewCredentials(credentialProvider),
-		Region:           aws.String(region),
-		S3ForcePathStyle: aws.Bool(true),
-	},
-		Profile: profile})
-	if err != nil {
-		fmt.Println("Error creating session:", err)
-		return nil, err
-	}
+// 	// create session
+// 	sess, err := session.NewSessionWithOptions(session.Options{Config: aws.Config{
+// 		//TODO: remove hardcoded enpoint
+// 		//Endpoint:         aws.String(localstackEndpoint),
+// 		Credentials:      credentials.NewCredentials(credentialProvider),
+// 		Region:           aws.String(region),
+// 		S3ForcePathStyle: aws.Bool(true),
+// 	},
+// 		Profile: profile})
+// 	if err != nil {
+// 		fmt.Println("Error creating session:", err)
+// 		return nil, err
+// 	}
 
-	// token, err := cfg.BearerAuthTokenProvider.RetrieveBearerToken(context.Background())
-	// if err != nil {
-	// 	return nil, err
-	// }
-	// log.Info().Msg("Token is: " + token.Value)
+// 	// token, err := cfg.BearerAuthTokenProvider.RetrieveBearerToken(context.Background())
+// 	// if err != nil {
+// 	// 	return nil, err
+// 	// }
+// 	// log.Info().Msg("Token is: " + token.Value)
 
-	// credsS := credentials.Value{
-	// 	AccessKeyID:     creds.AccessKeyID,
-	// 	SecretAccessKey: creds.SecretAccessKey,
-	// 	SessionToken:    token.Value,
-	// }
+// 	// credsS := credentials.Value{
+// 	// 	AccessKeyID:     creds.AccessKeyID,
+// 	// 	SecretAccessKey: creds.SecretAccessKey,
+// 	// 	SessionToken:    token.Value,
+// 	// }
 
-	// credential := credentials.NewStaticCredentialsFromCreds(credsS)
+// 	// credential := credentials.NewStaticCredentialsFromCreds(credsS)
 
-	// config := aws.NewConfig().WithCredentials(credential).WithRegion("ap-south-1")
-	// sess1, err := session.NewSession(config)
-	// if err != nil {
-	// 	panic(err)
-	// }
+// 	// config := aws.NewConfig().WithCredentials(credential).WithRegion("ap-south-1")
+// 	// sess1, err := session.NewSession(config)
+// 	// if err != nil {
+// 	// 	panic(err)
+// 	// }
 
-	// sssoStartURL := "https://my-sso-portal.awsapps.com/start"
-	// ssoRegion := "us-east-1"
-	// ssoAccountID := "123456789012"
+// 	// sssoStartURL := "https://my-sso-portal.awsapps.com/start"
+// 	// ssoRegion := "us-east-1"
+// 	// ssoAccountID := "123456789012"
 
-	// sess, err = session.NewSessionWithOptions(session.Options{
-	// 	Config: aws.Config{
-	// 		Region: aws.String(ssoRegion),
-	// 		Credentials: credentials.NewCredentials(&credentials.{
-	// 			StartURL:  ssoStartURL,
-	// 			AccountID: ssoAccountID,
-	// 		}),
-	// 	},
-	// })
+// 	// sess, err = session.NewSessionWithOptions(session.Options{
+// 	// 	Config: aws.Config{
+// 	// 		Region: aws.String(ssoRegion),
+// 	// 		Credentials: credentials.NewCredentials(&credentials.{
+// 	// 			StartURL:  ssoStartURL,
+// 	// 			AccountID: ssoAccountID,
+// 	// 		}),
+// 	// 	},
+// 	// })
 
-	// if err != nil {
-	// 	fmt.Println("Error creating session: ", err)
-	// 	return
-	// }
+// 	// if err != nil {
+// 	// 	fmt.Println("Error creating session: ", err)
+// 	// 	return
+// 	// }
 
-	return sess, nil
-}
+// 	return sess, nil
+// }
 
 func GetCfg(profile, region string) (awsV2.Config, error) {
 	cfg, err := awsV2Config.LoadDefaultConfig(
@@ -160,7 +161,6 @@ func GetCfg(profile, region string) (awsV2.Config, error) {
 		fmt.Printf("failed to load config")
 		return awsV2.Config{}, err
 	}
-
 	creds, err := cfg.Credentials.Retrieve(context.TODO())
 	if err != nil {
 		fmt.Printf("failed to read credentials")
@@ -175,27 +175,33 @@ func GetCfg(profile, region string) (awsV2.Config, error) {
 	return cfg, err
 }
 
-func GetSessionUsingEnvVariables(region, profile string) (*session.Session, error) {
+func GetCfgUsingEnvVariables(profile, region string) (awsV2.Config, error) {
 	akid := aws.String(os.Getenv(AWS_ACCESS_KEY_ID))
 	secKey := aws.String(os.Getenv(AWS_SECRET_ACCESS_KEY))
-	//~/.aws/config and ~/.aws/credentials file are not present and even the env variables are not set.
-	if *akid == "" || *secKey == "" {
-		return nil, errors.New("Cannot find AWS_ACCESS_KEY_ID or AWS_SECRET_ACCESS_KEY")
+	cfg, err := awsV2Config.LoadDefaultConfig(
+		context.TODO(),
+		awsV2Config.WithSharedConfigProfile(profile),
+		awsV2Config.WithRegion(region),
+		config.WithCredentialsProvider(
+			creds.NewStaticCredentialsProvider(*akid, *secKey, ""),
+		),
+	)
+	if err != nil {
+		fmt.Printf("failed to load config")
+		return awsV2.Config{}, err
 	}
-	creds := awsV2.Credentials{AccessKeyID: *akid, SecretAccessKey: *secKey}
+	creds, err := cfg.Credentials.Retrieve(context.TODO())
+	if err != nil {
+		fmt.Printf("failed to read credentials")
+		return awsV2.Config{}, err
+	}
+
 	credentialProvider := credentialProvider{Credentials: creds}
 	if credentialProvider.IsExpired() {
 		fmt.Println("Credentials have expired")
-		return nil, errors.New("AWS Credentials expired")
+		return awsV2.Config{}, errors.New("AWS Credentials expired")
 	}
-	sess, err := session.NewSession(&aws.Config{
-		Region:      aws.String(region),
-		Credentials: credentials.NewStaticCredentials(*akid, *secKey, ""),
-	})
-	if err != nil {
-		return nil, err
-	}
-	return sess, nil
+	return cfg, err
 }
 
 func GetProfiles() (profiles []string, err error) {
