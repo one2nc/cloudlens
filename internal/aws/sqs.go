@@ -8,17 +8,14 @@ import (
 	"time"
 
 	awsV2 "github.com/aws/aws-sdk-go-v2/aws"
-	sqss "github.com/aws/aws-sdk-go-v2/service/sqs"
+	"github.com/aws/aws-sdk-go-v2/service/sqs"
 	"github.com/aws/aws-sdk-go-v2/service/sqs/types"
-	"github.com/aws/aws-sdk-go/aws"
-	"github.com/aws/aws-sdk-go/aws/session"
-	"github.com/aws/aws-sdk-go/service/sqs"
 	"github.com/rs/zerolog/log"
 )
 
 func GetAllQueues(cfg awsV2.Config) ([]SQSResp, error) {
 	queueResp := []SQSResp{}
-	sqsServ := *sqss.NewFromConfig(cfg)
+	sqsServ := *sqs.NewFromConfig(cfg)
 	res, err := sqsServ.ListQueues(context.Background(), nil)
 	if err != nil {
 		log.Info().Msg(fmt.Sprintf("Error in fetching all queues, err: %v", err))
@@ -28,7 +25,7 @@ func GetAllQueues(cfg awsV2.Config) ([]SQSResp, error) {
 	for _, qUrl := range res.QueueUrls {
 		qA := strings.Split(qUrl, "/")
 		qName := qA[len(qA)-1]
-		qAttributes, err := sqsServ.GetQueueAttributes(context.Background(), &sqss.GetQueueAttributesInput{
+		qAttributes, err := sqsServ.GetQueueAttributes(context.Background(), &sqs.GetQueueAttributesInput{
 			AttributeNames: []types.QueueAttributeName{types.QueueAttributeNameAll},
 			QueueUrl:       &qUrl,
 		})
@@ -59,11 +56,11 @@ func GetAllQueues(cfg awsV2.Config) ([]SQSResp, error) {
 	return queueResp, nil
 }
 
-func GetMessageFromQueue(sess session.Session, queueUrl string) (*sqs.ReceiveMessageOutput, error) {
-	sqsServ := *sqs.New(&sess)
-	result, err := sqsServ.ReceiveMessage(&sqs.ReceiveMessageInput{
+func GetMessageFromQueue(cfg awsV2.Config, queueUrl string) (*sqs.ReceiveMessageOutput, error) {
+	sqsServ := *sqs.NewFromConfig(cfg)
+	result, err := sqsServ.ReceiveMessage(context.Background(), &sqs.ReceiveMessageInput{
 		QueueUrl:            &queueUrl,
-		MaxNumberOfMessages: aws.Int64(100),
+		MaxNumberOfMessages: (100),
 	})
 	if err != nil {
 		log.Info().Msg(fmt.Sprintf("Error in fetching queue attributes : %v", err))

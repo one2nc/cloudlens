@@ -7,13 +7,13 @@ import (
 	"time"
 
 	awsV2 "github.com/aws/aws-sdk-go-v2/aws"
-	lambdaa "github.com/aws/aws-sdk-go-v2/service/lambda"
+	"github.com/aws/aws-sdk-go-v2/service/lambda"
 	"github.com/rs/zerolog/log"
 )
 
 func GetAllLambdaFunctions(cfg awsV2.Config) ([]LambdaResp, error) {
 	responseA := []LambdaResp{}
-	lambdaServ := lambdaa.NewFromConfig(cfg)
+	lambdaServ := lambda.NewFromConfig(cfg)
 	response, err := lambdaServ.ListFunctions(context.Background(), nil)
 	if err != nil {
 		log.Info().Msg(fmt.Sprintf("Error getting Lambda functions : %v", err))
