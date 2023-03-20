@@ -91,11 +91,11 @@ func (h *Help) showServices() model.MenuHints {
 		},
 		{
 			Mnemonic:    "ec2:i",
-			Description: "View EC2 snapshots",
+			Description: "View EC2 images",
 		},
 		{
 			Mnemonic:    "ec2:s",
-			Description: "View EC2 images",
+			Description: "View EC2 snapshots",
 		},
 		{
 			Mnemonic:    "vpc",

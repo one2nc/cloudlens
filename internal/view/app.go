@@ -93,7 +93,7 @@ func (a *App) layout(ctx context.Context) {
 	main.AddItem(flash, 1, 1, false)
 
 	a.Main.AddPage("main", main, true, false)
-	a.Main.AddPage("splash", ui.NewSplash("0.1.1"), true, true)
+	a.Main.AddPage("splash", ui.NewSplash("0.1.2"), true, true)
 	a.toggleHeader(true)
 }
 
