@@ -47,47 +47,53 @@ func GetInstances(cfg aws.Config) ([]EC2Resp, error) {
 	return ec2Info, nil
 }
 
-func GetSingleInstance(cfg aws.Config, insId string) *ec2.DescribeInstancesOutput {
+func GetSingleInstance(cfg aws.Config, insId string) string {
 	ec2Client := ec2.NewFromConfig(cfg)
 	result, err := ec2Client.DescribeInstances(context.Background(), &ec2.DescribeInstancesInput{
 		InstanceIds: []string{insId},
 	})
 	if err != nil {
 		log.Info().Msg(fmt.Sprintf("Error fetching instance with id: %s, err: %v", insId, err))
-		return nil
+		return ""
 	}
-	return result
+	r, _ := json.MarshalIndent(result, "", " ")
+	return string(r)
 }
 
-func GetSecGrps(cfg aws.Config) ([]types.SecurityGroup, error) {
+func GetSecGrps(cfg aws.Config) ([]SGResp, error) {
+	var sgInfo []SGResp
 	ec2Client := ec2.NewFromConfig(cfg)
 	result, err := ec2Client.DescribeSecurityGroups(context.Background(), &ec2.DescribeSecurityGroupsInput{})
 	if err != nil {
-		log.Info().Msg(fmt.Sprintf("Error in fetching Security Groups. err: %v ", err))
-		return nil, err
+		panic("failed to describe security groups, " + err.Error())
 	}
+
 	for _, sg := range result.SecurityGroups {
-		log.Info().Msgf("Security Group ID: %s, Name: %s\n", *sg.GroupId, *sg.GroupName)
+		sgResp := &SGResp{
+			GroupId:     *sg.GroupId,
+			GroupName:   *sg.GroupName,
+			Description: *sg.Description,
+			OwnerId:     *sg.OwnerId,
+			VpcId:       *sg.VpcId,
+		}
+		sgInfo = append(sgInfo, *sgResp)
 	}
-	return result.SecurityGroups, nil
+	return sgInfo, nil
 }
 
-func GetSingleSecGrp(cfg aws.Config, sgId string) *ec2.DescribeSecurityGroupsOutput {
+func GetSingleSecGrp(cfg aws.Config, sgId string) string {
 	ec2Serv := *ec2.NewFromConfig(cfg)
 	result, err := ec2Serv.DescribeSecurityGroups(context.Background(), &ec2.DescribeSecurityGroupsInput{
 		GroupIds: []string{sgId},
 	})
 	if err != nil {
 		log.Info().Msg(fmt.Sprintf("Error in fetching Security Group: %s err: %v ", sgId, err))
-		return nil
+		return ""
 	}
-	return result
+	r, _ := json.MarshalIndent(result, "", " ")
+	return string(r)
 }
 
-/*
-Volumes(ebs) are region specific
-Localstack doesn't have default volumes, so at some regions, there won't be any volumes.
-*/
 func GetVolumes(cfg aws.Config) ([]EBSResp, error) {
 	var volumes []EBSResp
 	ec2Client := ec2.NewFromConfig(cfg)

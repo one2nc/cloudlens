@@ -19,19 +19,6 @@ func (ec2 *EC2) Init(ctx context.Context) {
 	ec2.ctx = ctx
 }
 
-//	func (e *EC2) List(ctx context.Context) ([]Object, error) {
-//		sess, ok := ctx.Value(internal.KeySession).(*session.Session)
-//		if !ok {
-//			log.Err(fmt.Errorf("conversion err: Expected session.session but got %v", sess))
-//		}
-//		ins, err := aws.GetInstances(*sess)
-//		objs := make([]Object, len(ins))
-//		for i, obj := range ins {
-//			objs[i] = obj
-//		}
-//		return objs, err
-//	}
-
 func (e *EC2) List(ctx context.Context) ([]Object, error) {
 	cfg, ok := ctx.Value(internal.KeySession).(awsV2.Config)
 	if !ok {

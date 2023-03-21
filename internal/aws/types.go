@@ -122,3 +122,11 @@ type SubnetResp struct {
 	AvailabilityZone string
 	State            string
 }
+
+type SGResp struct {
+	GroupId     string
+	GroupName   string
+	Description string
+	OwnerId     string
+	VpcId       string
+}

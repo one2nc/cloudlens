@@ -30,7 +30,6 @@ func (sg *SG) List(ctx context.Context) ([]Object, error) {
 	}
 	objs := make([]Object, len(sgs))
 	for i, obj := range sgs {
-		log.Info().Msgf("SEC GRP INFO: %v", obj)
 		objs[i] = obj
 	}
 	return objs, nil
