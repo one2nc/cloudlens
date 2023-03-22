@@ -10,7 +10,6 @@ import (
 type SG struct {
 }
 
-// Header returns a header row.
 func (sg SG) Header() Header {
 	return Header{
 		HeaderColumn{Name: "Group-Id", SortIndicatorIdx: 6, Align: tview.AlignLeft, Hide: false, Wide: false, MX: false, Time: false},
