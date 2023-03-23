@@ -4,7 +4,7 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/aws/aws-sdk-go/aws/session"
+	awsV2 "github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/one2nc/cloudlens/internal"
 	"github.com/one2nc/cloudlens/internal/aws"
 	"github.com/rs/zerolog/log"
@@ -20,12 +20,12 @@ func (irp *IamRolePloicy) Init(ctx context.Context) {
 }
 
 func (irp *IamRolePloicy) List(ctx context.Context) ([]Object, error) {
-	sess, ok := ctx.Value(internal.KeySession).(*session.Session)
+	cfg, ok := ctx.Value(internal.KeySession).(awsV2.Config)
 	if !ok {
-		log.Err(fmt.Errorf("conversion err: Expected session.session but got %v", sess))
+		log.Err(fmt.Errorf("conversion err: Expected awsV2.Config but got %v", cfg))
 	}
 	rn := fmt.Sprintf("%v", ctx.Value(internal.RoleName))
-	rp := aws.GetPoliciesOfRoles(*sess, rn)
+	rp := aws.GetPoliciesOfRoles(cfg, rn)
 	objs := make([]Object, len(rp))
 	for i, obj := range rp {
 		objs[i] = obj

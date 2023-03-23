@@ -6,8 +6,9 @@ import (
 	"strings"
 	"time"
 
-	"github.com/aws/aws-sdk-go/aws/session"
-	"github.com/aws/aws-sdk-go/service/s3"
+	awsV2 "github.com/aws/aws-sdk-go-v2/aws"
+	"github.com/aws/aws-sdk-go-v2/service/s3"
+	"github.com/aws/aws-sdk-go-v2/service/s3/types"
 	"github.com/dustin/go-humanize"
 	"github.com/one2nc/cloudlens/internal"
 	"github.com/one2nc/cloudlens/internal/aws"
@@ -19,14 +20,14 @@ type BObj struct {
 }
 
 func (bo *BObj) List(ctx context.Context) ([]Object, error) {
-	sess, ok := ctx.Value(internal.KeySession).(*session.Session)
+	cfg, ok := ctx.Value(internal.KeySession).(awsV2.Config)
 	if !ok {
-		log.Err(fmt.Errorf("conversion err: Expected session.session but got %v", sess))
+		log.Err(fmt.Errorf("conversion err: Expected awsV2.Config but got %v", cfg))
 	}
 	bucketName := fmt.Sprintf("%v", ctx.Value(internal.BucketName))
 	fn := fmt.Sprintf("%v", ctx.Value(internal.FolderName))
 	var s3Objects []aws.S3Object
-	bucketInfo, err := aws.GetInfoAboutBucket(*sess, bucketName, "/", fn)
+	bucketInfo, err := aws.GetInfoAboutBucket(cfg, bucketName, "/", fn)
 	if err != nil {
 		s3Objects = append(s3Objects, aws.S3Object{
 			Name: "No objects found",
@@ -60,7 +61,7 @@ func getBucLevelInfo(bucketInfo *s3.ListObjectsV2Output) ([]string, []string) {
 	return folderArrayInfo, fileArrayInfo
 }
 
-func setFoldersAndFiles(folders []*s3.CommonPrefix, files []*s3.Object) []aws.S3Object {
+func setFoldersAndFiles(folders []types.CommonPrefix, files []types.Object) []aws.S3Object {
 	var s3Objects []aws.S3Object
 	indx := 0
 
@@ -95,8 +96,8 @@ func setFoldersAndFiles(folders []*s3.CommonPrefix, files []*s3.Object) []aws.S3
 					Name:         keyA[len(keyA)-1],
 					ObjectType:   "File",
 					LastModified: IST.Format("Mon Jan _2 15:04:05 2006"),
-					Size:         humanize.Bytes(uint64(*fi.Size)),
-					StorageClass: *fi.StorageClass,
+					Size:         humanize.Bytes(uint64(fi.Size)),
+					StorageClass: string(fi.StorageClass),
 				}
 				s3Objects = append(s3Objects, o)
 				indx++

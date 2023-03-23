@@ -252,12 +252,13 @@ func (a *App) regionChanged(region string, index int) {
 }
 
 func (a *App) refreshSession(profile string, region string) {
-	sess, err := aws.GetSession(profile, region)
+	cfg, err := aws.GetCfg(profile, region)
+	//sess, err := aws.GetSession(profile, region)
 	if err != nil {
 		a.App.Flash().Err(err)
 		return
 	}
-	ctx := context.WithValue(a.GetContext(), internal.KeySession, sess)
+	ctx := context.WithValue(a.GetContext(), internal.KeySession, cfg)
 	a.SetContext(ctx)
 	stackedViews := a.Content.Pages.Stack.Flatten()
 	a.gotoResource(stackedViews[0], "", true)

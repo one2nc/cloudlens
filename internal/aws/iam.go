@@ -1,18 +1,18 @@
 package aws
 
 import (
+	"context"
 	"fmt"
 	"time"
 
-	"github.com/aws/aws-sdk-go/aws"
-	"github.com/aws/aws-sdk-go/aws/session"
-	"github.com/aws/aws-sdk-go/service/iam"
+	awsV2 "github.com/aws/aws-sdk-go-v2/aws"
+	"github.com/aws/aws-sdk-go-v2/service/iam"
 	"github.com/rs/zerolog/log"
 )
 
-func GetUsers(sess session.Session) []IAMUSerResp {
-	iamSrv := iam.New(&sess)
-	result, err := iamSrv.ListUsers(&iam.ListUsersInput{})
+func GetUsers(cfg awsV2.Config) []IAMUSerResp {
+	iamSrv := iam.NewFromConfig(cfg)
+	result, err := iamSrv.ListUsers(context.Background(), &iam.ListUsersInput{})
 	if err != nil {
 		log.Info().Msg(fmt.Sprintf("Error in fetching Iam users: ,  err: %v", err))
 		return nil
@@ -38,9 +38,9 @@ func GetUsers(sess session.Session) []IAMUSerResp {
 	return users
 }
 
-func GetUserGroups(sess session.Session) []IAMUSerGroupResp {
-	iamSrv := iam.New(&sess)
-	result, err := iamSrv.ListGroups(&iam.ListGroupsInput{})
+func GetUserGroups(cfg awsV2.Config) []IAMUSerGroupResp {
+	iamSrv := iam.NewFromConfig(cfg)
+	result, err := iamSrv.ListGroups(context.Background(), &iam.ListGroupsInput{})
 	if err != nil {
 		log.Info().Msg(fmt.Sprintf("Error in fetching Iam Groups: , err: %v", err))
 		return nil
@@ -58,10 +58,10 @@ func GetUserGroups(sess session.Session) []IAMUSerGroupResp {
 	return userGroups
 }
 
-func GetGroupUsers(sess session.Session, grpName string) []IAMUSerResp {
-	iamSrv := iam.New(&sess)
-	result, err := iamSrv.GetGroup(&iam.GetGroupInput{
-		GroupName: aws.String(grpName),
+func GetGroupUsers(cfg awsV2.Config, grpName string) []IAMUSerResp {
+	iamSrv := iam.NewFromConfig(cfg)
+	result, err := iamSrv.GetGroup(context.Background(), &iam.GetGroupInput{
+		GroupName: &grpName,
 	})
 	if err != nil {
 		log.Info().Msg(fmt.Sprintf("Error in fetching Iam users of the Group: %s,  err: %v", grpName, err))
@@ -81,10 +81,10 @@ func GetGroupUsers(sess session.Session, grpName string) []IAMUSerResp {
 	return users
 }
 
-func GetPoliciesOfGrp(sess session.Session, grpName string) []IAMUSerGroupPolicyResponse {
-	imaSrv := iam.New(&sess)
-	result, err := imaSrv.ListAttachedGroupPolicies(&iam.ListAttachedGroupPoliciesInput{
-		GroupName: aws.String(grpName),
+func GetPoliciesOfGrp(cfg awsV2.Config, grpName string) []IAMUSerGroupPolicyResponse {
+	imaSrv := iam.NewFromConfig(cfg)
+	result, err := imaSrv.ListAttachedGroupPolicies(context.Background(), &iam.ListAttachedGroupPoliciesInput{
+		GroupName: &grpName,
 	})
 	if err != nil {
 		log.Info().Msg(fmt.Sprintf("Error in fetching Iam policies of the Group: %s,  err: %v", grpName, err))
@@ -103,10 +103,10 @@ func GetPoliciesOfGrp(sess session.Session, grpName string) []IAMUSerGroupPolicy
 
 // If a user belong to a Group then we can't see the user's attached policy here,
 // their policies are governed on the top of the group
-func GetPoliciesOfUser(sess session.Session, usrName string) []IAMUSerPolicyResponse {
-	imaSrv := iam.New(&sess)
-	result, err := imaSrv.ListAttachedUserPolicies(&iam.ListAttachedUserPoliciesInput{
-		UserName: aws.String(usrName),
+func GetPoliciesOfUser(cfg awsV2.Config, usrName string) []IAMUSerPolicyResponse {
+	imaSrv := iam.NewFromConfig(cfg)
+	result, err := imaSrv.ListAttachedUserPolicies(context.Background(), &iam.ListAttachedUserPoliciesInput{
+		UserName: &usrName,
 	})
 	if err != nil {
 		log.Info().Msg(fmt.Sprintf("Error in fetching Iam policies of the User: %s,  err: %v", usrName, err))
@@ -123,9 +123,9 @@ func GetPoliciesOfUser(sess session.Session, usrName string) []IAMUSerPolicyResp
 	return usersPolicy
 }
 
-func GetIamRoles(sess session.Session) []IamRoleResp {
-	iamSrv := iam.New(&sess)
-	result, err := iamSrv.ListRoles(&iam.ListRolesInput{})
+func GetIamRoles(cfg awsV2.Config) []IamRoleResp {
+	iamSrv := iam.NewFromConfig(cfg)
+	result, err := iamSrv.ListRoles(context.Background(), &iam.ListRolesInput{})
 	if err != nil {
 		log.Info().Msg(fmt.Sprintf("Error in fetching Iam roles,  err: %v", err))
 		return nil
@@ -151,10 +151,10 @@ func GetIamRoles(sess session.Session) []IamRoleResp {
 	return roles
 }
 
-func GetPoliciesOfRoles(sess session.Session, roleName string) []IamRolePolicyResponse {
-	imaSrv := iam.New(&sess)
-	result, err := imaSrv.ListAttachedRolePolicies(&iam.ListAttachedRolePoliciesInput{
-		RoleName: aws.String(roleName),
+func GetPoliciesOfRoles(cfg awsV2.Config, roleName string) []IamRolePolicyResponse {
+	imaSrv := iam.NewFromConfig(cfg)
+	result, err := imaSrv.ListAttachedRolePolicies(context.Background(), &iam.ListAttachedRolePoliciesInput{
+		RoleName: &roleName,
 	})
 	if err != nil {
 		log.Info().Msg(fmt.Sprintf("Error in fetching Iam policies of the User: %v  err: %v", roleName, err))

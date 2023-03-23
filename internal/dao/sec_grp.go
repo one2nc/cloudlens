@@ -4,7 +4,7 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/aws/aws-sdk-go/aws/session"
+	awsV2 "github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/one2nc/cloudlens/internal"
 	"github.com/one2nc/cloudlens/internal/aws"
 	"github.com/rs/zerolog/log"
@@ -20,11 +20,14 @@ func (sg *SG) Init(ctx context.Context) {
 }
 
 func (sg *SG) List(ctx context.Context) ([]Object, error) {
-	sess, ok := ctx.Value(internal.KeySession).(*session.Session)
+	cfg, ok := ctx.Value(internal.KeySession).(awsV2.Config)
 	if !ok {
-		log.Err(fmt.Errorf("conversion err: Expected session.session but got %v", sess))
+		log.Err(fmt.Errorf("conversion err: Expected awsV2.Config but got %v", cfg))
 	}
-	sgs := aws.GetSecGrps(*sess)
+	sgs, err := aws.GetSecGrps(cfg)
+	if err != nil {
+		log.Info().Msg("Error in getting security groups: " + err.Error())
+	}
 	objs := make([]Object, len(sgs))
 	for i, obj := range sgs {
 		objs[i] = obj
@@ -37,10 +40,10 @@ func (sg *SG) Get(ctx context.Context, path string) (Object, error) {
 }
 
 func (sg *SG) Describe(path string) (string, error) {
-	sess, ok := sg.ctx.Value(internal.KeySession).(*session.Session)
+	cfg, ok := sg.ctx.Value(internal.KeySession).(awsV2.Config)
 	if !ok {
-		log.Err(fmt.Errorf("conversion err: Expected session.session but got %v", sess))
+		log.Err(fmt.Errorf("conversion err: Expected awsV2.Config but got %v", cfg))
 	}
-	sgInfo := aws.GetSingleSecGrp(*sess, path)
-	return sgInfo.GoString(), nil
+	sgInfo := aws.GetSingleSecGrp(cfg, path)
+	return fmt.Sprintf("%v", sgInfo), nil
 }

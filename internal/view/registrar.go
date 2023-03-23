@@ -19,6 +19,9 @@ func coreViewers(vv MetaViewers) {
 	vv[internal.LowercaseSg] = MetaViewer{
 		viewerFn: NewSG,
 	}
+	vv[internal.UppercaseSg] = MetaViewer{
+		viewerFn: NewSG,
+	}
 	vv[internal.LowercaseIamUser] = MetaViewer{
 		viewerFn: NewIAMU,
 	}
@@ -38,7 +41,7 @@ func coreViewers(vv MetaViewers) {
 		viewerFn: NewEC2I,
 	}
 	vv[internal.LowercaseSQS] = MetaViewer{
-		viewerFn: NewEC2I,
+		viewerFn: NewSQS,
 	}
 	vv[internal.LowercaseVPC] = MetaViewer{
 		viewerFn: NewVPC,

@@ -45,13 +45,17 @@ func LookupForValue(profiles []string, value string) bool {
 
 // SwapFirstIndexWithValue return swapped array if match found. If match not found returns same array and says match not found.
 func SwapFirstIndexWithValue(array []string, value string) ([]string, IsSwapHappen) {
-	var isSwapped IsSwapHappen
-	for i, got := range array {
-		if strings.EqualFold(got, value) {
-			array[0], array[i] = array[i], array[0]
-			isSwapped = true
-			break
+	if len(array) > 0 {
+		var isSwapped IsSwapHappen
+		for i, got := range array {
+			if strings.EqualFold(got, value) {
+				array[0], array[i] = array[i], array[0]
+				isSwapped = true
+				break
+			}
 		}
+		return array, isSwapped
+	} else {
+		return nil, false
 	}
-	return array, isSwapped
 }

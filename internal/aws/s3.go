@@ -9,10 +9,10 @@ import (
 	"time"
 
 	"github.com/atotto/clipboard"
-	"github.com/aws/aws-sdk-go/aws"
-	"github.com/aws/aws-sdk-go/aws/session"
-	"github.com/aws/aws-sdk-go/service/s3"
-	"github.com/aws/aws-sdk-go/service/s3/s3manager"
+	"github.com/aws/aws-sdk-go-v2/aws"
+	"github.com/aws/aws-sdk-go-v2/feature/s3/manager"
+	"github.com/aws/aws-sdk-go-v2/service/s3"
+	"github.com/aws/aws-sdk-go-v2/service/s3/types"
 	"github.com/rs/zerolog/log"
 )
 
@@ -22,16 +22,20 @@ type BucketResp struct {
 	Region       string
 }
 
-func ListBuckets(sess session.Session) ([]BucketResp, error) {
+type Presigner struct {
+	PresignClient *s3.PresignClient
+}
+
+func ListBuckets(cfg aws.Config) ([]BucketResp, error) {
 	var bucketInfo []BucketResp
-	s3Serv := *s3.New(&sess)
-	lbop, err := s3Serv.ListBuckets(&s3.ListBucketsInput{})
+	s3Client := s3.NewFromConfig(cfg)
+	lbop, err := s3Client.ListBuckets(context.Background(), &s3.ListBucketsInput{})
 	if err != nil {
 		log.Info().Msg(fmt.Sprintf("Error in listing buckets. err: %v", err))
 		return nil, err
 	}
 	for _, buc := range lbop.Buckets {
-		reg, err := s3Serv.GetBucketLocationWithContext(context.Background(), &s3.GetBucketLocationInput{Bucket: aws.String(*buc.Name)})
+		reg, err := s3Client.GetBucketLocation(context.Background(), &s3.GetBucketLocationInput{Bucket: buc.Name})
 		if err != nil {
 			log.Info().Msg(fmt.Sprintf("error getting bucket location. err: %v", err))
 			return nil, err
@@ -44,18 +48,18 @@ func ListBuckets(sess session.Session) ([]BucketResp, error) {
 		}
 		loc, _ := time.LoadLocation(localZone)
 		IST := launchTime.In(loc)
-		bucketresp := &BucketResp{BucketName: *buc.Name, CreationTime: IST.Format("Mon Jan _2 15:04:05 2006"), Region: aws.StringValue(reg.LocationConstraint)}
+		bucketresp := &BucketResp{BucketName: *buc.Name, CreationTime: IST.Format("Mon Jan _2 15:04:05 2006"), Region: string(reg.LocationConstraint)}
 		bucketInfo = append(bucketInfo, *bucketresp)
 	}
 	return bucketInfo, nil
 }
 
-func GetInfoAboutBucket(sess session.Session, bucketName string, delimiter string, prefix string) (*s3.ListObjectsV2Output, error) {
-	s3Serv := *s3.New(&sess)
-	result, err := s3Serv.ListObjectsV2(&s3.ListObjectsV2Input{
-		Bucket:    aws.String(bucketName),
-		Delimiter: aws.String(delimiter),
-		Prefix:    aws.String(prefix)})
+func GetInfoAboutBucket(cfg aws.Config, bucketName string, delimiter string, prefix string) (*s3.ListObjectsV2Output, error) {
+	s3Serv := *s3.NewFromConfig(cfg)
+	result, err := s3Serv.ListObjectsV2(context.Background(), &s3.ListObjectsV2Input{
+		Bucket:    &bucketName,
+		Delimiter: &delimiter,
+		Prefix:    &prefix})
 	if err != nil {
 		log.Info().Msg(fmt.Sprintf("Error is here: %v", err))
 		return nil, err
@@ -63,19 +67,23 @@ func GetInfoAboutBucket(sess session.Session, bucketName string, delimiter strin
 	return result, nil
 }
 
-func GetPreSignedUrl(sess session.Session, bucketName, key string) string {
-	s3Serv := *s3.New(&sess)
-	req, _ := s3Serv.GetObjectRequest(&s3.GetObjectInput{
+func GetPreSignedUrl(cfg aws.Config, bucketName, key string) string {
+
+	s3Serv := *s3.NewFromConfig(cfg)
+	input := &s3.GetObjectInput{
 		Bucket: aws.String(bucketName),
 		Key:    aws.String(key),
-	})
+	}
 
-	url, _ := req.Presign(15 * time.Minute)
-	return url
+	psClient := s3.NewPresignClient(&s3Serv, s3.WithPresignExpires(15*time.Minute))
+	res, _ := psClient.PresignGetObject(context.Background(), input)
+	return res.URL
+
 }
 
-func DownloadObject(sess session.Session, bucketName, key string) string {
-	downloader := s3manager.NewDownloader(&sess)
+func DownloadObject(cfg aws.Config, bucketName, key string) string {
+	abc := s3.NewFromConfig(cfg)
+	downloader := manager.NewDownloader(abc)
 	usr, err := user.Current()
 	if err != nil {
 		log.Info().Msg(fmt.Sprintf("error in getting the machine's user: %v", err))
@@ -95,9 +103,9 @@ func DownloadObject(sess session.Session, bucketName, key string) string {
 		return ""
 	}
 	defer f.Close()
-	n, err := downloader.Download(f, &s3.GetObjectInput{
-		Bucket: aws.String(bucketName),
-		Key:    aws.String(key),
+	n, err := downloader.Download(context.Background(), f, &s3.GetObjectInput{
+		Bucket: &bucketName,
+		Key:    &key,
 	})
 	if err != nil {
 		log.Info().Msg(fmt.Sprintf("failed to download file, err: %v", err))
@@ -108,33 +116,19 @@ func DownloadObject(sess session.Session, bucketName, key string) string {
 	return fmt.Sprintf("%v with size %d bytes, downloaded and its path copied to the clipboard", objectName, n)
 }
 
-func PutObjects(sess session.Session) {
-	body := strings.NewReader("Hello, I'm working on aws cli!")
-	s3Serv := *s3.New(&sess)
-	_, err := s3Serv.PutObject(&s3.PutObjectInput{
-		Bucket: aws.String("test-bucket12948611666145821"),
-		Key:    aws.String(""),
-		Body:   body,
-	})
-	if err != nil {
-		log.Info().Msg(fmt.Sprintf("err: %v", err))
-	}
-	log.Info().Msg("uploaded object")
-}
-
-func GetBuckEncryption(sess session.Session, bucketName string) *s3.ServerSideEncryptionConfiguration {
-	s3Serv := *s3.New(&sess)
-	sse, _ := s3Serv.GetBucketEncryption(&s3.GetBucketEncryptionInput{
+func GetBuckEncryption(cfg aws.Config, bucketName string) *types.ServerSideEncryptionConfiguration {
+	s3Serv := *s3.NewFromConfig(cfg)
+	sse, _ := s3Serv.GetBucketEncryption(context.Background(), &s3.GetBucketEncryptionInput{
 		Bucket: &bucketName,
 	})
 	//fmt.Println("sse string is :", sse.GoString())
 	return sse.ServerSideEncryptionConfiguration
 }
 
-func GetBuckLifecycle(sess session.Session, bucketName string) *s3.GetBucketLifecycleConfigurationOutput {
-	s3Serv := *s3.New(&sess)
-	blc, _ := s3Serv.GetBucketLifecycleConfiguration(&s3.GetBucketLifecycleConfigurationInput{
-		Bucket: aws.String(bucketName),
+func GetBuckLifecycle(cfg aws.Config, bucketName string) *s3.GetBucketLifecycleConfigurationOutput {
+	s3Serv := *s3.NewFromConfig(cfg)
+	blc, _ := s3Serv.GetBucketLifecycleConfiguration(context.Background(), &s3.GetBucketLifecycleConfigurationInput{
+		Bucket: &bucketName,
 	})
 	return blc
 }
