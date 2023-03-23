@@ -115,7 +115,11 @@ func GetProfiles() (profiles []string, err error) {
 	}
 	for i := 0; i < len(defaultReturn.Data); i++ {
 		spltiArr := strings.Split(defaultReturn.Data[i], " ")
-		ret = append(ret, spltiArr[len(spltiArr)-1])
+		if len(spltiArr) == 1 {
+			ret = append(ret, spltiArr[len(spltiArr)-1])
+		} else if len(spltiArr) > 1 && spltiArr[0] == "profile" {
+			ret = append(ret, spltiArr[len(spltiArr)-1])
+		}
 	}
 	return ret, nil
 }
