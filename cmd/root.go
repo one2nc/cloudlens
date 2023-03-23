@@ -90,10 +90,6 @@ func run(cmd *cobra.Command, args []string) {
 		profiles := []string{*profile}
 		region := awsS.String(os.Getenv(AWS_DEFAULT_REGION))
 		regions := []string{*region}
-		//sess, err = aws.GetSessionUsingEnvVariables(*region, *profile)
-		// if err != nil {
-		// 	panic(fmt.Sprintf("aws session init failed -- %v", err))
-		// }
 		cfg, err := aws.GetCfgUsingEnvVariables(profiles[0], regions[0])
 		if err != nil {
 			panic(fmt.Sprintf("aws session init failed -- %v", err))
