@@ -68,22 +68,19 @@ func GetInfoAboutBucket(cfg aws.Config, bucketName string, delimiter string, pre
 }
 
 func GetPreSignedUrl(cfg aws.Config, bucketName, key string) string {
-
 	s3Serv := *s3.NewFromConfig(cfg)
 	input := &s3.GetObjectInput{
 		Bucket: aws.String(bucketName),
 		Key:    aws.String(key),
 	}
-
 	psClient := s3.NewPresignClient(&s3Serv, s3.WithPresignExpires(15*time.Minute))
 	res, _ := psClient.PresignGetObject(context.Background(), input)
 	return res.URL
-
 }
 
 func DownloadObject(cfg aws.Config, bucketName, key string) string {
-	abc := s3.NewFromConfig(cfg)
-	downloader := manager.NewDownloader(abc)
+	s3Serv := s3.NewFromConfig(cfg)
+	downloader := manager.NewDownloader(s3Serv)
 	usr, err := user.Current()
 	if err != nil {
 		log.Info().Msg(fmt.Sprintf("error in getting the machine's user: %v", err))
