@@ -23,9 +23,9 @@ func GetSecurityGroupsTest(ctx context.Context, api SgAPI) (*ec2.DescribeSecurit
 	return object, nil
 }
 
-type mockGetSecurityGroups func(ctx context.Context, params *ec2.DescribeSecurityGroupsInput) (*ec2.DescribeSecurityGroupsOutput, error)
+type mockGetSecurityGroupsAPI func(ctx context.Context, params *ec2.DescribeSecurityGroupsInput) (*ec2.DescribeSecurityGroupsOutput, error)
 
-func (m mockGetSecurityGroups) GetSecurityGroups(ctx context.Context, params *ec2.DescribeSecurityGroupsInput) (*ec2.DescribeSecurityGroupsOutput, error) {
+func (m mockGetSecurityGroupsAPI) GetSecurityGroups(ctx context.Context, params *ec2.DescribeSecurityGroupsInput) (*ec2.DescribeSecurityGroupsOutput, error) {
 	return m(ctx, params)
 }
 
@@ -36,7 +36,7 @@ func TestGetSecurityGroups(t *testing.T) {
 	}{
 		{
 			client: func(t *testing.T) SgAPI {
-				return mockGetSecurityGroups(func(ctx context.Context, params *ec2.DescribeSecurityGroupsInput) (*ec2.DescribeSecurityGroupsOutput, error) {
+				return mockGetSecurityGroupsAPI(func(ctx context.Context, params *ec2.DescribeSecurityGroupsInput) (*ec2.DescribeSecurityGroupsOutput, error) {
 					t.Helper()
 					return &ec2.DescribeSecurityGroupsOutput{SecurityGroups: []types.SecurityGroup{{GroupId: aws.String("sec-group-1")}}}, nil
 				})
