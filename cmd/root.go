@@ -33,7 +33,7 @@ var (
 )
 
 func init() {
-	rootCmd.AddCommand(versionCmd())
+	rootCmd.AddCommand(versionCmd(), updateCmd())
 	rootCmd.PersistentFlags().StringVarP(&profile, "profile", "p", "default", "Read aws profile")
 	rootCmd.PersistentFlags().StringVarP(&region, "region", "r", "", "Read aws region")
 }
