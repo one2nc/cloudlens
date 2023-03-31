@@ -42,6 +42,12 @@ For knowing all the options available, use:
 cloudlens help
 ```
 
+### Self Update
+For updating to latest version, use:
+```console
+cloudlens update
+```
+
 ## Features
 
 Cloudlens supports viewing EC2 instances, S3 buckets, EBS volumes, VPCs, SQS queues, Lambda functions, Subnets, Security Groups, and IAM roles. Read the [cloudlens documentation](https://one2n.gitbook.io/docs/) to know more.
