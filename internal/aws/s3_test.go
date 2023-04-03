@@ -168,7 +168,3 @@ func TestS3Buckets(t *testing.T) {
 		}
 	}
 }
-
-// insert test data in localstack without using code. (json, yml, csv) time-box to 45 mins
-// modify existing populator with predictable naming --> one happy path case (s3/ec2)
-// submodule git ??
