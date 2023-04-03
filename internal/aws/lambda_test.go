@@ -79,3 +79,20 @@ func TestGetAllLambdaFunctions(t *testing.T) {
 		})
 	}
 }
+
+func TestGetLambdaFunctions(t *testing.T) {
+	lambdaFunctions := []string{"lambdaaa-func-0", "lambdaaa-func-1", "lambdaaa-func-2"}
+	localStackConf, err := GetLocalstackCfg("us-east-1")
+	if err != nil {
+		fmt.Println("Error in getting config")
+	}
+
+	lambdaInfo, err := GetAllLambdaFunctions(localStackConf)
+	for i := 0; i < len(lambdaFunctions); i++ {
+		got := lambdaInfo[i].FunctionName
+		want := lambdaFunctions[i]
+		if got != want {
+			t.Errorf("Got %v, want %v", got, want)
+		}
+	}
+}

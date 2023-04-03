@@ -65,3 +65,22 @@ func TestGetec2Instances(t *testing.T) {
 		})
 	}
 }
+
+func TestGetEc2Instances(t *testing.T) {
+	want := "t2.micro"
+	got := ""
+	localStackConf, err := GetLocalstackCfg("us-east-1")
+	if err != nil {
+		fmt.Println("Error in getting config")
+	}
+
+	instances, err := GetInstances(localStackConf)
+	if err != nil {
+		fmt.Println("Error in getting instances")
+	}
+
+	got = instances[0].InstanceType
+	if got != want {
+		t.Errorf("expect %v, got %v", want, got)
+	}
+}

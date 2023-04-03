@@ -149,3 +149,26 @@ func TestGetPresignedUrl(t *testing.T) {
 		})
 	}
 }
+
+func TestS3Buckets(t *testing.T) {
+	expected := []string{"test-bucket0", "test-bucket1", "test-bucket2", "test-bucket3"}
+	localStackConf, err := GetLocalstackCfg("us-east-1")
+	if err != nil {
+		fmt.Println("Error in getting config")
+	}
+	lb, err := ListBuckets(localStackConf)
+	if err != nil {
+		t.Errorf("Could not list buckets")
+	}
+	for i := 0; i < len(expected); i++ {
+		want := expected[i]
+		got := lb[i].BucketName
+		if got != want {
+			t.Errorf("want %v, got %v", want, got)
+		}
+	}
+}
+
+// insert test data in localstack without using code. (json, yml, csv) time-box to 45 mins
+// modify existing populator with predictable naming --> one happy path case (s3/ec2)
+// submodule git ??

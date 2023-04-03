@@ -66,3 +66,20 @@ func TestGetAllQueues(t *testing.T) {
 		})
 	}
 }
+
+func TestSQS(t *testing.T) {
+	urls := []string{"http://localhost:4566/000000000000/test-queue0", "http://localhost:4566/000000000000/test-queue1", "http://localhost:4566/000000000000/test-queue2"}
+	localStackConf, err := GetLocalstackCfg("us-east-1")
+	if err != nil {
+		fmt.Println("Error in getting config")
+	}
+	sqsResp, err := GetAllQueues(localStackConf)
+	for i := 0; i < len(urls); i++ {
+		want := urls[i]
+		got := sqsResp[i].URL
+		fmt.Println("got is :", got)
+		if got != want {
+			t.Errorf("got: %v, want %v", got, want)
+		}
+	}
+}

@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"log"
 	"os"
 	"strings"
 
@@ -122,4 +123,22 @@ func GetProfiles() (profiles []string, err error) {
 		}
 	}
 	return ret, nil
+}
+
+func GetLocalstackCfg(region string) (awsV2.Config, error) {
+	customResolver := awsV2.EndpointResolverFunc(func(service, region string) (awsV2.Endpoint, error) {
+		return awsV2.Endpoint{
+			URL:           "http://localhost:4566",
+			SigningRegion: region,
+		}, nil
+	})
+
+	awsLSCfg, err := config.LoadDefaultConfig(context.TODO(),
+		config.WithRegion(region),
+		config.WithEndpointResolver(customResolver),
+	)
+	if err != nil {
+		log.Fatalf("Cannot load the AWS configs: %s", err)
+	}
+	return awsLSCfg, nil
 }

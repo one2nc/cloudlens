@@ -18,3 +18,9 @@ build:
 	
 run: build
 	./execs/cloudlens
+
+setup:
+	docker-compose up -d 
+
+setup-down:
+	docker ps -a --format "{{.ID}} {{.Names}}" | grep cloudlens| awk '{print $$1}'| xargs docker stop | xargs docker rm -v

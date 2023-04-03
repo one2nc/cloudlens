@@ -124,3 +124,20 @@ func TestIamGroups(t *testing.T) {
 		})
 	}
 }
+
+func TestIamUserss(t *testing.T) {
+	iamUsers := []string{"iam-user-0", "iam-user-1", "iam-user-2"}
+	localStackConf, err := GetLocalstackCfg("us-east-1")
+	if err != nil {
+		fmt.Println("Error in getting config")
+	}
+	iamUsersInfo := GetUsers(localStackConf)
+	for i := 0; i < len(iamUsers); i++ {
+		got := iamUsersInfo[i].UserName
+		want := iamUsers[i]
+
+		if got != want {
+			t.Errorf("Got %v, want %v", got, want)
+		}
+	}
+}

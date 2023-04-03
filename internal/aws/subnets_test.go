@@ -38,10 +38,10 @@ func TestGetSubnets(t *testing.T) {
 			client: func(t *testing.T) SubnetAPI {
 				return mockGetSubnetAPI(func(ctx context.Context, params *ec2.DescribeSubnetsInput) (*ec2.DescribeSubnetsOutput, error) {
 					t.Helper()
-					return &ec2.DescribeSubnetsOutput{Subnets: []types.Subnet{types.Subnet{SubnetId: aws.String("subnet-1"), AvailabilityZone: aws.String("ap-south-1"), OwnerId: aws.String("000000000000")}}}, nil
+					return &ec2.DescribeSubnetsOutput{Subnets: []types.Subnet{{SubnetId: aws.String("subnet-1"), AvailabilityZone: aws.String("ap-south-1"), OwnerId: aws.String("000000000000")}}}, nil
 				})
 			},
-			expect: ec2.DescribeSubnetsOutput{Subnets: []types.Subnet{types.Subnet{SubnetId: aws.String("subnet-1"), AvailabilityZone: aws.String("ap-south-1"), OwnerId: aws.String("000000000000")}}},
+			expect: ec2.DescribeSubnetsOutput{Subnets: []types.Subnet{{SubnetId: aws.String("subnet-1"), AvailabilityZone: aws.String("ap-south-1"), OwnerId: aws.String("000000000000")}}},
 		},
 	}
 	for i, tt := range cases {
