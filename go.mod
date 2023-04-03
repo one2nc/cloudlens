@@ -18,6 +18,7 @@ require (
 require (
 	github.com/adrg/xdg v0.4.0
 	github.com/atotto/clipboard v0.1.4
+	gopkg.in/ini.v1 v1.67.0
 )
 
 require (
@@ -27,11 +28,10 @@ require (
 	github.com/aws/aws-sdk-go-v2/service/internal/checksum v1.1.25 // indirect
 	github.com/aws/aws-sdk-go-v2/service/internal/s3shared v1.13.24 // indirect
 	github.com/kylelemons/godebug v1.1.0 // indirect
-	gopkg.in/ini.v1 v1.67.0 // indirect
 )
 
 require (
-	github.com/aws/aws-sdk-go-v2/credentials v1.13.17 // indirect
+	github.com/aws/aws-sdk-go-v2/credentials v1.13.17
 	github.com/aws/aws-sdk-go-v2/feature/ec2/imds v1.13.0 // indirect
 	github.com/aws/aws-sdk-go-v2/feature/s3/manager v1.11.58
 	github.com/aws/aws-sdk-go-v2/internal/configsources v1.1.30 // indirect
