@@ -28,5 +28,5 @@ func TestSQSRender(t *testing.T) {
 	assert.Equal(t, 3, headers.IndexOf("Created", false))
 	assert.Equal(t, 4, headers.IndexOf("Messages-Available", false))
 	assert.Equal(t, 5, headers.IndexOf("Encryption", false))
-	assert.Equal(t, 6, headers.IndexOf("Max-Message-Size", false))
+	assert.Equal(t, 6, headers.IndexOf("Max-Message-Size", true))
 }
