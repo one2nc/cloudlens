@@ -8,11 +8,11 @@ import (
 )
 
 func TestEc2Render(t *testing.T) {
-	pom := aws.EC2Resp{InstanceId: "ec2-instance-1", InstanceState: "running", InstanceType: "t2.micro", MonitoringState: "disabled", PublicDNS: "public-dns", LaunchTime: "9:00:00", AvailabilityZone: "us-east-1e"}
+	resp := aws.EC2Resp{InstanceId: "ec2-instance-1", InstanceState: "running", InstanceType: "t2.micro", MonitoringState: "disabled", PublicDNS: "public-dns", LaunchTime: "9:00:00", AvailabilityZone: "us-east-1e"}
 
 	var ec2 EC2
 	r := NewRow(7)
-	err := ec2.Render(pom, "ec2", &r)
+	err := ec2.Render(resp, "ec2", &r)
 	assert.Nil(t, err)
 
 	assert.Equal(t, "ec2", r.ID)

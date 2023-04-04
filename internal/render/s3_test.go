@@ -8,13 +8,13 @@ import (
 )
 
 func TestS3Render(t *testing.T) {
-	pom := aws.BucketResp{
+	resp := aws.BucketResp{
 		BucketName: "test-bucket-1",
 	}
 
 	var s3 S3
 	r := NewRow(1)
-	err := s3.Render(pom, "s3", &r)
+	err := s3.Render(resp, "s3", &r)
 	assert.Nil(t, err)
 
 	assert.Equal(t, "s3", r.ID)

@@ -8,11 +8,11 @@ import (
 )
 
 func TestEc2ImageRender(t *testing.T) {
-	pom := aws.ImageResp{ImageId: "image-1", OwnerId: "8011", ImageLocation: "amazon/getting-started", Name: "Windows_server_2016", ImageType: "machine"}
+	resp := aws.ImageResp{ImageId: "image-1", OwnerId: "8011", ImageLocation: "amazon/getting-started", Name: "Windows_server_2016", ImageType: "machine"}
 
 	var ec2i EC2I
 	r := NewRow(5)
-	err := ec2i.Render(pom, "ec2i", &r)
+	err := ec2i.Render(resp, "ec2i", &r)
 	assert.Nil(t, err)
 
 	assert.Equal(t, "ec2i", r.ID)

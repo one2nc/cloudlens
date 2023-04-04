@@ -8,11 +8,11 @@ import (
 )
 
 func TestSubnetRender(t *testing.T) {
-	pom := aws.SubnetResp{SubnetId: "subnet-1", OwnerId: "000000000000", CidrBlock: "172.31.0.0/16", AvailabilityZone: "us-east-1", State: "disabled"}
+	resp := aws.SubnetResp{SubnetId: "subnet-1", OwnerId: "000000000000", CidrBlock: "172.31.0.0/16", AvailabilityZone: "us-east-1", State: "disabled"}
 
 	var subnet Subnet
 	r := NewRow(5)
-	err := subnet.Render(pom, "subnet", &r)
+	err := subnet.Render(resp, "subnet", &r)
 	assert.Nil(t, err)
 
 	assert.Equal(t, "subnet", r.ID)

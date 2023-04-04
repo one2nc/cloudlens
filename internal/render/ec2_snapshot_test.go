@@ -8,11 +8,11 @@ import (
 )
 
 func TestEc2SnapshotRender(t *testing.T) {
-	pom := aws.Snapshot{SnapshotId: "snap-1", OwnerId: "8011", VolumeId: "vol-1", VolumeSize: "15", StartTime: "9:00:00", State: "completed"}
+	resp := aws.Snapshot{SnapshotId: "snap-1", OwnerId: "8011", VolumeId: "vol-1", VolumeSize: "15", StartTime: "9:00:00", State: "completed"}
 
 	var ec2s EC2S
 	r := NewRow(6)
-	err := ec2s.Render(pom, "ec2s", &r)
+	err := ec2s.Render(resp, "ec2s", &r)
 	assert.Nil(t, err)
 
 	assert.Equal(t, "ec2s", r.ID)

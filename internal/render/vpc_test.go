@@ -8,11 +8,11 @@ import (
 )
 
 func TestVpcRender(t *testing.T) {
-	pom := aws.VpcResp{VpcId: "vpc-1", OwnerId: "000000000000", CidrBlock: "172.31.0.0/16", InstanceTenancy: "default", State: "available"}
+	resp := aws.VpcResp{VpcId: "vpc-1", OwnerId: "000000000000", CidrBlock: "172.31.0.0/16", InstanceTenancy: "default", State: "available"}
 
 	var vpc VPC
 	r := NewRow(5)
-	err := vpc.Render(pom, "vpc", &r)
+	err := vpc.Render(resp, "vpc", &r)
 	assert.Nil(t, err)
 
 	assert.Equal(t, "vpc", r.ID)

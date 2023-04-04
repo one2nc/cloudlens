@@ -8,11 +8,11 @@ import (
 )
 
 func TestIamRoleRender(t *testing.T) {
-	pom := aws.IamRoleResp{RoleId: "iam-role-1", RoleName: "role", ARN: "arn:aws:iam:00000000000:role/role-1", CreationTime: "9:00:00"}
+	resp := aws.IamRoleResp{RoleId: "iam-role-1", RoleName: "role", ARN: "arn:aws:iam:00000000000:role/role-1", CreationTime: "9:00:00"}
 
 	var iamRole IamRole
 	r := NewRow(4)
-	err := iamRole.Render(pom, "iamRole", &r)
+	err := iamRole.Render(resp, "iamRole", &r)
 	assert.Nil(t, err)
 
 	assert.Equal(t, "iamRole", r.ID)

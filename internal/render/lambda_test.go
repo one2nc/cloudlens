@@ -8,11 +8,11 @@ import (
 )
 
 func TestLambdaRender(t *testing.T) {
-	pom := aws.LambdaResp{FunctionName: "lambda-func-1", Description: "", Role: "arn:aws:iam:000000000000:role/Andre", FunctionArn: "arn:aws:lambda:us-east-1:000000000000:function:lambda-func-1", CodeSize: "861", LastModified: "9:00:00"}
+	resp := aws.LambdaResp{FunctionName: "lambda-func-1", Description: "", Role: "arn:aws:iam:000000000000:role/Andre", FunctionArn: "arn:aws:lambda:us-east-1:000000000000:function:lambda-func-1", CodeSize: "861", LastModified: "9:00:00"}
 
 	var lambda Lambda
 	r := NewRow(6)
-	err := lambda.Render(pom, "lambda", &r)
+	err := lambda.Render(resp, "lambda", &r)
 	assert.Nil(t, err)
 
 	assert.Equal(t, "lambda", r.ID)

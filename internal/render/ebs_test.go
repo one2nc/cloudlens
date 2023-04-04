@@ -8,11 +8,11 @@ import (
 )
 
 func TestEBSRender(t *testing.T) {
-	pom := aws.EBSResp{VolumeId: "vol-ebs-1", Size: "32", VolumeType: "gp2", State: "in-use", AvailabilityZone: "us-east-1e", Snapshot: "snapshot", CreationTime: "9:00:00"}
+	resp := aws.EBSResp{VolumeId: "vol-ebs-1", Size: "32", VolumeType: "gp2", State: "in-use", AvailabilityZone: "us-east-1e", Snapshot: "snapshot", CreationTime: "9:00:00"}
 
 	var ebs EBS
 	r := NewRow(7)
-	err := ebs.Render(pom, "ebs", &r)
+	err := ebs.Render(resp, "ebs", &r)
 	assert.Nil(t, err)
 
 	assert.Equal(t, "ebs", r.ID)

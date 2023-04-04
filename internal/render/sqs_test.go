@@ -8,11 +8,11 @@ import (
 )
 
 func TestSQSRender(t *testing.T) {
-	pom := aws.SQSResp{Name: "Queue-1", URL: "http://localhost:4566/000000000000", Type: "arn:aws:sqs:us-east-1:000000000000:P", Created: "9:00:00", MessagesAvailable: "10", Encryption: "ASE", MaxMessageSize: "128"}
+	resp := aws.SQSResp{Name: "Queue-1", URL: "http://localhost:4566/000000000000", Type: "arn:aws:sqs:us-east-1:000000000000:P", Created: "9:00:00", MessagesAvailable: "10", Encryption: "ASE", MaxMessageSize: "128"}
 
 	var sqs SQS
 	r := NewRow(7)
-	err := sqs.Render(pom, "sqs", &r)
+	err := sqs.Render(resp, "sqs", &r)
 	assert.Nil(t, err)
 
 	assert.Equal(t, "sqs", r.ID)
