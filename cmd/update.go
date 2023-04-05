@@ -36,7 +36,6 @@ const (
 var (
 	Oraganisation         = "one2nc"
 	ToolName              = "cloudlens"
-	currentTag            = "v0.1.2"
 	extIfFound            = ".exe"
 	HideProgressBar       = false
 	HideReleaseNotes      = false
@@ -70,7 +69,7 @@ func doUpdate() error {
 	if err != nil {
 		return fmt.Errorf("[ERROR] failed to parse semversion from tagname `%v` got %v", latest.GetTagName(), err)
 	}
-	currentVersion, err := semver.NewVersion(currentTag)
+	currentVersion, err := semver.NewVersion(version)
 	if err != nil {
 		return fmt.Errorf("[ERROR] failed to parse semversion from current version %v got %v", version, err)
 	}
