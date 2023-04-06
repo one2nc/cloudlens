@@ -2,7 +2,7 @@ GO_FLAGS   ?=
 NAME       := cloudlens
 OUTPUT_BIN ?= execs/${NAME}
 PACKAGE    := github.com/one2nc/$(NAME)
-VERSION    = v0.1.2
+VERSION    = v0.1.3
 GIT_REV    ?= $(shell git rev-parse --short HEAD)
 SOURCE_DATE_EPOCH ?= $(shell date +%s)
 ifeq ($(shell uname), Darwin)
@@ -18,3 +18,9 @@ build:
 	
 run: build
 	./execs/cloudlens
+
+setup:
+	docker-compose up -d 
+
+setup-down:
+	docker ps -a --format "{{.ID}} {{.Names}}" | grep cloudlens| awk '{print $$1}'| xargs docker stop | xargs docker rm -v

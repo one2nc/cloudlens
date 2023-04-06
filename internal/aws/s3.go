@@ -35,11 +35,6 @@ func ListBuckets(cfg aws.Config) ([]BucketResp, error) {
 		return nil, err
 	}
 	for _, buc := range lbop.Buckets {
-		reg, err := s3Client.GetBucketLocation(context.Background(), &s3.GetBucketLocationInput{Bucket: buc.Name})
-		if err != nil {
-			log.Info().Msg(fmt.Sprintf("error getting bucket location. err: %v", err))
-			return nil, err
-		}
 		launchTime := buc.CreationDate
 		localZone, err := GetLocalTimeZone() // Empty string loads the local timezone
 		if err != nil {
@@ -48,7 +43,7 @@ func ListBuckets(cfg aws.Config) ([]BucketResp, error) {
 		}
 		loc, _ := time.LoadLocation(localZone)
 		IST := launchTime.In(loc)
-		bucketresp := &BucketResp{BucketName: *buc.Name, CreationTime: IST.Format("Mon Jan _2 15:04:05 2006"), Region: string(reg.LocationConstraint)}
+		bucketresp := &BucketResp{BucketName: *buc.Name, CreationTime: IST.Format("Mon Jan _2 15:04:05 2006")}
 		bucketInfo = append(bucketInfo, *bucketresp)
 	}
 	return bucketInfo, nil
@@ -68,22 +63,19 @@ func GetInfoAboutBucket(cfg aws.Config, bucketName string, delimiter string, pre
 }
 
 func GetPreSignedUrl(cfg aws.Config, bucketName, key string) string {
-
 	s3Serv := *s3.NewFromConfig(cfg)
 	input := &s3.GetObjectInput{
 		Bucket: aws.String(bucketName),
 		Key:    aws.String(key),
 	}
-
 	psClient := s3.NewPresignClient(&s3Serv, s3.WithPresignExpires(15*time.Minute))
 	res, _ := psClient.PresignGetObject(context.Background(), input)
 	return res.URL
-
 }
 
 func DownloadObject(cfg aws.Config, bucketName, key string) string {
-	abc := s3.NewFromConfig(cfg)
-	downloader := manager.NewDownloader(abc)
+	s3Serv := s3.NewFromConfig(cfg)
+	downloader := manager.NewDownloader(s3Serv)
 	usr, err := user.Current()
 	if err != nil {
 		log.Info().Msg(fmt.Sprintf("error in getting the machine's user: %v", err))
