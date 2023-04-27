@@ -10,8 +10,6 @@ AWS Console in your terminal! well, almost. Explore AWS services like EC2, S3, I
 
 ## Installation
 
-Cloudlens is available on Linux and macOS.
-
 * Via [Homebrew](https://brew.sh/) for macOS or Linux
 
    ```shell
