@@ -15,6 +15,11 @@ AWS Console in your terminal! well, almost. Explore AWS services like EC2, S3, I
    ```shell
    brew install one2nc/cloudlens/cloudlens
    ```
+* Using go install
+      *cloudlens* requires go1.19 to install successfully. Run the following command to install the latest version -
+   ```shell
+       go install -v github.com/one2nc/cloudlens@latest
+   ```
 
 * Building from source code
       Cloudlens is currently in active development. We use Go 1.19. Follow these steps to build cloudlens locally:
