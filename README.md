@@ -32,6 +32,10 @@ AWS Console in your terminal! well, almost. Explore AWS services like EC2, S3, I
   make run
   ```
 
+## Prerequisite
+1. Docker installed on your local. Refer this [documentation](https://docs.docker.com/engine/install/)
+2. If you want to use localstack for populating dummy data, use our repo [cloud-lens-populator](https://github.com/one2nc/cloud-lens-populator) 
+
 ## Usage
 
 For the simple usage, just run the command without any options.
