@@ -28,6 +28,8 @@ const (
 	UppercaseNo          string     = "NO"
 	LowercaseEc2         string     = "ec2"
 	UppercaseEc2         string     = "Ec2"
+	LowercaseEcsCluster  string     = "ecs:c"
+	UppercaseEcsCluster  string     = "ECS:C"
 	LowercaseS3          string     = "s3"
 	UppercaseS3          string     = "S3"
 	LowercaseEBS         string     = "ebs"

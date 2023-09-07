@@ -26,7 +26,7 @@ var (
 	rootCmd         = &cobra.Command{
 		Use:   `cloudlens`,
 		Short: `cli for aws services`,
-		Long:  `cli for aws services[s3, ec2, security-groups, iam]`,
+		Long:  `cli for aws services[s3, ec2, security-groups, iam, ecs]`,
 		Run:   run,
 	}
 	out = colorable.NewColorableStdout()
