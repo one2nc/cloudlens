@@ -35,11 +35,18 @@ func (c credentialProvider) IsExpired() bool {
 }
 
 func GetCfg(profile, region string) (awsV2.Config, error) {
-	cfg, err := awsV2Config.LoadDefaultConfig(
-		context.TODO(),
-		awsV2Config.WithSharedConfigProfile(profile),
-		awsV2Config.WithRegion(region),
-	)
+	var cfg awsV2.Config
+	var err error
+	if os.Getenv("LOCALSTACK") == "true" {
+		cfg, err = GetLocalstackCfg(region)
+		profile = "default"
+	} else {
+		cfg, err = awsV2Config.LoadDefaultConfig(
+			context.TODO(),
+			awsV2Config.WithSharedConfigProfile(profile),
+			awsV2Config.WithRegion(region),
+		)
+	}
 	if err != nil {
 		fmt.Printf("failed to load config")
 		return awsV2.Config{}, err
@@ -61,6 +68,7 @@ func GetCfg(profile, region string) (awsV2.Config, error) {
 func GetCfgUsingEnvVariables(profile, region string) (awsV2.Config, error) {
 	akid := aws.String(os.Getenv(AWS_ACCESS_KEY_ID))
 	secKey := aws.String(os.Getenv(AWS_SECRET_ACCESS_KEY))
+
 	cfg, err := awsV2Config.LoadDefaultConfig(
 		context.TODO(),
 		awsV2Config.WithSharedConfigProfile(profile),
