@@ -133,7 +133,9 @@ func (t *Table) buildRow(r int, re, ore render.RowEvent, h render.Header) {
 		if col == 0 {
 			cell.SetReference(re.Row.ID)
 		}
-		t.SetCell(r, col, cell)
+		if !h[c].Hide {
+			t.SetCell(r, col, cell)
+		}
 		col++
 	}
 }
@@ -147,7 +149,9 @@ func (t *Table) AddHeaderCell(col int, h render.HeaderColumn) {
 	c.SetAttributes(tcell.AttrBold)
 	c.SetExpansion(1)
 	c.SetAlign(h.Align)
-	t.SetCell(0, col, c)
+	if !h.Hide{
+		t.SetCell(0, col, c)
+	}
 }
 
 // ClearMarks clear out marked items.
