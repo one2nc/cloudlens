@@ -18,7 +18,7 @@ import (
 )
 
 const (
-	splashDelay = 1 * time.Second
+	splashDelay = 3 * time.Second
 )
 
 type App struct {
@@ -39,6 +39,7 @@ func NewApp() *App {
 		IsPageContentSorted: false,
 	}
 	a.Views()["statusIndicator"] = ui.NewStatusIndicator(a.App)
+	// a.Views()["cloudSelector"] = ui.NewCloudSelector(a.App)
 	return &a
 }
 
@@ -86,7 +87,7 @@ func (a *App) layout(ctx context.Context) {
 	flash := ui.NewFlash(a.App)
 	go flash.Watch(ctx, a.Flash().Channel())
 	main := tview.NewFlex().SetDirection(tview.FlexRow)
-
+  gcpScreen := tview.NewTextView().SetText("TODO")
 	main.AddItem(a.statusIndicator(), 1, 1, false)
 	main.AddItem(a.Content, 0, 10, true)
 	main.AddItem(a.Crumbs(), 1, 1, false)
@@ -94,6 +95,20 @@ func (a *App) layout(ctx context.Context) {
 
 	a.Main.AddPage("main", main, true, false)
 	a.Main.AddPage("splash", ui.NewSplash("0.1.3"), true, true)
+	a.Main.AddPage("mainGCP", gcpScreen, true, true)
+
+	// Build cloud selection page
+	cloudSelectionScreen := tview.NewFlex().SetDirection(tview.FlexRow)
+	cloudSelectionScreen.AddItem(tview.NewTextView().SetText("Please Select Cloud Provider:").SetTextAlign(1), 0, 1, false)
+	cloudSelectionScreen.AddItem(tview.NewFlex().SetDirection(tview.FlexColumn).AddItem(tview.NewButton("AWS").SetSelectedFunc(func() {
+		// handle aws creds and launch aws main page
+		a.Main.SwitchToPage("main")
+	}), 0, 1, false).AddItem(tview.NewButton("GCP").SetSelectedFunc(func() {
+		// handle GCP creds and launch gcp main page
+		a.Main.SwitchToPage("mainGCP")
+	}), 0, 1, false), 0, 1, true)
+	cloudSelectionScreen.AddItem(nil, 0, 1, false)
+	a.Main.AddPage("cloudSelector", cloudSelectionScreen, true, false)
 	a.toggleHeader(true)
 }
 
@@ -111,8 +126,11 @@ func (a *App) Run() error {
 	//a.Resume()
 	go func() {
 		<-time.After(splashDelay)
+		// a.QueueUpdateDraw(func() {
+		// 	a.Main.SwitchToPage("main")
+		// })
 		a.QueueUpdateDraw(func() {
-			a.Main.SwitchToPage("main")
+			a.Main.SwitchToPage("cloudSelector")
 		})
 	}()
 
@@ -249,6 +267,17 @@ func (a *App) profileChanged(profile string, index int) {
 func (a *App) regionChanged(region string, index int) {
 	profile := a.GetContext().Value(internal.KeyActiveProfile).(string)
 	a.refreshSession(profile, region)
+}
+func (a *App) cloudSelected(cloud string, index int) {
+
+	switch cloud {
+	case "AWS":
+		a.Main.SwitchToPage("main")
+
+	case "GCP":
+		a.Main.SwitchToPage("main")
+
+	}
 }
 
 func (a *App) refreshSession(profile string, region string) {
