@@ -122,6 +122,11 @@ func (t *Table) buildRow(r int, re, ore render.RowEvent, h render.Header) {
 			continue
 		}
 
+		if h[c].Hide {
+			col++
+			continue
+		}
+
 		cell := tview.NewTableCell(field)
 		cell.SetAttributes(tcell.AttrNone)
 		cell.SetTextColor(tcell.ColorSkyblue)
@@ -133,15 +138,17 @@ func (t *Table) buildRow(r int, re, ore render.RowEvent, h render.Header) {
 		if col == 0 {
 			cell.SetReference(re.Row.ID)
 		}
-		if !h[c].Hide {
-			t.SetCell(r, col, cell)
-		}
+
+		t.SetCell(r, col, cell)
 		col++
 	}
 }
 
 // AddHeaderCell configures a table cell header.
 func (t *Table) AddHeaderCell(col int, h render.HeaderColumn) {
+	if h.Hide {
+		return
+	}
 	sort := h.Name == t.sortCol.name
 	//c := tview.NewTableCell(sortIndicator(sort, t.sortCol.asc, h))
 	c := tview.NewTableCell(sortIndicator(sort, t.sortCol.asc, h))
@@ -149,9 +156,7 @@ func (t *Table) AddHeaderCell(col int, h render.HeaderColumn) {
 	c.SetAttributes(tcell.AttrBold)
 	c.SetExpansion(1)
 	c.SetAlign(h.Align)
-	if !h.Hide{
-		t.SetCell(0, col, c)
-	}
+	t.SetCell(0, col, c)
 }
 
 // ClearMarks clear out marked items.
