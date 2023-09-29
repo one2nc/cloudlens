@@ -122,6 +122,11 @@ func (t *Table) buildRow(r int, re, ore render.RowEvent, h render.Header) {
 			continue
 		}
 
+		if h[c].Hide {
+			col++
+			continue
+		}
+
 		cell := tview.NewTableCell(field)
 		cell.SetAttributes(tcell.AttrNone)
 		cell.SetTextColor(tcell.ColorSkyblue)
@@ -133,6 +138,7 @@ func (t *Table) buildRow(r int, re, ore render.RowEvent, h render.Header) {
 		if col == 0 {
 			cell.SetReference(re.Row.ID)
 		}
+
 		t.SetCell(r, col, cell)
 		col++
 	}
@@ -140,6 +146,9 @@ func (t *Table) buildRow(r int, re, ore render.RowEvent, h render.Header) {
 
 // AddHeaderCell configures a table cell header.
 func (t *Table) AddHeaderCell(col int, h render.HeaderColumn) {
+	if h.Hide {
+		return
+	}
 	sort := h.Name == t.sortCol.name
 	//c := tview.NewTableCell(sortIndicator(sort, t.sortCol.asc, h))
 	c := tview.NewTableCell(sortIndicator(sort, t.sortCol.asc, h))
