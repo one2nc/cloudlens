@@ -12,6 +12,7 @@ import (
 	"github.com/one2nc/cloudlens/internal"
 	"github.com/one2nc/cloudlens/internal/aws"
 	"github.com/one2nc/cloudlens/internal/model"
+	"github.com/one2nc/cloudlens/internal/render"
 	"github.com/one2nc/cloudlens/internal/ui"
 	"github.com/one2nc/cloudlens/internal/ui/dialog"
 	"github.com/rs/zerolog/log"
@@ -19,6 +20,10 @@ import (
 
 const (
 	splashDelay = 1 * time.Second
+)
+
+var (
+	availableCloud = []string{"AWS", "GCP"}
 )
 
 type App struct {
@@ -78,10 +83,50 @@ func (a *App) Init(ctx context.Context, profiles, regions []string, version stri
 		return err
 	}
 	a.CmdBuff().SetSuggestionFn(a.suggestCommand())
+	a.showCloudSelectionScreen(ctx)
 	a.layout(ctx)
 	return nil
 }
 
+func handleAWS() {
+	//TODO
+}
+
+func handleGCP() {
+	//TODO
+}
+
+func (a *App) showCloudSelectionScreen(ctx context.Context) {
+
+	cloudSelectionTable := ui.NewTable("Select Cloud")
+	cloudSelectionTable.Init(ctx)
+
+	cloudSelectionTable.SetSelectedFunc(func(row int, column int) {
+		seletedCloud := availableCloud[row-1]
+		switch seletedCloud {
+		case "AWS":
+			a.Main.SwitchToPage("main")
+		case "GCP":
+			//TODO
+		}
+	})
+
+	tableData := render.NewTableData()
+	tableData.Header = render.Header{
+		render.HeaderColumn{Name: "Cloud", SortIndicatorIdx: -1},
+	}
+	for _, cloud := range availableCloud {
+		row := render.NewRow(1)
+		row.Fields = []string{cloud}
+		rowEvent := render.NewRowEvent(1, row)
+		tableData.RowEvents = append(tableData.RowEvents, rowEvent)
+	}
+	cloudSelectionTable.Update(tableData)
+	logo := ui.NewLogo()
+	cloudSelectionScreen := tview.NewFlex().SetDirection(tview.FlexRow)
+	cloudSelectionScreen.AddItem(logo, 8, 2, false).AddItem(cloudSelectionTable, 0, 8, true)
+	a.Main.AddPage("cloudSelectionScreen", cloudSelectionScreen, true, true)
+}
 func (a *App) layout(ctx context.Context) {
 	flash := ui.NewFlash(a.App)
 	go flash.Watch(ctx, a.Flash().Channel())
@@ -112,7 +157,7 @@ func (a *App) Run() error {
 	go func() {
 		<-time.After(splashDelay)
 		a.QueueUpdateDraw(func() {
-			a.Main.SwitchToPage("main")
+			a.Main.SwitchToPage("cloudSelectionScreen")
 		})
 	}()
 
