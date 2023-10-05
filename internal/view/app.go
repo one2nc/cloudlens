@@ -11,6 +11,7 @@ import (
 	"github.com/gdamore/tcell/v2"
 	"github.com/one2nc/cloudlens/internal"
 	"github.com/one2nc/cloudlens/internal/aws"
+	"github.com/one2nc/cloudlens/internal/gcp"
 	"github.com/one2nc/cloudlens/internal/model"
 	"github.com/one2nc/cloudlens/internal/render"
 	"github.com/one2nc/cloudlens/internal/ui"
@@ -93,7 +94,8 @@ func handleAWS() {
 }
 
 func handleGCP() {
-	//TODO
+	gcp.FetchProjects()
+
 }
 
 func (a *App) showCloudSelectionScreen(ctx context.Context) {
@@ -105,9 +107,11 @@ func (a *App) showCloudSelectionScreen(ctx context.Context) {
 		seletedCloud := availableCloud[row-1]
 		switch seletedCloud {
 		case "AWS":
-			a.Main.SwitchToPage("main")
+			a.Main.SwitchToPage(internal.AWS_SCREEN)
 		case "GCP":
-			//TODO
+			handleGCP()
+			a.Main.SwitchToPage(internal.GCP_SCREEN)
+
 		}
 	})
 
@@ -125,20 +129,24 @@ func (a *App) showCloudSelectionScreen(ctx context.Context) {
 	logo := ui.NewLogo()
 	cloudSelectionScreen := tview.NewFlex().SetDirection(tview.FlexRow)
 	cloudSelectionScreen.AddItem(logo, 8, 2, false).AddItem(cloudSelectionTable, 0, 8, true)
-	a.Main.AddPage("cloudSelectionScreen", cloudSelectionScreen, true, true)
+	a.Main.AddPage(internal.MAIN_SCREEN, cloudSelectionScreen, true, true)
 }
 func (a *App) layout(ctx context.Context) {
 	flash := ui.NewFlash(a.App)
 	go flash.Watch(ctx, a.Flash().Channel())
-	main := tview.NewFlex().SetDirection(tview.FlexRow)
 
-	main.AddItem(a.statusIndicator(), 1, 1, false)
-	main.AddItem(a.Content, 0, 10, true)
-	main.AddItem(a.Crumbs(), 1, 1, false)
-	main.AddItem(flash, 1, 1, false)
+	aws := tview.NewFlex().SetDirection(tview.FlexRow)
+	aws.AddItem(a.statusIndicator(), 1, 1, false)
+	aws.AddItem(a.Content, 0, 10, true)
+	aws.AddItem(a.Crumbs(), 1, 1, false)
+	aws.AddItem(flash, 1, 1, false)
+	a.Main.AddPage(internal.AWS_SCREEN, aws, true, false)
 
-	a.Main.AddPage("main", main, true, false)
-	a.Main.AddPage("splash", ui.NewSplash("0.1.3"), true, true)
+	gcp := tview.NewFlex().SetDirection(tview.FlexRow)
+	gcp.AddItem(tview.NewTextView().SetText("TODO").SetTextColor(tcell.ColorDarkRed), 1, 1, false)
+	a.Main.AddPage(internal.GCP_SCREEN, gcp, true, false)
+
+	a.Main.AddPage(internal.SPLASH_SCREEN, ui.NewSplash("0.1.3"), true, true)
 	a.toggleHeader(true)
 }
 
@@ -157,7 +165,7 @@ func (a *App) Run() error {
 	go func() {
 		<-time.After(splashDelay)
 		a.QueueUpdateDraw(func() {
-			a.Main.SwitchToPage("cloudSelectionScreen")
+			a.Main.SwitchToPage(internal.MAIN_SCREEN)
 		})
 	}()
 
@@ -184,7 +192,7 @@ func (a *App) SetContext(ctx context.Context) {
 func (a *App) toggleHeader(header bool) {
 	a.showHeader = header
 
-	flex, ok := a.Main.GetPrimitive("main").(*tview.Flex)
+	flex, ok := a.Main.GetPrimitive(internal.AWS_SCREEN).(*tview.Flex)
 	if !ok {
 		log.Fatal().Msg("Expecting valid flex view")
 	}
@@ -341,6 +349,8 @@ func (a *App) PrevCmd(evt *tcell.EventKey) *tcell.EventKey {
 			a.SetContext(ctx)
 			log.Info().Msg(fmt.Sprintf("inside prv cmd: %v", a.context.Value(internal.FolderName)))
 		}
+	} else {
+		a.Main.SwitchToPage(internal.MAIN_SCREEN)
 	}
 
 	return nil

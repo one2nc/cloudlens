@@ -3,6 +3,9 @@ package internal
 // ContextKey represents context key.
 type ContextKey string
 
+// ScreenName represents screen name.
+type ScreenName string
+
 // A collection of context keys.
 const (
 	KeyFactory           ContextKey = "factory"
@@ -69,4 +72,11 @@ const (
 	UserGroupPolicy      string     = "User Group Policy"
 	RolePolicy           string     = "Role Policy"
 	GroupUsers           string     = "Group Users"
+)
+
+const (
+	AWS_SCREEN    = "AWS"
+	GCP_SCREEN    = "GCP"
+	MAIN_SCREEN   = "MAIN"
+	SPLASH_SCREEN = "SPLASH"
 )

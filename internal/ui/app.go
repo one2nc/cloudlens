@@ -6,6 +6,7 @@ import (
 
 	"github.com/derailed/tview"
 	"github.com/gdamore/tcell/v2"
+	"github.com/one2nc/cloudlens/internal"
 	"github.com/one2nc/cloudlens/internal/model"
 )
 
@@ -86,7 +87,7 @@ func (a *App) BufferChanged(_, _ string) {}
 
 // BufferActive indicates the buff activity changed.
 func (a *App) BufferActive(state bool, kind model.BufferKind) {
-	flex, ok := a.Main.GetPrimitive("main").(*tview.Flex)
+	flex, ok := a.Main.GetPrimitive(internal.AWS_SCREEN).(*tview.Flex)
 	if !ok {
 		return
 	}
