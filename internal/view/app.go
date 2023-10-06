@@ -109,7 +109,7 @@ func (a *App) showCloudSelectionScreen(ctx context.Context) {
 		case "AWS":
 			a.Main.SwitchToPage(internal.AWS_SCREEN)
 		case "GCP":
-			handleGCP()
+			// handleGCP()
 			a.Main.SwitchToPage(internal.GCP_SCREEN)
 
 		}

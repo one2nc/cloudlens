@@ -86,6 +86,10 @@ func (h *Help) showServices() model.MenuHints {
 			Description: "view s3",
 		},
 		{
+			Mnemonic:    "storage",
+			Description: "view storage",
+		},
+		{
 			Mnemonic:    "ec2",
 			Description: "View Ec2",
 		},

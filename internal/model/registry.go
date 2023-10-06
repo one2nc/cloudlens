@@ -79,4 +79,8 @@ var Registry = map[string]ResourceMeta{
 		DAO:      &dao.Lambda{},
 		Renderer: &render.Lambda{},
 	},
+	internal.LowercaseStorage: {
+		DAO:      &dao.Storage{},
+		Renderer: &render.Storage{},
+	},
 }

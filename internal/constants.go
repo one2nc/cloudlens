@@ -57,6 +57,8 @@ const (
 	UppercaseSubnet      string     = "SUBNET"
 	LowercaseLamda       string     = "lambda"
 	UppercaseLamda       string     = "LAMBDA"
+	LowercaseStorage       string     = "storage"
+	UppercaseStorage       string     = "STORAGE"
 	Help                 string     = "help"
 	LowercaseH           string     = "h"
 	QuestionMark         string     = "?"

@@ -21,7 +21,7 @@ func  FetchProjects() {
 	defer c.Close()
 
 	req := &resourcemanagerpb.ListProjectsRequest{
-			Parent: "organizations/151178925207",
+			Parent: "organizations/{org_id}",
 	}
 	it := c.ListProjects(ctx, req)
 	projetNames := []string{}
@@ -33,6 +33,7 @@ func  FetchProjects() {
 		}
 		if err != nil {
 			// TODO: Handle error.
+			break
 		}
 		// TODO: Use resp.
 

@@ -143,6 +143,7 @@ func (a *Aliases) loadDefaultAliases() {
 	a.declare(internal.LowercaseVPC, internal.UppercaseVPC)
 	a.declare(internal.LowercaseSubnet, internal.UppercaseSubnet)
 	a.declare(internal.LowercaseLamda, internal.UppercaseLamda)
+	a.declare(internal.LowercaseStorage, internal.UppercaseStorage)
 
 	a.declare(internal.Help, internal.QuestionMark, internal.LowercaseH)
 	a.declare(internal.Quit, internal.LowercaseQ, internal.QFactorial, internal.UppercaseQ)
