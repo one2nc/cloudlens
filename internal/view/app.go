@@ -3,15 +3,18 @@ package view
 import (
 	"context"
 	"fmt"
+	"os"
 	"sort"
 	"strings"
 	"time"
 
+	cfg "github.com/aws/aws-sdk-go-v2/config"
+	awsS "github.com/aws/aws-sdk-go/aws"
 	"github.com/derailed/tview"
 	"github.com/gdamore/tcell/v2"
 	"github.com/one2nc/cloudlens/internal"
 	"github.com/one2nc/cloudlens/internal/aws"
-	"github.com/one2nc/cloudlens/internal/gcp"
+	"github.com/one2nc/cloudlens/internal/config"
 	"github.com/one2nc/cloudlens/internal/model"
 	"github.com/one2nc/cloudlens/internal/render"
 	"github.com/one2nc/cloudlens/internal/ui"
@@ -24,7 +27,8 @@ const (
 )
 
 var (
-	availableCloud = []string{"AWS", "GCP"}
+	availableCloud  = []string{"AWS", "GCP"}
+	profile, region string
 )
 
 type App struct {
@@ -49,11 +53,75 @@ func NewApp() *App {
 }
 
 // TODO keep context param at first place always
-func (a *App) Init(ctx context.Context, profiles, regions []string, version string) error {
+func (a *App) Init(version string) error {
+
+	ctx := context.Background()
+	ctx = context.WithValue(ctx, internal.KeyApp, a)
+	a.SetContext(ctx)
+
 	a.version = model.NormalizeVersion(version)
+	if err := a.Content.Init(ctx); err != nil {
+		return err
+	}
+	a.Content.Stack.AddListener(a.Menu())
+	a.Content.Stack.AddListener(a.Crumbs())
+
+	a.App.Init()
+	a.SetInputCapture(a.keyboard)
+	a.bindKeys()
+
+	a.command = NewCommand(a)
+	if err := a.command.Init(); err != nil {
+		log.Print(err)
+		return err
+	}
+	a.CmdBuff().SetSuggestionFn(a.suggestCommand())
+	a.showCloudSelectionScreen()
+	a.layout(ctx)
+	return nil
+}
+
+func (a *App) handleAWS() {
+	var regions []string
+	profiles, err := readAndValidateProfile()
+	if err != nil {
+
+		panic(err)
+	}
+	if len(profiles) > 0 {
+		if profiles[0] == "default" && len(region) == 0 {
+			region = getDefaultAWSRegion()
+		} else if len(region) == 0 {
+			region = "ap-south-1"
+		}
+
+		regions = readAndValidateRegion()
+
+		cfg, err := aws.GetCfg(profiles[0], regions[0])
+		if err != nil {
+			panic(fmt.Sprintf("aws session init failed -- %v", err))
+		}
+
+		ctx := context.WithValue(a.context, internal.KeySession, cfg)
+		a.SetContext(ctx)
+
+	} else {
+		profile := awsS.String(os.Getenv(internal.AWS_PROFILE))
+		profiles = []string{*profile}
+		region := awsS.String(os.Getenv(internal.AWS_DEFAULT_REGION))
+		regions := []string{*region}
+		cfg, err := aws.GetCfgUsingEnvVariables(profiles[0], regions[0])
+		if err != nil {
+			panic(fmt.Sprintf("aws session init failed -- %v", err))
+		}
+		ctx := context.WithValue(context.Background(), internal.KeySession, cfg)
+		a.SetContext(ctx)
+
+	}
+	ctx := a.GetContext()
 	ctx = context.WithValue(ctx, internal.KeyActiveProfile, profiles[0])
 	ctx = context.WithValue(ctx, internal.KeyActiveRegion, regions[0])
-	ctx = context.WithValue(ctx, internal.KeyApp, a)
+	ctx = context.WithValue(ctx, internal.KeySelectedCloud, "AWS")
 	a.SetContext(ctx)
 
 	p := ui.NewDropDown("Profile:", profiles)
@@ -69,47 +137,39 @@ func (a *App) Init(ctx context.Context, profiles, regions []string, version stri
 		"region":  a.region(),
 	}
 	a.Views()["info"] = ui.NewInfo(infoData)
-
-	if err := a.Content.Init(ctx); err != nil {
-		return err
-	}
-	a.Content.Stack.AddListener(a.Menu())
-	a.Content.Stack.AddListener(a.Crumbs())
-	a.App.Init()
-	a.SetInputCapture(a.keyboard)
-	a.bindKeys()
-
-	a.command = NewCommand(a)
-	if err := a.command.Init(); err != nil {
-		return err
-	}
-	a.CmdBuff().SetSuggestionFn(a.suggestCommand())
-	a.showCloudSelectionScreen(ctx)
-	a.layout(ctx)
-	return nil
-}
-
-func handleAWS() {
-	//TODO
-}
-
-func handleGCP() {
-	gcp.FetchProjects()
+	a.toggleHeader(true)
 
 }
 
-func (a *App) showCloudSelectionScreen(ctx context.Context) {
+func (a *App) handleGCP() {
+	ctx := a.GetContext()
+	ctx = context.WithValue(ctx, internal.KeySelectedCloud, "GCP")
+	ctx = context.WithValue(ctx, internal.KeyActiveProject, "centering-aegis-400910")
+	a.SetContext(ctx)
 
+}
+
+func (a *App) showCloudSelectionScreen() {
 	cloudSelectionTable := ui.NewTable("Select Cloud")
-	cloudSelectionTable.Init(ctx)
+	cloudSelectionTable.Init(a.context)
 
 	cloudSelectionTable.SetSelectedFunc(func(row int, column int) {
+		if row == 0 {
+			return
+		}
 		seletedCloud := availableCloud[row-1]
 		switch seletedCloud {
 		case "AWS":
+			a.handleAWS()
+			if err := a.command.defaultCmd(); err != nil {
+				panic(err)
+			}
 			a.Main.SwitchToPage(internal.AWS_SCREEN)
 		case "GCP":
-			// handleGCP()
+			a.handleGCP()
+			if err := a.command.defaultCmd(); err != nil {
+				panic(err)
+			}
 			a.Main.SwitchToPage(internal.GCP_SCREEN)
 
 		}
@@ -143,11 +203,13 @@ func (a *App) layout(ctx context.Context) {
 	a.Main.AddPage(internal.AWS_SCREEN, aws, true, false)
 
 	gcp := tview.NewFlex().SetDirection(tview.FlexRow)
-	gcp.AddItem(tview.NewTextView().SetText("TODO").SetTextColor(tcell.ColorDarkRed), 1, 1, false)
+	gcp.AddItem(a.statusIndicator(), 1, 1, false)
+	gcp.AddItem(a.Content, 0, 10, true)
+	gcp.AddItem(a.Crumbs(), 1, 1, false)
+	gcp.AddItem(flash, 1, 1, false)
 	a.Main.AddPage(internal.GCP_SCREEN, gcp, true, false)
 
 	a.Main.AddPage(internal.SPLASH_SCREEN, ui.NewSplash("0.1.3"), true, true)
-	a.toggleHeader(true)
 }
 
 // QueueUpdateDraw queues up a ui action and redraw the ui.
@@ -168,10 +230,6 @@ func (a *App) Run() error {
 			a.Main.SwitchToPage(internal.MAIN_SCREEN)
 		})
 	}()
-
-	if err := a.command.defaultCmd(); err != nil {
-		return err
-	}
 	a.SetRunning(true)
 
 	if err := a.Application.Run(); err != nil {
@@ -336,6 +394,7 @@ func (a *App) inject(c model.Component) error {
 
 // PrevCmd pops the command stack.
 func (a *App) PrevCmd(evt *tcell.EventKey) *tcell.EventKey {
+	log.Print(a.Content.IsLast())
 	if !a.Content.IsLast() {
 		a.Content.Pop()
 		fn := fmt.Sprintf("%v", a.context.Value(internal.FolderName))
@@ -370,4 +429,36 @@ func (a *App) profile() *ui.DropDown {
 
 func (a *App) region() *ui.DropDown {
 	return a.Views()["region"].(*ui.DropDown)
+}
+
+func readAndValidateProfile() ([]string, error) {
+	profiles, err := aws.GetProfiles()
+	if err != nil {
+		// fmt.Sprintf("failed to read profiles -- %v", err)
+		return nil, err
+	}
+	profiles, isSwapped := config.SwapFirstIndexWithValue(profiles, profile)
+	if !isSwapped {
+		// fmt.Printf("Profile '%v' not found, using profile '%v'... ", color.Colorize(profile, color.Red), color.Colorize(profiles[0], color.Green))
+	}
+	return profiles, nil
+}
+
+func readAndValidateRegion() []string {
+	regions := aws.GetAllRegions()
+	regions, isSwapped := config.SwapFirstIndexWithValue(regions, region)
+	if !isSwapped {
+		// fmt.Printf("Region '%v' not found, using %v..", color.Colorize(region, color.Red), color.Colorize(regions[0], color.Green))
+	}
+	return regions
+}
+
+func getDefaultAWSRegion() string {
+	cfg, err := cfg.LoadDefaultConfig(context.TODO())
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "failed to load AWS SDK config: %v\n", err)
+		os.Exit(1)
+	}
+	region := cfg.Region
+	return region
 }

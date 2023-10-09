@@ -3,6 +3,7 @@ package view
 import (
 	"github.com/derailed/tview"
 	"github.com/gdamore/tcell/v2"
+	"github.com/one2nc/cloudlens/internal"
 )
 
 type Tab struct {
@@ -17,8 +18,15 @@ func NewTab(app *App) *Tab {
 }
 
 func (t *Tab) Add() {
-	t.items = append(t.items, t.App.profile())
-	t.items = append(t.items, t.App.region())
+
+	ctx := t.App.GetContext()
+
+	cloud := ctx.Value(internal.KeySelectedCloud)
+	if cloud == "AWS" {
+		t.items = append(t.items, t.App.profile())
+		t.items = append(t.items, t.App.region())
+
+	}
 }
 
 func (t *Tab) tabAction(event *tcell.EventKey) *tcell.EventKey {

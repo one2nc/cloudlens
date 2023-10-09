@@ -4,6 +4,7 @@ import (
 	"context"
 
 	"cloud.google.com/go/storage"
+	"github.com/one2nc/cloudlens/internal"
 	"github.com/rs/zerolog/log"
 	"google.golang.org/api/iterator"
 )
@@ -14,15 +15,15 @@ type StorageResp struct {
 	Region       string
 }
 
-func ListBuckets() ([]StorageResp, error) {
+func ListBuckets(ctx context.Context) ([]StorageResp, error) {
 	var bucketInfo []StorageResp
 
-	ctx := context.Background()
 	client, err := storage.NewClient(ctx)
 	if err != nil {
-		// TODO: handle error.
+		return bucketInfo,err
 	}
-	it := client.Buckets(ctx, "centering-aegis-400910") //TODO: Pass project id through gcpconfig
+	project := ctx.Value(internal.KeyActiveProject).(string)
+	it := client.Buckets(ctx, project)
 
 	for {
 		bucket, err := it.Next()

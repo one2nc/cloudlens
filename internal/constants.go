@@ -3,15 +3,14 @@ package internal
 // ContextKey represents context key.
 type ContextKey string
 
-// ScreenName represents screen name.
-type ScreenName string
-
 // A collection of context keys.
 const (
+	KeySelectedCloud     ContextKey = "seleted_cloud"
 	KeyFactory           ContextKey = "factory"
 	KeyApp               ContextKey = "app"
 	KeyActiveProfile     ContextKey = "active-profile"
 	KeyActiveRegion      ContextKey = "active-region"
+	KeyActiveProject      ContextKey = "active-project"
 	KeySession           ContextKey = "session"
 	BucketName           ContextKey = "bucket_name"
 	ObjectName           ContextKey = "object_name"
@@ -57,8 +56,8 @@ const (
 	UppercaseSubnet      string     = "SUBNET"
 	LowercaseLamda       string     = "lambda"
 	UppercaseLamda       string     = "LAMBDA"
-	LowercaseStorage       string     = "storage"
-	UppercaseStorage       string     = "STORAGE"
+	LowercaseStorage     string     = "storage"
+	UppercaseStorage     string     = "STORAGE"
 	Help                 string     = "help"
 	LowercaseH           string     = "h"
 	QuestionMark         string     = "?"
@@ -77,8 +76,13 @@ const (
 )
 
 const (
-	AWS_SCREEN    = "AWS"
-	GCP_SCREEN    = "GCP"
-	MAIN_SCREEN   = "MAIN"
-	SPLASH_SCREEN = "SPLASH"
+	AWS_SCREEN    string = "AWS"
+	GCP_SCREEN    string = "GCP"
+	MAIN_SCREEN   string = "MAIN"
+	SPLASH_SCREEN string = "SPLASH"
+)
+
+const (
+	AWS_PROFILE        string = "AWS_PROFILE"
+	AWS_DEFAULT_REGION string = "AWS_DEFAULT_REGION"
 )

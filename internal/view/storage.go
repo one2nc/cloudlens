@@ -10,10 +10,10 @@ type Storage struct {
 }
 
 func NewStorage(resource string) ResourceViewer {
-	var l Storage
-	l.ResourceViewer = NewBrowser(resource)
-	l.AddBindKeysFn(l.bindKeys)
-	return &l
+	var s Storage
+	s.ResourceViewer = NewBrowser(resource)
+	s.AddBindKeysFn(s.bindKeys)
+	return &s
 }
 
 func (s *Storage) bindKeys(aa ui.KeyActions) {

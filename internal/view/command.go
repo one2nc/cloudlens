@@ -1,11 +1,13 @@
 package view
 
 import (
+	"errors"
 	"fmt"
 	"regexp"
 	"strings"
 	"sync"
 
+	"github.com/one2nc/cloudlens/internal"
 	"github.com/one2nc/cloudlens/internal/dao"
 	"github.com/one2nc/cloudlens/internal/model"
 	"github.com/rs/zerolog/log"
@@ -77,7 +79,17 @@ func (c *Command) run(cmd, path string, clearStack bool) error {
 }
 
 func (c *Command) defaultCmd() error {
-	return c.run("ec2", "", true)
+	ctx := c.app.context
+	cloud := ctx.Value(internal.KeySelectedCloud)
+	switch cloud {
+	case "AWS":
+		return c.run("ec2", "", true)
+	case "GCP":
+		return c.run("storage", "", true)
+	default:
+		return errors.New("Invalid")
+	}
+
 }
 
 func (c *Command) specialCmd(cmd, path string) bool {
