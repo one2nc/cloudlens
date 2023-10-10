@@ -22,10 +22,13 @@ func (t *Tab) Add() {
 	ctx := t.App.GetContext()
 
 	cloud := ctx.Value(internal.KeySelectedCloud)
-	if cloud == "AWS" {
+
+	switch cloud {
+	case internal.AWS:
 		t.items = append(t.items, t.App.profile())
 		t.items = append(t.items, t.App.region())
-
+	case internal.GCP:
+		t.items = append(t.items, t.App.project())
 	}
 }
 
@@ -43,7 +46,6 @@ func (t *Tab) tabAction(event *tcell.EventKey) *tcell.EventKey {
 		}
 		focusIdx = focusIdx + 1
 	}
-	
 	if focusIdx < 0 {
 		focusIdx = 0
 	}

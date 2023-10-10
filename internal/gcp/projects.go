@@ -1,46 +1,22 @@
 package gcp
 
 import (
-	"context"
-
-	"github.com/rs/zerolog/log"
-	"google.golang.org/api/iterator"
-
-	resourcemanager "cloud.google.com/go/resourcemanager/apiv3"
-	"cloud.google.com/go/resourcemanager/apiv3/resourcemanagerpb"
+	"encoding/json"
+	"os"
 )
 
+type ServiceAccount struct {
+	ProjectID string `json:"project_id"`
+}
 
-func  FetchProjects() {
-	ctx := context.Background()
-	c, err := resourcemanager.NewProjectsClient(ctx)
+func FetchProjectID(filePath string) (ServiceAccount, error) {
+	jsonFile, err := os.ReadFile(filePath)
+	var serviceAccount ServiceAccount
 	if err != nil {
-		log.Print(err)
+		return serviceAccount, err
 	}
 
-	defer c.Close()
-
-	req := &resourcemanagerpb.ListProjectsRequest{
-			Parent: "organizations/{org_id}",
-	}
-	it := c.ListProjects(ctx, req)
-	projetNames := []string{}
-	for {
-		resp, err := it.Next()
-		log.Print(err)
-		if err == iterator.Done {
-			break
-		}
-		if err != nil {
-			// TODO: Handle error.
-			break
-		}
-		// TODO: Use resp.
-
-		projetNames = append(projetNames, resp.Name)
-
-	}
-
-	log.Print(projetNames)
+	err = json.Unmarshal(jsonFile, &serviceAccount)
+	return serviceAccount, err
 
 }

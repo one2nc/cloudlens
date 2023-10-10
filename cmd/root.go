@@ -3,6 +3,7 @@ package cmd
 import (
 	"fmt"
 	"os"
+	"path/filepath"
 
 	"github.com/mattn/go-colorable"
 	"github.com/one2nc/cloudlens/internal/view"
@@ -39,8 +40,24 @@ func Execute() {
 }
 
 func run(cmd *cobra.Command, args []string) {
+	dirPath := "temp"
+	filename := "cloudlens.log"
+
+	// Create the full path to the file
+	filePath := filepath.Join(dirPath, filename)
+
+	_, err := os.Stat(dirPath)
+
+	if os.IsNotExist(err) {
+		err := os.MkdirAll(dirPath, 0755)
+		if err != nil {
+			fmt.Println("Error creating directory:", err)
+			return
+		}
+	}
+
 	mod := os.O_CREATE | os.O_APPEND | os.O_WRONLY
-	file, err := os.OpenFile("./cloudlens.log", mod, 0644)
+	file, err := os.OpenFile(filePath, mod, 0644)
 	if err != nil {
 		log.Printf("Could not open cloudlens.log. Writing logs to stdout instead.")
 		log.Logger = log.Output(zerolog.ConsoleWriter{Out: os.Stdout})

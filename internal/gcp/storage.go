@@ -20,7 +20,7 @@ func ListBuckets(ctx context.Context) ([]StorageResp, error) {
 
 	client, err := storage.NewClient(ctx)
 	if err != nil {
-		return bucketInfo,err
+		return bucketInfo, err
 	}
 	project := ctx.Value(internal.KeyActiveProject).(string)
 	it := client.Buckets(ctx, project)
@@ -32,7 +32,7 @@ func ListBuckets(ctx context.Context) ([]StorageResp, error) {
 				break
 			}
 			log.Printf("Error fetching bucket: %v", err)
-			continue
+			break
 		}
 
 		storageResp := &StorageResp{BucketName: bucket.Name, CreationTime: bucket.Created.Local().String()}

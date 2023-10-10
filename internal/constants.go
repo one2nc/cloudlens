@@ -81,6 +81,11 @@ const (
 	MAIN_SCREEN   string = "MAIN"
 	SPLASH_SCREEN string = "SPLASH"
 )
+const (
+	AWS    string = "AWS"
+	GCP    string = "GCP"
+)
+
 
 const (
 	AWS_PROFILE        string = "AWS_PROFILE"

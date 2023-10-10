@@ -82,12 +82,12 @@ func (c *Command) defaultCmd() error {
 	ctx := c.app.context
 	cloud := ctx.Value(internal.KeySelectedCloud)
 	switch cloud {
-	case "AWS":
-		return c.run("ec2", "", true)
-	case "GCP":
-		return c.run("storage", "", true)
+	case internal.AWS:
+		return c.run(internal.LowercaseEc2, "", true)
+	case internal.GCP:
+		return c.run(internal.LowercaseStorage, "", true)
 	default:
-		return errors.New("Invalid")
+		return errors.New("Invalid command")
 	}
 
 }

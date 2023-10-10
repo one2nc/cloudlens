@@ -2,6 +2,7 @@ package view
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"os"
 	"sort"
@@ -14,7 +15,9 @@ import (
 	"github.com/gdamore/tcell/v2"
 	"github.com/one2nc/cloudlens/internal"
 	"github.com/one2nc/cloudlens/internal/aws"
+	"github.com/one2nc/cloudlens/internal/color"
 	"github.com/one2nc/cloudlens/internal/config"
+	"github.com/one2nc/cloudlens/internal/gcp"
 	"github.com/one2nc/cloudlens/internal/model"
 	"github.com/one2nc/cloudlens/internal/render"
 	"github.com/one2nc/cloudlens/internal/ui"
@@ -121,7 +124,7 @@ func (a *App) handleAWS() {
 	ctx := a.GetContext()
 	ctx = context.WithValue(ctx, internal.KeyActiveProfile, profiles[0])
 	ctx = context.WithValue(ctx, internal.KeyActiveRegion, regions[0])
-	ctx = context.WithValue(ctx, internal.KeySelectedCloud, "AWS")
+	ctx = context.WithValue(ctx, internal.KeySelectedCloud, internal.AWS)
 	a.SetContext(ctx)
 
 	p := ui.NewDropDown("Profile:", profiles)
@@ -141,12 +144,30 @@ func (a *App) handleAWS() {
 
 }
 
-func (a *App) handleGCP() {
+func (a *App) handleGCP() error {
 	ctx := a.GetContext()
-	ctx = context.WithValue(ctx, internal.KeySelectedCloud, "GCP")
-	ctx = context.WithValue(ctx, internal.KeyActiveProject, "centering-aegis-400910")
-	a.SetContext(ctx)
+	ctx = context.WithValue(ctx, internal.KeySelectedCloud, internal.GCP)
+	credFilePath := os.Getenv("GOOGLE_APPLICATION_CREDENTIALS")
+	if credFilePath == "" {
+		return errors.New("Invalid path to google credentials")
+	}
+	serviceAccount, err := gcp.FetchProjectID(credFilePath)
+	if err != nil {
+		return err
+	}
+	ctx = context.WithValue(ctx, internal.KeyActiveProject, serviceAccount.ProjectID)
 
+	p := ui.NewDropDown("Projects:", []string{serviceAccount.ProjectID})
+	p.SetSelectedFunc(a.projectchanged)
+	a.Views()["project"] = p
+
+	infoData := map[string]tview.Primitive{
+		"project": a.project(),
+	}
+	a.Views()["info"] = ui.NewInfo(infoData)
+	a.SetContext(ctx)
+	a.toggleHeader(true)
+	return nil
 }
 
 func (a *App) showCloudSelectionScreen() {
@@ -159,19 +180,19 @@ func (a *App) showCloudSelectionScreen() {
 		}
 		seletedCloud := availableCloud[row-1]
 		switch seletedCloud {
-		case "AWS":
+		case internal.AWS:
 			a.handleAWS()
-			if err := a.command.defaultCmd(); err != nil {
-				panic(err)
-			}
 			a.Main.SwitchToPage(internal.AWS_SCREEN)
-		case "GCP":
-			a.handleGCP()
-			if err := a.command.defaultCmd(); err != nil {
+		case internal.GCP:
+			err := a.handleGCP()
+			if err != nil {
 				panic(err)
 			}
 			a.Main.SwitchToPage(internal.GCP_SCREEN)
 
+		}
+		if err := a.command.defaultCmd(); err != nil {
+			panic(err)
 		}
 	})
 
@@ -249,8 +270,9 @@ func (a *App) SetContext(ctx context.Context) {
 
 func (a *App) toggleHeader(header bool) {
 	a.showHeader = header
+	cloud := a.context.Value(internal.KeySelectedCloud).(string)
 
-	flex, ok := a.Main.GetPrimitive(internal.AWS_SCREEN).(*tview.Flex)
+	flex, ok := a.Main.GetPrimitive(cloud).(*tview.Flex)
 	if !ok {
 		log.Fatal().Msg("Expecting valid flex view")
 	}
@@ -357,6 +379,10 @@ func (a *App) profileChanged(profile string, index int) {
 	a.refreshSession(profile, region)
 }
 
+func (a *App) projectchanged(project string, index int) {
+	a.refreshProject(project)
+}
+
 func (a *App) regionChanged(region string, index int) {
 	profile := a.GetContext().Value(internal.KeyActiveProfile).(string)
 	a.refreshSession(profile, region)
@@ -370,6 +396,14 @@ func (a *App) refreshSession(profile string, region string) {
 		return
 	}
 	ctx := context.WithValue(a.GetContext(), internal.KeySession, cfg)
+	a.SetContext(ctx)
+	stackedViews := a.Content.Pages.Stack.Flatten()
+	a.gotoResource(stackedViews[0], "", true)
+	a.App.Flash().Infof("Refreshing %v...", stackedViews[0])
+}
+
+func (a *App) refreshProject(project string) {
+	ctx := context.WithValue(a.GetContext(), internal.KeyActiveProject, project)
 	a.SetContext(ctx)
 	stackedViews := a.Content.Pages.Stack.Flatten()
 	a.gotoResource(stackedViews[0], "", true)
@@ -394,7 +428,6 @@ func (a *App) inject(c model.Component) error {
 
 // PrevCmd pops the command stack.
 func (a *App) PrevCmd(evt *tcell.EventKey) *tcell.EventKey {
-	log.Print(a.Content.IsLast())
 	if !a.Content.IsLast() {
 		a.Content.Pop()
 		fn := fmt.Sprintf("%v", a.context.Value(internal.FolderName))
@@ -427,6 +460,10 @@ func (a *App) profile() *ui.DropDown {
 	return a.Views()["profile"].(*ui.DropDown)
 }
 
+func (a *App) project() *ui.DropDown {
+	return a.Views()["project"].(*ui.DropDown)
+}
+
 func (a *App) region() *ui.DropDown {
 	return a.Views()["region"].(*ui.DropDown)
 }
@@ -434,12 +471,12 @@ func (a *App) region() *ui.DropDown {
 func readAndValidateProfile() ([]string, error) {
 	profiles, err := aws.GetProfiles()
 	if err != nil {
-		// fmt.Sprintf("failed to read profiles -- %v", err)
+		log.Print("failed to read profiles -- %v", err)
 		return nil, err
 	}
 	profiles, isSwapped := config.SwapFirstIndexWithValue(profiles, profile)
 	if !isSwapped {
-		// fmt.Printf("Profile '%v' not found, using profile '%v'... ", color.Colorize(profile, color.Red), color.Colorize(profiles[0], color.Green))
+		log.Print("Profile '%v' not found, using profile '%v'... ", color.Colorize(profile, color.Red), color.Colorize(profiles[0], color.Green))
 	}
 	return profiles, nil
 }
@@ -448,7 +485,7 @@ func readAndValidateRegion() []string {
 	regions := aws.GetAllRegions()
 	regions, isSwapped := config.SwapFirstIndexWithValue(regions, region)
 	if !isSwapped {
-		// fmt.Printf("Region '%v' not found, using %v..", color.Colorize(region, color.Red), color.Colorize(regions[0], color.Green))
+		log.Print("Region '%v' not found, using %v..", color.Colorize(region, color.Red), color.Colorize(regions[0], color.Green))
 	}
 	return regions
 }
