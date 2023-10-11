@@ -13,6 +13,7 @@ import (
 
 	"github.com/atotto/clipboard"
 	"github.com/gdamore/tcell/v2"
+	"github.com/one2nc/cloudlens/internal"
 	"github.com/one2nc/cloudlens/internal/ui"
 	"github.com/rs/zerolog/log"
 )
@@ -104,8 +105,7 @@ func (t *Table) toggleWideCmd(evt *tcell.EventKey) *tcell.EventKey {
 	return nil
 }
 func (t *Table) importAsCSV(evt *tcell.EventKey) *tcell.EventKey {
-	_, profile := t.app.profile().GetCurrentOption()
-	_, region := t.app.region().GetCurrentOption()
+
 	var tableData [][]string
 	rowCount := t.GetRowCount()
 	colCount := t.GetColumnCount()
@@ -118,7 +118,10 @@ func (t *Table) importAsCSV(evt *tcell.EventKey) *tcell.EventKey {
 		}
 		tableData = append(tableData, row)
 	}
+	log.Print(t.GetTitle())
 	csvFileName := strings.Split(t.GetTitle(), " ")
+	log.Print(csvFileName)
+
 	usr, err := user.Current()
 	if err != nil {
 		log.Info().Msg(fmt.Sprintf("error in getting the machine's user: %v", err))
@@ -128,11 +131,27 @@ func (t *Table) importAsCSV(evt *tcell.EventKey) *tcell.EventKey {
 	if err != nil {
 		log.Info().Msg(fmt.Sprintf("error in creating csv directory: %v", err))
 	}
-	if csvFileName[len(csvFileName)-2] == "S3" || strings.Contains(csvFileName[len(csvFileName)-2], "IAM") {
-		path = filepath.Join(path + "/" + csvFileName[len(csvFileName)-2] + "-" + profile + ".csv")
-	} else {
-		path = filepath.Join(path + "/" + csvFileName[len(csvFileName)-2] + "-" + profile + "-" + region + ".csv")
+
+	var profile, region, projectID string
+	var fileSuffix string
+	cloud := t.app.context.Value(internal.KeySelectedCloud).(string)
+	switch cloud {
+	case internal.AWS:
+		_, profile = t.app.profile().GetCurrentOption()
+		_, region = t.app.region().GetCurrentOption()
+
+		if csvFileName[len(csvFileName)-2] == "S3" || strings.Contains(csvFileName[len(csvFileName)-2], "IAM") {
+			fileSuffix = csvFileName[len(csvFileName)-2] + "-" + profile + ".csv"
+		} else {
+			fileSuffix = csvFileName[len(csvFileName)-2] + "-" + profile + "-" + region + ".csv"
+		}
+	case internal.GCP:
+		_, projectID = t.app.project().GetCurrentOption()
+		fileSuffix = csvFileName[len(csvFileName)-2] + "-" + projectID + ".csv"
 	}
+
+	path = filepath.Join(path + "/" + fileSuffix)
+
 	file, err := os.Create(path)
 	if err != nil {
 		log.Info().Msg(fmt.Sprintf("error in creating csv file: %v", err))

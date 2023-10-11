@@ -2,9 +2,12 @@ package gcp
 
 import (
 	"context"
+	"fmt"
+	"time"
 
 	"cloud.google.com/go/storage"
 	"github.com/one2nc/cloudlens/internal"
+	"github.com/one2nc/cloudlens/internal/config"
 	"github.com/rs/zerolog/log"
 	"google.golang.org/api/iterator"
 )
@@ -35,7 +38,15 @@ func ListBuckets(ctx context.Context) ([]StorageResp, error) {
 			break
 		}
 
-		storageResp := &StorageResp{BucketName: bucket.Name, CreationTime: bucket.Created.Local().String()}
+		launchTime := bucket.Created
+		localZone, err := config.GetLocalTimeZone() // Empty string loads the local timezone
+		if err != nil {
+			fmt.Println("Error loading local timezone:", err)
+			return nil, err
+		}
+		loc, _ := time.LoadLocation(localZone)
+		IST := launchTime.In(loc)
+		storageResp := &StorageResp{BucketName: bucket.Name, CreationTime: IST.Format("Mon Jan _2 15:04:05 2006")}
 		bucketInfo = append(bucketInfo, *storageResp)
 	}
 
