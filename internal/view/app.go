@@ -57,7 +57,6 @@ func NewApp() *App {
 
 // TODO keep context param at first place always
 func (a *App) Init(version string, cloudConfig config.CloudConfig) error {
-	log.Print(cloudConfig)
 	ctx := context.Background()
 	ctx = context.WithValue(ctx, internal.KeyApp, a)
 	a.SetContext(ctx)
