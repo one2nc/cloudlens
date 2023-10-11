@@ -19,4 +19,4 @@ execs
 
 #logs
 *.log
-temp
+tmp

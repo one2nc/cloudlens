@@ -6,6 +6,8 @@ import (
 	"path/filepath"
 
 	"github.com/mattn/go-colorable"
+	"github.com/one2nc/cloudlens/internal"
+	"github.com/one2nc/cloudlens/internal/config"
 	"github.com/one2nc/cloudlens/internal/view"
 	"github.com/rs/zerolog"
 	"github.com/rs/zerolog/log"
@@ -13,11 +15,12 @@ import (
 )
 
 var (
-	profile, region string
-	version         = "dev"
-	commit          = "dev"
-	date            = "today"
-	rootCmd         = &cobra.Command{
+	profile, region, gcpCredFilePath string
+	isAWS, isGCP                     bool
+	version                          = "dev"
+	commit                           = "dev"
+	date                             = "today"
+	rootCmd                          = &cobra.Command{
 		Use:   `cloudlens`,
 		Short: `cli for aws services`,
 		Long:  `cli for aws services[s3, ec2, security-groups, iam]`,
@@ -28,8 +31,11 @@ var (
 
 func init() {
 	rootCmd.AddCommand(versionCmd(), updateCmd())
+	rootCmd.PersistentFlags().BoolVar(&isAWS, "aws", false, "Select AWS")
 	rootCmd.PersistentFlags().StringVarP(&profile, "profile", "p", "default", "Read aws profile")
 	rootCmd.PersistentFlags().StringVarP(&region, "region", "r", "", "Read aws region")
+	rootCmd.PersistentFlags().BoolVar(&isGCP, "gcp", false, "Select GCP")
+	rootCmd.PersistentFlags().StringVar(&gcpCredFilePath, "cf", "", "Read GCP credential file")
 }
 
 func Execute() {
@@ -40,7 +46,7 @@ func Execute() {
 }
 
 func run(cmd *cobra.Command, args []string) {
-	dirPath := "temp"
+	dirPath := "tmp"
 	filename := "cloudlens.log"
 
 	// Create the full path to the file
@@ -70,11 +76,22 @@ func run(cmd *cobra.Command, args []string) {
 	if err == nil {
 		log.Logger = log.Output(zerolog.ConsoleWriter{Out: file})
 	}
+
+	cloudConfig := config.NewCloudConfig()
+	if isAWS {
+		cloudConfig.SelectedCloud = internal.AWS
+		cloudConfig.AWSConfig.Profile = profile
+		cloudConfig.AWSConfig.Region = region
+	} else if isGCP {
+		cloudConfig.SelectedCloud = internal.GCP
+		os.Setenv("GOOGLE_APPLICATION_CREDENTIALS", gcpCredFilePath)
+		cloudConfig.CredFilePath = gcpCredFilePath
+	}
 	//TODO profiles and regions should under aws
 	//var sess *session.Session
 
 	app := view.NewApp()
-	app.Init(version)
+	app.Init(version, cloudConfig)
 
 	if err := app.Run(); err != nil {
 		panic(fmt.Sprintf("app run failed %v", err))

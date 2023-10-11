@@ -2,7 +2,6 @@ package view
 
 import (
 	"context"
-	"errors"
 	"fmt"
 	"os"
 	"sort"
@@ -43,6 +42,7 @@ type App struct {
 	showHeader          bool
 	IsPageContentSorted bool
 	version             string
+	cloudConfig         config.CloudConfig
 }
 
 func NewApp() *App {
@@ -56,8 +56,8 @@ func NewApp() *App {
 }
 
 // TODO keep context param at first place always
-func (a *App) Init(version string) error {
-
+func (a *App) Init(version string, cloudConfig config.CloudConfig) error {
+	log.Print(cloudConfig)
 	ctx := context.Background()
 	ctx = context.WithValue(ctx, internal.KeyApp, a)
 	a.SetContext(ctx)
@@ -79,8 +79,18 @@ func (a *App) Init(version string) error {
 		return err
 	}
 	a.CmdBuff().SetSuggestionFn(a.suggestCommand())
-	a.showCloudSelectionScreen()
+
 	a.layout(ctx)
+
+	if cloudConfig.SelectedCloud != "" {
+		a.cloudConfig = cloudConfig
+		err := a.handleCloudSelection(cloudConfig.SelectedCloud)
+		if err != nil {
+			return err
+		}
+	} else {
+		a.showCloudSelectionScreen()
+	}
 	return nil
 }
 
@@ -88,9 +98,11 @@ func (a *App) handleAWS() {
 	var regions []string
 	profiles, err := readAndValidateProfile()
 	if err != nil {
-
 		panic(err)
 	}
+
+	region = a.cloudConfig.Region
+	profile = a.cloudConfig.Profile
 	if len(profiles) > 0 {
 		if profiles[0] == "default" && len(region) == 0 {
 			region = getDefaultAWSRegion()
@@ -149,12 +161,21 @@ func (a *App) handleGCP() error {
 	ctx = context.WithValue(ctx, internal.KeySelectedCloud, internal.GCP)
 	credFilePath := os.Getenv("GOOGLE_APPLICATION_CREDENTIALS")
 	if credFilePath == "" {
-		return errors.New("Invalid path to google credentials")
+		go func() {
+			<-time.After(splashDelay)
+			dialog.ShowError(a.Content.Pages, "Invalid path to google credentials")
+
+		}()
 	}
 	serviceAccount, err := gcp.FetchProjectID(credFilePath)
 	if err != nil {
-		return err
+		go func() {
+			<-time.After(splashDelay)
+			dialog.ShowError(a.Content.Pages, "Invalid path to google credentials")
+
+		}()
 	}
+
 	ctx = context.WithValue(ctx, internal.KeyActiveProject, serviceAccount.ProjectID)
 
 	p := ui.NewDropDown("Projects:", []string{serviceAccount.ProjectID})
@@ -179,23 +200,8 @@ func (a *App) showCloudSelectionScreen() {
 			return
 		}
 		seletedCloud := availableCloud[row-1]
-		switch seletedCloud {
-		case internal.AWS:
-			a.handleAWS()
-			a.Main.SwitchToPage(internal.AWS_SCREEN)
-		case internal.GCP:
-			err := a.handleGCP()
-			if err != nil {
-				panic(err)
-			}
-			a.Main.SwitchToPage(internal.GCP_SCREEN)
-
-		}
-		if err := a.command.defaultCmd(); err != nil {
-			panic(err)
-		}
+		a.handleCloudSelection(seletedCloud)
 	})
-
 	tableData := render.NewTableData()
 	tableData.Header = render.Header{
 		render.HeaderColumn{Name: "Cloud", SortIndicatorIdx: -1},
@@ -212,6 +218,23 @@ func (a *App) showCloudSelectionScreen() {
 	cloudSelectionScreen.AddItem(logo, 8, 2, false).AddItem(cloudSelectionTable, 0, 8, true)
 	a.Main.AddPage(internal.MAIN_SCREEN, cloudSelectionScreen, true, true)
 }
+
+func (a *App) handleCloudSelection(seletedCloud string) error {
+	switch seletedCloud {
+	case internal.AWS:
+		a.handleAWS()
+	case internal.GCP:
+		err := a.handleGCP()
+		if err != nil {
+			return err
+		}
+	}
+	if err := a.command.defaultCmd(); err != nil {
+		return err
+	}
+	return nil
+}
+
 func (a *App) layout(ctx context.Context) {
 	flash := ui.NewFlash(a.App)
 	go flash.Watch(ctx, a.Flash().Channel())
@@ -248,7 +271,17 @@ func (a *App) Run() error {
 	go func() {
 		<-time.After(splashDelay)
 		a.QueueUpdateDraw(func() {
-			a.Main.SwitchToPage(internal.MAIN_SCREEN)
+
+			switch a.cloudConfig.SelectedCloud {
+			case "":
+				a.Main.SwitchToPage(internal.MAIN_SCREEN)
+
+			case internal.AWS:
+				a.Main.SwitchToPage(internal.AWS_SCREEN)
+
+			case internal.GCP:
+				a.Main.SwitchToPage(internal.GCP_SCREEN)
+			}
 		})
 	}()
 	a.SetRunning(true)
@@ -442,7 +475,10 @@ func (a *App) PrevCmd(evt *tcell.EventKey) *tcell.EventKey {
 			log.Info().Msg(fmt.Sprintf("inside prv cmd: %v", a.context.Value(internal.FolderName)))
 		}
 	} else {
-		a.Main.SwitchToPage(internal.MAIN_SCREEN)
+
+		if a.cloudConfig.SelectedCloud == "" {
+			a.Main.SwitchToPage(internal.MAIN_SCREEN)
+		}
 	}
 
 	return nil
