@@ -223,11 +223,13 @@ func (a *App) handleCloudSelection(seletedCloud string) error {
 	switch seletedCloud {
 	case internal.AWS:
 		a.handleAWS()
+		a.Main.SwitchToPage(internal.AWS_SCREEN)
 	case internal.GCP:
 		err := a.handleGCP()
 		if err != nil {
 			return err
 		}
+		a.Main.SwitchToPage(internal.GCP_SCREEN)
 	}
 	if err := a.command.defaultCmd(); err != nil {
 		return err
