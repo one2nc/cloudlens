@@ -96,6 +96,7 @@ func setFoldersAndFiles(folders []types.CommonPrefix, files []types.Object) []aw
 					Name:         keyA[len(keyA)-1],
 					ObjectType:   "File",
 					LastModified: IST.Format("Mon Jan _2 15:04:05 2006"),
+					SizeInBytes:  fi.Size,
 					Size:         humanize.Bytes(uint64(fi.Size)),
 					StorageClass: string(fi.StorageClass),
 				}

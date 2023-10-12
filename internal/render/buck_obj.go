@@ -17,6 +17,7 @@ func (obj BObj) Header() Header {
 		HeaderColumn{Name: "Last-Modified", SortIndicatorIdx: 5, Align: tview.AlignLeft, Hide: false, Wide: false, MX: false, Time: true},
 		HeaderColumn{Name: "Size", SortIndicatorIdx: 0, Align: tview.AlignLeft, Hide: false, Wide: false, MX: false, Time: false},
 		HeaderColumn{Name: "Storage-Class", SortIndicatorIdx: 8, Align: tview.AlignLeft, Hide: false, Wide: false, MX: false, Time: true},
+		HeaderColumn{Name: "SizeInBytes", SortIndicatorIdx: 0, Align: tview.AlignLeft, Hide: true, Wide: false, MX: false, Time: false},
 	}
 }
 
@@ -33,6 +34,7 @@ func (obj BObj) Render(o interface{}, ns string, row *Row) error {
 		s3Resp.LastModified,
 		s3Resp.Size,
 		s3Resp.StorageClass,
+		fmt.Sprint(s3Resp.SizeInBytes),
 	}
 	return nil
 }
