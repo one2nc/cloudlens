@@ -14,7 +14,6 @@ import (
 	"github.com/gdamore/tcell/v2"
 	"github.com/one2nc/cloudlens/internal"
 	"github.com/one2nc/cloudlens/internal/aws"
-	"github.com/one2nc/cloudlens/internal/color"
 	"github.com/one2nc/cloudlens/internal/config"
 	"github.com/one2nc/cloudlens/internal/gcp"
 	"github.com/one2nc/cloudlens/internal/model"
@@ -72,11 +71,6 @@ func (a *App) Init(version string, cloudConfig config.CloudConfig) error {
 	a.SetInputCapture(a.keyboard)
 	a.bindKeys()
 
-	a.command = NewCommand(a)
-	if err := a.command.Init(); err != nil {
-		log.Print(err)
-		return err
-	}
 	a.CmdBuff().SetSuggestionFn(a.suggestCommand())
 
 	a.layout(ctx)
@@ -94,14 +88,15 @@ func (a *App) Init(version string, cloudConfig config.CloudConfig) error {
 }
 
 func (a *App) handleAWS() {
+
+	region = a.cloudConfig.Region
+	profile = a.cloudConfig.Profile
 	var regions []string
 	profiles, err := readAndValidateProfile()
 	if err != nil {
 		panic(err)
 	}
 
-	region = a.cloudConfig.Region
-	profile = a.cloudConfig.Profile
 	if len(profiles) > 0 {
 		if profiles[0] == "default" && len(region) == 0 {
 			region = getDefaultAWSRegion()
@@ -229,6 +224,11 @@ func (a *App) handleCloudSelection(seletedCloud string) error {
 			return err
 		}
 		a.Main.SwitchToPage(internal.GCP_SCREEN)
+	}
+	a.command = NewCommand(a)
+	if err := a.command.Init(); err != nil {
+		log.Print(err)
+		return err
 	}
 	if err := a.command.defaultCmd(); err != nil {
 		return err
@@ -513,7 +513,10 @@ func readAndValidateProfile() ([]string, error) {
 	}
 	profiles, isSwapped := config.SwapFirstIndexWithValue(profiles, profile)
 	if !isSwapped {
-		log.Print("Profile '%v' not found, using profile '%v'... ", color.Colorize(profile, color.Red), color.Colorize(profiles[0], color.Green))
+		if profile != "" {
+			fmt.Fprintf(os.Stderr, "Could not load profile: %v\n", profile)
+			os.Exit(1)
+		}
 	}
 	return profiles, nil
 }
@@ -522,7 +525,10 @@ func readAndValidateRegion() []string {
 	regions := aws.GetAllRegions()
 	regions, isSwapped := config.SwapFirstIndexWithValue(regions, region)
 	if !isSwapped {
-		log.Print("Region '%v' not found, using %v..", color.Colorize(region, color.Red), color.Colorize(regions[0], color.Green))
+		if region != "" {
+			fmt.Fprintf(os.Stderr, "Could not load region: %v\n", region)
+			os.Exit(1)
+		}
 	}
 	return regions
 }

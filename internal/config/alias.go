@@ -94,8 +94,8 @@ func (a *Aliases) Define(resource string, aliases ...string) {
 }
 
 // Load Cloudlens aliases.
-func (a *Aliases) Load() error {
-	a.loadDefaultAliases()
+func (a *Aliases) Load(cloud string) error {
+	a.loadDefaultAliases(cloud)
 	return a.LoadFileAliases(CloudlensAlias)
 }
 
@@ -125,26 +125,30 @@ func (a *Aliases) declare(key string, aliases ...string) {
 	}
 }
 
-func (a *Aliases) loadDefaultAliases() {
+func (a *Aliases) loadDefaultAliases(cloud string) {
 	a.mx.Lock()
 	defer a.mx.Unlock()
 
-	a.declare(internal.LowercaseEc2, internal.UppercaseEc2)
-	a.declare(internal.LowercaseS3, internal.UppercaseS3)
-	a.declare(internal.LowercaseSg, internal.UppercaseSg)
-	a.declare(internal.LowercaseIamUser, internal.UppercaseIamUser)
-	a.declare(internal.LowercaseEBS, internal.UppercaseEBS)
-	a.declare(internal.LowercaseIamUser, internal.UppercaseIamUser, internal.LowercaseIam, internal.UppercaseIam)
-	a.declare(internal.LowercaseIamGroup, internal.UppercaseIamGroup)
-	a.declare(internal.LowercaseIamRole, internal.UppercaseIamRole)
-	a.declare(internal.LowercaseEc2Snapshot, internal.UppercaseEc2Snapshot)
-	a.declare(internal.LowercaseEc2Image, internal.UppercaseEc2Image)
-	a.declare(internal.LowercaseSQS, internal.UppercaseSQS)
-	a.declare(internal.LowercaseVPC, internal.UppercaseVPC)
-	a.declare(internal.LowercaseSubnet, internal.UppercaseSubnet)
-	a.declare(internal.LowercaseLamda, internal.UppercaseLamda)
-	a.declare(internal.LowercaseStorage, internal.UppercaseStorage)
+	switch cloud {
+	case internal.AWS:
+		a.declare(internal.LowercaseEc2, internal.UppercaseEc2)
+		a.declare(internal.LowercaseS3, internal.UppercaseS3)
+		a.declare(internal.LowercaseSg, internal.UppercaseSg)
+		a.declare(internal.LowercaseIamUser, internal.UppercaseIamUser)
+		a.declare(internal.LowercaseEBS, internal.UppercaseEBS)
+		a.declare(internal.LowercaseIamUser, internal.UppercaseIamUser, internal.LowercaseIam, internal.UppercaseIam)
+		a.declare(internal.LowercaseIamGroup, internal.UppercaseIamGroup)
+		a.declare(internal.LowercaseIamRole, internal.UppercaseIamRole)
+		a.declare(internal.LowercaseEc2Snapshot, internal.UppercaseEc2Snapshot)
+		a.declare(internal.LowercaseEc2Image, internal.UppercaseEc2Image)
+		a.declare(internal.LowercaseSQS, internal.UppercaseSQS)
+		a.declare(internal.LowercaseVPC, internal.UppercaseVPC)
+		a.declare(internal.LowercaseSubnet, internal.UppercaseSubnet)
+		a.declare(internal.LowercaseLamda, internal.UppercaseLamda)
+	case internal.GCP:
+		a.declare(internal.LowercaseStorage, internal.UppercaseStorage)
 
+	}
 	a.declare(internal.Help, internal.QuestionMark, internal.LowercaseH)
 	a.declare(internal.Quit, internal.LowercaseQ, internal.QFactorial, internal.UppercaseQ)
 	// a.declare(internal.Alias,internal.Aliases, internal.LowercaseA)

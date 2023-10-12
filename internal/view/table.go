@@ -118,9 +118,7 @@ func (t *Table) importAsCSV(evt *tcell.EventKey) *tcell.EventKey {
 		}
 		tableData = append(tableData, row)
 	}
-	log.Print(t.GetTitle())
 	csvFileName := strings.Split(t.GetTitle(), " ")
-	log.Print(csvFileName)
 
 	usr, err := user.Current()
 	if err != nil {

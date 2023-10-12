@@ -9,6 +9,7 @@ import (
 
 	"github.com/derailed/tview"
 	"github.com/gdamore/tcell/v2"
+	"github.com/one2nc/cloudlens/internal"
 	"github.com/one2nc/cloudlens/internal/model"
 	"github.com/one2nc/cloudlens/internal/ui"
 )
@@ -80,64 +81,78 @@ func (h *Help) build() {
 }
 
 func (h *Help) showServices() model.MenuHints {
-	return model.MenuHints{
-		{
-			Mnemonic:    "s3",
-			Description: "view s3",
-		},
-		{
-			Mnemonic:    "storage",
-			Description: "view storage",
-		},
-		{
-			Mnemonic:    "ec2",
-			Description: "View Ec2",
-		},
-		{
-			Mnemonic:    "ec2:i",
-			Description: "View EC2 images",
-		},
-		{
-			Mnemonic:    "ec2:s",
-			Description: "View EC2 snapshots",
-		},
-		{
-			Mnemonic:    "vpc",
-			Description: "View VPC",
-		},
-		{
-			Mnemonic:    "subnet",
-			Description: "View Subnet",
-		},
-		{
-			Mnemonic:    "iam:u",
-			Description: "View IAM User",
-		},
-		{
-			Mnemonic:    "iam:r",
-			Description: "View IAM Role",
-		},
-		{
-			Mnemonic:    "iam:g",
-			Description: "View IAM User group",
-		},
-		{
-			Mnemonic:    "sg",
-			Description: "View Security Group",
-		},
-		{
-			Mnemonic:    "ebs",
-			Description: "View EBS volumes",
-		},
-		{
-			Mnemonic:    "sqs",
-			Description: "View sqs queues",
-		},
-		{
-			Mnemonic:    "lambda",
-			Description: "View Lamda functions",
-		},
+
+	cloud := h.app.context.Value(internal.KeySelectedCloud)
+
+	switch cloud {
+	case internal.AWS:
+		return model.MenuHints{
+			{
+				Mnemonic:    "s3",
+				Description: "view s3",
+			},
+			{
+				Mnemonic:    "ec2",
+				Description: "View Ec2",
+			},
+			{
+				Mnemonic:    "ec2:i",
+				Description: "View EC2 images",
+			},
+			{
+				Mnemonic:    "ec2:s",
+				Description: "View EC2 snapshots",
+			},
+			{
+				Mnemonic:    "vpc",
+				Description: "View VPC",
+			},
+			{
+				Mnemonic:    "subnet",
+				Description: "View Subnet",
+			},
+			{
+				Mnemonic:    "iam:u",
+				Description: "View IAM User",
+			},
+			{
+				Mnemonic:    "iam:r",
+				Description: "View IAM Role",
+			},
+			{
+				Mnemonic:    "iam:g",
+				Description: "View IAM User group",
+			},
+			{
+				Mnemonic:    "sg",
+				Description: "View Security Group",
+			},
+			{
+				Mnemonic:    "ebs",
+				Description: "View EBS volumes",
+			},
+			{
+				Mnemonic:    "sqs",
+				Description: "View sqs queues",
+			},
+			{
+				Mnemonic:    "lambda",
+				Description: "View Lamda functions",
+			},
+		}
+
+	case internal.GCP:
+		return model.MenuHints{
+			{
+				Mnemonic:    "storage",
+				Description: "view storage",
+			},
+		}
+
 	}
+
+	return model.MenuHints{}
+
 }
 
 func (h *Help) showGeneral() model.MenuHints {

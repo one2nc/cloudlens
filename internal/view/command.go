@@ -36,7 +36,8 @@ func NewCommand(app *App) *Command {
 // Init initializes the command.
 func (c *Command) Init() error {
 	c.alias = dao.NewAlias()
-	if _, err := c.alias.Ensure(); err != nil {
+	cloud := c.app.context.Value(internal.KeySelectedCloud).(string)
+	if _, err := c.alias.Ensure(cloud); err != nil {
 		log.Error().Err(err).Msgf("command init failed!")
 		return err
 	}
@@ -52,7 +53,8 @@ func (c *Command) Reset(clear bool) error {
 	if clear {
 		c.alias.Clear()
 	}
-	if _, err := c.alias.Ensure(); err != nil {
+	cloud := c.app.context.Value(internal.KeySelectedCloud).(string)
+	if _, err := c.alias.Ensure(cloud); err != nil {
 		return err
 	}
 	return nil

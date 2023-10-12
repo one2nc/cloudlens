@@ -19,7 +19,6 @@ func awsCommand() *cobra.Command {
 	command.Flags().StringVarP(&profile, "profile", "p", "default", "Read aws profile")
 
 	command.Flags().StringVarP(&region, "region", "r", "", "Read aws region")
-	command.MarkFlagRequired("region")
 
 	return &command
 }

@@ -11,7 +11,7 @@ func gcpCommand() *cobra.Command {
 
 	command := cobra.Command{
 		Use:   "gcp",
-		Short: "Select gcp",
+		Short: "Select gcp (set GOOGLE_APPLICATION_CREDENTIALS env variable or use \"gcp\" sub-command )",
 		Long:  "Selects gcp as default cloud",
 		Run: func(cmd *cobra.Command, args []string) {
 			selectGCP()
