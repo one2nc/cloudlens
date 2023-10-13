@@ -508,7 +508,7 @@ func (a *App) region() *ui.DropDown {
 func readAndValidateProfile() ([]string, error) {
 	profiles, err := aws.GetProfiles()
 	if err != nil {
-		log.Print("failed to read profiles -- %v", err)
+		log.Printf("failed to read profiles -- %v", err)
 		return nil, err
 	}
 	profiles, isSwapped := config.SwapFirstIndexWithValue(profiles, profile)
