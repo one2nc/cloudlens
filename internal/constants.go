@@ -10,9 +10,10 @@ const (
 	KeyApp               ContextKey = "app"
 	KeyActiveProfile     ContextKey = "active-profile"
 	KeyActiveRegion      ContextKey = "active-region"
-	KeyActiveProject      ContextKey = "active-project"
+	KeyActiveProject     ContextKey = "active-project"
 	KeySession           ContextKey = "session"
 	BucketName           ContextKey = "bucket_name"
+	StorageBucketName    ContextKey = "storage_bucket_name"
 	ObjectName           ContextKey = "object_name"
 	FolderName           ContextKey = "folder_name"
 	KeyAliases           ContextKey = "aliases"
@@ -69,10 +70,11 @@ const (
 	Alias                string     = "alias"
 	LowercaseA           string     = "a"
 	Object               string     = "OBJ"
-	UserPolicy           string     = "User Policy"
-	UserGroupPolicy      string     = "User Group Policy"
-	RolePolicy           string     = "Role Policy"
-	GroupUsers           string     = "Group Users"
+	StorageObject   string = "STORAGE_OBJ"
+	UserPolicy      string = "User Policy"
+	UserGroupPolicy string = "User Group Policy"
+	RolePolicy      string = "Role Policy"
+	GroupUsers      string = "Group Users"
 )
 
 const (
@@ -82,10 +84,9 @@ const (
 	SPLASH_SCREEN string = "SPLASH"
 )
 const (
-	AWS    string = "AWS"
-	GCP    string = "GCP"
+	AWS string = "AWS"
+	GCP string = "GCP"
 )
-
 
 const (
 	AWS_PROFILE        string = "AWS_PROFILE"
