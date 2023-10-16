@@ -3,6 +3,7 @@ package gcp
 import (
 	"context"
 	"fmt"
+	"strings"
 	"time"
 
 	"cloud.google.com/go/storage"
@@ -36,7 +37,7 @@ func ListBuckets(ctx context.Context) ([]StorageResp, error) {
 		launchTime := bucket.Created
 		localZone, err := config.GetLocalTimeZone() // Empty string loads the local timezone
 		if err != nil {
-			fmt.Println("Error loading local timezone:", err)
+			log.Print("Error loading local timezone:", err)
 			return nil, err
 		}
 		loc, _ := time.LoadLocation(localZone)
@@ -48,50 +49,69 @@ func ListBuckets(ctx context.Context) ([]StorageResp, error) {
 	return bucketInfo, nil
 }
 
-func GetInfoAboutBucket(ctx context.Context) []StorageObjResp {
+func GetInfoAboutBucket(ctx context.Context) ([]StorageObjResp, error) {
+	objs := []StorageObjResp{}
 	client, err := storage.NewClient(ctx)
 	if err != nil {
-		log.Printf("Failed to create client: %v", err)
+		
+		return objs, err
 	}
 	defer client.Close()
 	bucketName := fmt.Sprintf("%v", ctx.Value(internal.BucketName))
-	
-	query := &storage.Query{Prefix: ""} // List all objects in the bucket.
+	fn := fmt.Sprintf("%v", ctx.Value(internal.FolderName))
+	query := &storage.Query{Delimiter: "/", Prefix: fn} // List all objects in the bucket.
 	it := client.Bucket(bucketName).Objects(ctx, query)
 
 	// Iterate through the objects in the bucket.
-	objs := []StorageObjResp{}
 	for {
 		attrs, err := it.Next()
 		if err == iterator.Done {
 			break
 		}
 		if err != nil {
-			log.Print("Failed to iterate through objects: %v", err)
-			break
+			return objs,err
 		}
 
-		obj := StorageObjResp{
-			Name: attrs.Name,
-		}
-		log.Print(attrs)
-		// Check if the object is a folder by examining its ContentType.
-		if attrs.ContentType == "application/x-directory" {
+		obj := StorageObjResp{}
 
+		if attrs.Prefix != "" {
+			obj.Name = attrs.Prefix
 			obj.ObjectType = "Folder"
 			obj.Size = "-"
-			obj.LastModified = attrs.Updated.String()
+			obj.LastModified = "-"
 			obj.StorageClass = "-"
-			fmt.Printf("Folder: %s\n", attrs.Prefix)
 		} else {
+			if attrs.Name == fn {
+				continue
+			}
+			// remove folder name from file name
+			splitName := strings.Split(attrs.Name, "/")
+			obj.Name = splitName[len(splitName)-1]
 			obj.ObjectType = "File"
 			obj.Size = humanize.Bytes(uint64(attrs.Size))
-			obj.LastModified = attrs.Updated.String()
-			obj.StorageClass = "-"
+			obj.StorageClass = attrs.StorageClass
 			obj.SizeInBytes = attrs.Size
+
+			launchTime := attrs.Updated
+			localZone, err := config.GetLocalTimeZone() // Empty string loads the local timezone
+			if err != nil {
+				log.Print("Error loading local timezone:", err)
+				continue
+			}
+			loc, _ := time.LoadLocation(localZone)
+			IST := launchTime.In(loc)
+			obj.LastModified = IST.Format("Mon Jan _2 15:04:05 2006")
+		}
+
+		// remove parent folder name from child folder name
+		if strings.Contains(obj.Name, "/") {
+			pathList := strings.Split(obj.Name, "/")
+			if len(pathList) > 2 {
+				obj.Name = pathList[len(pathList)-2] + "/"
+			}
 		}
 		objs = append(objs, obj)
 	}
 
-	return objs
+	return objs,nil
 }

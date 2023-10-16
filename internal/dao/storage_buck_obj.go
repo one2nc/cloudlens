@@ -4,6 +4,7 @@ import (
 	"context"
 
 	"github.com/one2nc/cloudlens/internal/gcp"
+	"github.com/rs/zerolog/log"
 )
 
 type SBObj struct {
@@ -12,9 +13,12 @@ type SBObj struct {
 
 func (bo SBObj) List(ctx context.Context) ([]Object, error) {
 
-	storageObjects := gcp.GetInfoAboutBucket(ctx)
-
+	storageObjects, err := gcp.GetInfoAboutBucket(ctx)
 	objs := make([]Object, len(storageObjects))
+	if err != nil {
+		log.Print("Error while listing objects: ", err.Error())
+		return objs, err
+	}
 	for i, obj := range storageObjects {
 		objs[i] = obj
 	}

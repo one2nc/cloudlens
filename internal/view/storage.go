@@ -6,7 +6,6 @@ import (
 	"github.com/gdamore/tcell/v2"
 	"github.com/one2nc/cloudlens/internal"
 	"github.com/one2nc/cloudlens/internal/ui"
-	"github.com/rs/zerolog/log"
 )
 
 type Storage struct {
@@ -31,9 +30,8 @@ func (s *Storage) bindKeys(aa ui.KeyActions) {
 
 func (s *Storage) enterCmd(evt *tcell.EventKey) *tcell.EventKey {
 	bName := s.GetTable().GetSelectedItem()
-	log.Print(bName)
 	if bName != "" {
-		o := NewStorageFileViewer()
+		o := NewStorageFileViewer("",bName,"")
 		ctx := context.WithValue(s.App().GetContext(), internal.BucketName, bName)
 		s.App().SetContext(ctx)
 		ctx = context.WithValue(s.App().GetContext(), internal.FolderName, "")
