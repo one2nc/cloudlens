@@ -3,10 +3,13 @@ package gcp
 import (
 	"context"
 	"fmt"
+	"os"
+	"os/user"
 	"strings"
 	"time"
 
 	"cloud.google.com/go/storage"
+	"github.com/atotto/clipboard"
 	"github.com/dustin/go-humanize"
 	"github.com/one2nc/cloudlens/internal"
 	"github.com/one2nc/cloudlens/internal/config"
@@ -53,7 +56,7 @@ func GetInfoAboutBucket(ctx context.Context) ([]StorageObjResp, error) {
 	objs := []StorageObjResp{}
 	client, err := storage.NewClient(ctx)
 	if err != nil {
-		
+
 		return objs, err
 	}
 	defer client.Close()
@@ -69,7 +72,7 @@ func GetInfoAboutBucket(ctx context.Context) ([]StorageObjResp, error) {
 			break
 		}
 		if err != nil {
-			return objs,err
+			return objs, err
 		}
 
 		obj := StorageObjResp{}
@@ -113,5 +116,53 @@ func GetInfoAboutBucket(ctx context.Context) ([]StorageObjResp, error) {
 		objs = append(objs, obj)
 	}
 
-	return objs,nil
+	return objs, nil
+}
+
+func DownloadObject(ctx context.Context, bucketName string, path string, fileName string) string {
+
+	usr, err := user.Current()
+	if err != nil {
+		log.Info().Msg(fmt.Sprintf("error in getting the machine's user: %v", err))
+	}
+	dirPath := usr.HomeDir + "/cloudlens/gcp_storage_objects/"
+	err = os.MkdirAll(dirPath, os.ModePerm)
+	if err != nil {
+		log.Info().Msg(fmt.Sprintf("error in creating GCP storage Object directory: %v", err))
+		return ""
+	}
+
+	client, err := storage.NewClient(ctx)
+	if err != nil {
+		log.Info().Msg(fmt.Sprintf("Failed to create client: %v", err))
+		return ""
+	}
+	defer client.Close()
+
+	// Open the Google Cloud Storage object for reading.
+	reader, err := client.Bucket(bucketName).Object(fmt.Sprintf("%v%v", path, fileName)).NewReader(ctx)
+	if err != nil {
+		log.Info().Msg(fmt.Sprintf("Failed to open object for reading: %v", err))
+		return ""
+	}
+	defer reader.Close()
+
+	locaFileName := fileName
+	// Create a local file to save the downloaded object.
+	localFilePath := fmt.Sprintf("%v%v", dirPath, locaFileName)
+	localFile, err := os.Create(localFilePath)
+	if err != nil {
+		log.Info().Msg(fmt.Sprintf("Failed to create local file: %v", err))
+		return ""
+	}
+	defer localFile.Close()
+
+	// Copy the object content to the local file.
+	if _, err := fmt.Fprint(localFile, reader); err != nil {
+		log.Info().Msg(fmt.Sprintf("Failed to copy object content to local file: %v", err))
+		return ""
+	}
+	clipboard.WriteAll(localFilePath)
+
+	return fmt.Sprintf("%v with size %d bytes, downloaded and its path copied to the clipboard", fileName, reader.Attrs.Size)
 }

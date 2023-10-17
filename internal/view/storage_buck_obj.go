@@ -7,6 +7,7 @@ import (
 
 	"github.com/gdamore/tcell/v2"
 	"github.com/one2nc/cloudlens/internal"
+	"github.com/one2nc/cloudlens/internal/gcp"
 	"github.com/one2nc/cloudlens/internal/ui"
 	"github.com/rs/zerolog/log"
 )
@@ -46,7 +47,7 @@ func (obj *StorageFileViewer) bindKeys(aa ui.KeyActions) {
 		ui.KeyShiftC:    ui.NewKeyAction("Sort Storage-Class", obj.GetTable().SortColCmd("Storage-Class", true), true),
 		tcell.KeyEscape: ui.NewKeyAction("Back", obj.App().PrevCmd, false),
 		tcell.KeyEnter:  ui.NewKeyAction("View", obj.enterCmd, false),
-		// tcell.KeyCtrlD:  ui.NewKeyAction("Download Object", obj.downloadCmd, true), // TODO
+		tcell.KeyCtrlD:  ui.NewKeyAction("Download Object", obj.downloadCmd, true),
 		// tcell.KeyCtrlP:  ui.NewKeyAction("Pre-Signed URL", obj.preSignedUrlCmd, true), //TODO
 	})
 }
@@ -71,4 +72,17 @@ func (obj *StorageFileViewer) enterCmd(evt *tcell.EventKey) *tcell.EventKey {
 	}
 
 	return evt
+}
+
+func (obj *StorageFileViewer) downloadCmd(evt *tcell.EventKey) *tcell.EventKey {
+	objName := obj.GetTable().GetSelectedItem()
+	fileType := obj.GetTable().GetSecondColumn()
+	ctx := obj.App().GetContext()
+
+	if fileType == "File" {
+		res := gcp.DownloadObject(ctx, obj.bucketName, obj.path,objName)
+		obj.App().Flash().Info(res)
+	}
+
+	return nil
 }
