@@ -70,11 +70,11 @@ const (
 	Alias                string     = "alias"
 	LowercaseA           string     = "a"
 	Object               string     = "OBJ"
-	StorageObject   string = "STORAGE_OBJ"
-	UserPolicy      string = "User Policy"
-	UserGroupPolicy string = "User Group Policy"
-	RolePolicy      string = "Role Policy"
-	GroupUsers      string = "Group Users"
+	StorageObject        string     = "STORAGE_OBJ"
+	UserPolicy           string     = "User Policy"
+	UserGroupPolicy      string     = "User Group Policy"
+	RolePolicy           string     = "Role Policy"
+	GroupUsers           string     = "Group Users"
 )
 
 const (
@@ -91,4 +91,10 @@ const (
 const (
 	AWS_PROFILE        string = "AWS_PROFILE"
 	AWS_DEFAULT_REGION string = "AWS_DEFAULT_REGION"
+)
+
+const (
+	FOLDER_TYPE string = "Folder"
+	FILE_TYPE   string = "File"
+	NONE string = "-"
 )

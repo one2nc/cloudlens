@@ -79,10 +79,10 @@ func GetInfoAboutBucket(ctx context.Context) ([]StorageObjResp, error) {
 
 		if attrs.Prefix != "" {
 			obj.Name = attrs.Prefix
-			obj.ObjectType = "Folder"
-			obj.Size = "-"
-			obj.LastModified = "-"
-			obj.StorageClass = "-"
+			obj.ObjectType = internal.FOLDER_TYPE
+			obj.Size = internal.NONE
+			obj.LastModified = internal.NONE
+			obj.StorageClass = internal.NONE
 		} else {
 			if attrs.Name == fn {
 				continue
@@ -90,7 +90,7 @@ func GetInfoAboutBucket(ctx context.Context) ([]StorageObjResp, error) {
 			// remove folder name from file name
 			splitName := strings.Split(attrs.Name, "/")
 			obj.Name = splitName[len(splitName)-1]
-			obj.ObjectType = "File"
+			obj.ObjectType = internal.FILE_TYPE
 			obj.Size = humanize.Bytes(uint64(attrs.Size))
 			obj.StorageClass = attrs.StorageClass
 			obj.SizeInBytes = attrs.Size
@@ -165,4 +165,25 @@ func DownloadObject(ctx context.Context, bucketName string, path string, fileNam
 	clipboard.WriteAll(localFilePath)
 
 	return fmt.Sprintf("%v with size %d bytes, downloaded and its path copied to the clipboard", fileName, reader.Attrs.Size)
+}
+
+func GetPreSignedUrl(ctx context.Context, bucketName string, path string, fileName string) string {
+
+	client, err := storage.NewClient(ctx)
+	if err != nil {
+		log.Info().Msg(fmt.Sprintf("Failed to create client: %v", err))
+		return ""
+	}
+	defer client.Close()
+
+	// Open the Google Cloud Storage object for reading.
+	url, err := client.Bucket(bucketName).SignedURL(fmt.Sprintf("%v%v", path, fileName), &storage.SignedURLOptions{
+		Method:  "GET",
+		Expires: time.Now().Add(time.Hour),
+	})
+	if err != nil {
+		log.Info().Msg(fmt.Sprintf("Failed to open object for reading: %v", err))
+		return ""
+	}
+	return url
 }

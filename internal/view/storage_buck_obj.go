@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"strings"
 
+	"github.com/atotto/clipboard"
 	"github.com/gdamore/tcell/v2"
 	"github.com/one2nc/cloudlens/internal"
 	"github.com/one2nc/cloudlens/internal/gcp"
@@ -48,14 +49,14 @@ func (obj *StorageFileViewer) bindKeys(aa ui.KeyActions) {
 		tcell.KeyEscape: ui.NewKeyAction("Back", obj.App().PrevCmd, false),
 		tcell.KeyEnter:  ui.NewKeyAction("View", obj.enterCmd, false),
 		tcell.KeyCtrlD:  ui.NewKeyAction("Download Object", obj.downloadCmd, true),
-		// tcell.KeyCtrlP:  ui.NewKeyAction("Pre-Signed URL", obj.preSignedUrlCmd, true), //TODO
+		tcell.KeyCtrlP:  ui.NewKeyAction("Pre-Signed URL", obj.preSignedUrlCmd, true),
 	})
 }
 
 func (obj *StorageFileViewer) enterCmd(evt *tcell.EventKey) *tcell.EventKey {
 	objName := obj.GetTable().GetSelectedItem()
 	fileType := obj.GetTable().GetSecondColumn()
-	if fileType == "Folder" {
+	if fileType == internal.FOLDER_TYPE {
 		ctx := obj.App().GetContext()
 		bn := ctx.Value(internal.BucketName).(string)
 		o := NewStorageFileViewer(obj.path+objName, bn, objName)
@@ -79,9 +80,26 @@ func (obj *StorageFileViewer) downloadCmd(evt *tcell.EventKey) *tcell.EventKey {
 	fileType := obj.GetTable().GetSecondColumn()
 	ctx := obj.App().GetContext()
 
-	if fileType == "File" {
-		res := gcp.DownloadObject(ctx, obj.bucketName, obj.path,objName)
+	if fileType == internal.FILE_TYPE {
+		res := gcp.DownloadObject(ctx, obj.bucketName, obj.path, objName)
 		obj.App().Flash().Info(res)
+	}
+
+	return nil
+}
+
+func (obj *StorageFileViewer) preSignedUrlCmd(evt *tcell.EventKey) *tcell.EventKey {
+	objName := obj.GetTable().GetSelectedItem()
+	fileType := obj.GetTable().GetSecondColumn()
+	ctx := obj.App().GetContext()
+
+	if fileType == internal.FILE_TYPE {
+		url := gcp.GetPreSignedUrl(ctx, obj.bucketName, obj.path, objName)
+		if url != "" {
+			log.Info().Msg(fmt.Sprintf("In view Presigned URL: %v", url))
+			clipboard.WriteAll(url)
+			obj.App().Flash().Info("Presigned URL Copied to Clipboard.")
+		}
 	}
 
 	return nil
