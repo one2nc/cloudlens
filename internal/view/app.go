@@ -17,7 +17,6 @@ import (
 	"github.com/one2nc/cloudlens/internal/config"
 	"github.com/one2nc/cloudlens/internal/gcp"
 	"github.com/one2nc/cloudlens/internal/model"
-	"github.com/one2nc/cloudlens/internal/render"
 	"github.com/one2nc/cloudlens/internal/ui"
 	"github.com/one2nc/cloudlens/internal/ui/dialog"
 	"github.com/rs/zerolog/log"
@@ -186,31 +185,17 @@ func (a *App) handleGCP() error {
 }
 
 func (a *App) showCloudSelectionScreen() {
-	cloudSelectionTable := ui.NewTable("Select Cloud")
-	cloudSelectionTable.Init(a.context)
-
-	cloudSelectionTable.SetSelectedFunc(func(row int, column int) {
-		if row == 0 {
-			return
-		}
-		seletedCloud := availableCloud[row-1]
-		a.handleCloudSelection(seletedCloud)
+	cloudSelectScreen := ui.NewCloudSelectionScreen(ui.OptionWithAction{
+		"AWS": func() {
+			a.handleCloudSelection(internal.AWS)
+		},
+		"GCP": func() {
+			a.handleCloudSelection(internal.GCP)
+		},
 	})
-	tableData := render.NewTableData()
-	tableData.Header = render.Header{
-		render.HeaderColumn{Name: "Cloud", SortIndicatorIdx: -1},
-	}
-	for _, cloud := range availableCloud {
-		row := render.NewRow(1)
-		row.Fields = []string{cloud}
-		rowEvent := render.NewRowEvent(1, row)
-		tableData.RowEvents = append(tableData.RowEvents, rowEvent)
-	}
-	cloudSelectionTable.Update(tableData)
-	logo := ui.NewLogo()
-	cloudSelectionScreen := tview.NewFlex().SetDirection(tview.FlexRow)
-	cloudSelectionScreen.AddItem(logo, 8, 2, false).AddItem(cloudSelectionTable, 0, 8, true)
-	a.Main.AddPage(internal.MAIN_SCREEN, cloudSelectionScreen, true, true)
+	a.App.SetFocus(cloudSelectScreen.GetFocusItem())
+	a.Main.AddPage(internal.MAIN_SCREEN, cloudSelectScreen, true, true)
+
 }
 
 func (a *App) handleCloudSelection(seletedCloud string) error {
