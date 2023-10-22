@@ -27,6 +27,7 @@ func awsCommand() *cobra.Command {
 func selectAWS() {
 	cloudConfig.SelectedCloud = internal.AWS
 	cloudConfig.AWSConfig.Profile = profile
+	cloudConfig.AWSConfig.Region = region
 	cloudConfig.AWSConfig.UseLocalStack = useLocalStack
 
 	initView()
