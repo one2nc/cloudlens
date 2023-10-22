@@ -14,6 +14,7 @@ import (
 
 var (
 	profile, region, gcpCredFilePath string
+	useLocalStack bool
 	version                          = "dev"
 	commit                           = "dev"
 	date                             = "today"

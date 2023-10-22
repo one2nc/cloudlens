@@ -91,42 +91,56 @@ func (a *App) handleAWS() {
 
 	region = a.cloudConfig.Region
 	profile = a.cloudConfig.Profile
-	var regions []string
-	profiles, err := readAndValidateProfile()
-	if err != nil {
-		panic(err)
-	}
-
-	if len(profiles) > 0 {
-		if profiles[0] == "default" && len(region) == 0 {
-			region = getDefaultAWSRegion()
-		} else if len(region) == 0 {
-			region = "ap-south-1"
-		}
-
+	var regions, profiles []string
+	if a.cloudConfig.UseLocalStack {
+		profile = "localstack"
+		profiles = []string{profile}
 		regions = readAndValidateRegion()
-
-		cfg, err := aws.GetCfg(profiles[0], regions[0])
+		log.Print(regions)
+		cfg, err := aws.GetLocalstackCfg(regions[0])
 		if err != nil {
 			panic(fmt.Sprintf("aws session init failed -- %v", err))
 		}
-
 		ctx := context.WithValue(a.context, internal.KeySession, cfg)
 		a.SetContext(ctx)
-
 	} else {
-		profile := awsS.String(os.Getenv(internal.AWS_PROFILE))
-		profiles = []string{*profile}
-		region := awsS.String(os.Getenv(internal.AWS_DEFAULT_REGION))
-		regions := []string{*region}
-		cfg, err := aws.GetCfgUsingEnvVariables(profiles[0], regions[0])
+		var err error
+		profiles, err = readAndValidateProfile()
 		if err != nil {
-			panic(fmt.Sprintf("aws session init failed -- %v", err))
+			panic(err)
 		}
-		ctx := context.WithValue(context.Background(), internal.KeySession, cfg)
-		a.SetContext(ctx)
+		if len(profiles) > 0 {
+			if profiles[0] == "default" && len(region) == 0 {
+				region = getDefaultAWSRegion()
+			} else if len(region) == 0 {
+				region = "ap-south-1"
+			}
 
+			regions = readAndValidateRegion()
+
+			cfg, err := aws.GetCfg(profiles[0], regions[0])
+			if err != nil {
+				panic(fmt.Sprintf("aws session init failed -- %v", err))
+			}
+
+			ctx := context.WithValue(a.context, internal.KeySession, cfg)
+			a.SetContext(ctx)
+
+		} else {
+			profile := awsS.String(os.Getenv(internal.AWS_PROFILE))
+			profiles = []string{*profile}
+			region := awsS.String(os.Getenv(internal.AWS_DEFAULT_REGION))
+			regions = []string{*region}
+			cfg, err := aws.GetCfgUsingEnvVariables(profiles[0], regions[0])
+			if err != nil {
+				panic(fmt.Sprintf("aws session init failed -- %v", err))
+			}
+			ctx := context.WithValue(a.context, internal.KeySession, cfg)
+			a.SetContext(ctx)
+
+		}
 	}
+
 	ctx := a.GetContext()
 	ctx = context.WithValue(ctx, internal.KeyActiveProfile, profiles[0])
 	ctx = context.WithValue(ctx, internal.KeyActiveRegion, regions[0])
@@ -423,7 +437,16 @@ func (a *App) regionChanged(region string, index int) {
 }
 
 func (a *App) refreshSession(profile string, region string) {
-	cfg, err := aws.GetCfg(profile, region)
+
+	var cfg cfg.Config
+	var err error
+	if a.cloudConfig.UseLocalStack {
+		cfg, err = aws.GetLocalstackCfg(region)
+	} else {
+		cfg, err = aws.GetCfg(region, profile)
+
+	}
+
 	//sess, err := aws.GetSession(profile, region)
 	if err != nil {
 		a.App.Flash().Err(err)
