@@ -1,6 +1,7 @@
 package ui
 
 import (
+	"context"
 	"os"
 	"sync"
 
@@ -12,6 +13,7 @@ import (
 
 type App struct {
 	*tview.Application
+	context context.Context
 	Main    *Pages
 	flash   *model.Flash
 	actions KeyActions
@@ -87,7 +89,9 @@ func (a *App) BufferChanged(_, _ string) {}
 
 // BufferActive indicates the buff activity changed.
 func (a *App) BufferActive(state bool, kind model.BufferKind) {
-	flex, ok := a.Main.GetPrimitive(internal.AWS_SCREEN).(*tview.Flex)
+
+	selectedCloud := a.context.Value(internal.KeySelectedCloud).(string)
+	flex, ok := a.Main.GetPrimitive(selectedCloud).(*tview.Flex)
 	if !ok {
 		return
 	}
@@ -112,6 +116,10 @@ func (a *App) HasAction(key tcell.Key) (KeyAction, bool) {
 // GetActions returns a collection of actions.
 func (a *App) GetActions() KeyActions {
 	return a.actions
+}
+
+func (a *App) UpdateContext(ctx context.Context) {
+	a.context = ctx
 }
 
 // AddActions returns the application actions.

@@ -19,6 +19,7 @@ func awsCommand() *cobra.Command {
 	command.Flags().StringVarP(&profile, "profile", "p", "default", "Read aws profile")
 
 	command.Flags().StringVarP(&region, "region", "r", "", "Read aws region")
+	command.Flags().BoolVarP(&useLocalStack, "localstack", "l", false, "Use localsatck instead of AWS")
 
 	return &command
 }
@@ -27,6 +28,7 @@ func selectAWS() {
 	cloudConfig.SelectedCloud = internal.AWS
 	cloudConfig.AWSConfig.Profile = profile
 	cloudConfig.AWSConfig.Region = region
+	cloudConfig.AWSConfig.UseLocalStack = useLocalStack
 
 	initView()
 }
