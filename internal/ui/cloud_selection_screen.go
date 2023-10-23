@@ -64,15 +64,12 @@ func NewCloudSelectionScreen(optionsWithAction OptionWithAction) *CloudSelection
 		}
 		return x + 2, y + 2, width, height
 	})
-
+	// Add selection options
 	for option, action := range optionsWithAction {
 		cs.AddItem(strings.Repeat("  ", 4)+option+strings.Repeat("  ", 4), "", 0, action)
 	}
 
 	// design selection screen part
-	cs.SetTitleColor(tcell.ColorGreen)
-	cs.SetTitleColor(tcell.ColorGreen)
-	cs.SetTitleAlign(tview.AlignCenter)
 	cs.SetBorder(true)
 	cs.SetBorderColor(cs.GetBackgroundColor())
 	cs.ShowSecondaryText(false)
