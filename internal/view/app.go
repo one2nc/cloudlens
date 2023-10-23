@@ -146,6 +146,7 @@ func (a *App) handleAWS() {
 	ctx = context.WithValue(ctx, internal.KeyActiveRegion, regions[0])
 	ctx = context.WithValue(ctx, internal.KeySelectedCloud, internal.AWS)
 	a.SetContext(ctx)
+	a.App.UpdateContext(ctx)
 
 	p := ui.NewDropDown("Profile:", profiles)
 	p.SetSelectedFunc(a.profileChanged)
@@ -195,6 +196,7 @@ func (a *App) handleGCP() error {
 	}
 	a.Views()["info"] = ui.NewInfo(infoData)
 	a.SetContext(ctx)
+	a.App.UpdateContext(ctx)
 	a.toggleHeader(true)
 	return nil
 }
