@@ -1,29 +1,19 @@
 package ui
 
 import (
+	"fmt"
 	"strings"
 
 	"github.com/derailed/tview"
 	"github.com/gdamore/tcell/v2"
 )
 
-// const selectCloudCalvinSBanner = `
-
-// ╔═╗┬  ┌─┐┬ ┬┌┬┐  ┌─┐
-// ║  │  │ ││ │ ││   ┌┘
-// ╚═╝┴─┘└─┘└─┘─┴┘   o
-
-// `
-
-const selectCloudANSIShadowBanner = `
-
-██████╗██╗      ██████╗ ██╗   ██╗██████╗     ██████╗ 
-██╔════╝██║     ██╔═══██╗██║   ██║██╔══██╗    ╚════██╗
-██║     ██║     ██║   ██║██║   ██║██║  ██║      ▄███╔╝
-██║     ██║     ██║   ██║██║   ██║██║  ██║      ▀▀══╝ 
-╚██████╗███████╗╚██████╔╝╚██████╔╝██████╔╝      ██╗   
- ╚═════╝╚══════╝ ╚═════╝  ╚═════╝ ╚═════╝       ╚═╝   
-                                                       
+const selectCloudSlantBanner = `
+   ____      __           __         __               __
+  / __/___  / /___  ____ / /_  ____ / /___  __ __ ___/ /
+ _\ \ / -_)/ // -_)/ __// __/ / __// // _ \/ // // _  / 
+/___/ \__//_/ \__/ \__/ \__/  \__//_/ \___/\_,_/ \_,_/  
+													  
 `
 
 type OptionWithAction map[string]func()
@@ -33,13 +23,19 @@ type CloudSelectionScreen struct {
 	focusItem *tview.List
 }
 
-func NewCloudSelectionScreen(optionsWithAction OptionWithAction) *CloudSelectionScreen {
+func NewCloudSelectionScreen(optionsWithAction OptionWithAction, version string) *CloudSelectionScreen {
 	cloudSelectScreen := &CloudSelectionScreen{
 		Flex: tview.NewFlex().SetDirection(tview.FlexRow),
 	}
 
+	// Add logo
+	logoString := fmt.Sprintf("%s\n%s%s", strings.Join(LogoBig, "\n"), strings.Repeat("  ", 23), version)
+	logo := tview.NewTextView().SetText(logoString).SetTextAlign(tview.AlignCenter).SetTextColor(tcell.ColorWheat)
+	logo.SetBorderPadding(2, 0, 0, 0)
+	cloudSelectScreen.AddItem(logo, 0, 2, false)
+
 	// Add selection title
-	selectionTitle := tview.NewTextView().SetText(selectCloudANSIShadowBanner).SetTextAlign(tview.AlignCenter).SetTextColor(tcell.ColorGreen)
+	selectionTitle := tview.NewTextView().SetText(selectCloudSlantBanner).SetTextAlign(tview.AlignCenter).SetTextColor(tcell.ColorGreen)
 	cloudSelectScreen.AddItem(selectionTitle, 0, 1, false)
 
 	cscFlexCol := tview.NewFlex().SetDirection(tview.FlexColumn)
@@ -79,6 +75,8 @@ func NewCloudSelectionScreen(optionsWithAction OptionWithAction) *CloudSelection
 	cs.Blur()
 
 	cloudSelectScreen.AddItem(cscFlexCol, 0, 1, true)
+	cloudSelectScreen.AddItem(tview.NewBox(), 0, 1, false)
+	cloudSelectScreen.AddItem(tview.NewBox(), 0, 1, false)
 	cloudSelectScreen.AddItem(tview.NewBox(), 0, 1, false)
 	return cloudSelectScreen
 }
