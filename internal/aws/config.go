@@ -3,8 +3,6 @@ package aws
 import (
 	"context"
 	"errors"
-	"fmt"
-	"log"
 	"os"
 	"strings"
 
@@ -15,6 +13,7 @@ import (
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/credentials"
 	"github.com/aws/aws-sdk-go/aws/defaults"
+	"github.com/rs/zerolog/log"
 	"gopkg.in/ini.v1"
 )
 
@@ -35,24 +34,25 @@ func (c credentialProvider) IsExpired() bool {
 }
 
 func GetCfg(profile, region string) (awsV2.Config, error) {
+
 	cfg, err := awsV2Config.LoadDefaultConfig(
 		context.TODO(),
 		awsV2Config.WithSharedConfigProfile(profile),
 		awsV2Config.WithRegion(region),
 	)
 	if err != nil {
-		fmt.Printf("failed to load config")
+		log.Print("failed to load config")
 		return awsV2.Config{}, err
 	}
 	creds, err := cfg.Credentials.Retrieve(context.TODO())
 	if err != nil {
-		fmt.Printf("failed to read credentials")
+		log.Print("failed to read credentials ", err)
 		return awsV2.Config{}, err
 	}
 
 	credentialProvider := credentialProvider{Credentials: creds}
 	if credentialProvider.IsExpired() {
-		fmt.Println("Credentials have expired")
+		log.Print("Credentials have expired")
 		return awsV2.Config{}, errors.New("AWS Credentials expired")
 	}
 	return cfg, err
@@ -70,18 +70,18 @@ func GetCfgUsingEnvVariables(profile, region string) (awsV2.Config, error) {
 		),
 	)
 	if err != nil {
-		fmt.Printf("failed to load config")
+		log.Print("failed to load config")
 		return awsV2.Config{}, err
 	}
 	creds, err := cfg.Credentials.Retrieve(context.TODO())
 	if err != nil {
-		fmt.Printf("failed to read credentials")
+		log.Print("failed to read credentials ", err)
 		return awsV2.Config{}, err
 	}
 
 	credentialProvider := credentialProvider{Credentials: creds}
 	if credentialProvider.IsExpired() {
-		fmt.Println("Credentials have expired")
+		log.Print("Credentials have expired")
 		return awsV2.Config{}, errors.New("AWS Credentials expired")
 	}
 	return cfg, err
@@ -138,7 +138,7 @@ func GetLocalstackCfg(region string) (awsV2.Config, error) {
 		config.WithEndpointResolver(customResolver),
 	)
 	if err != nil {
-		log.Fatalf("Cannot load the AWS configs: %s", err)
+		log.Fatal().Err(err)
 	}
 	return awsLSCfg, nil
 }

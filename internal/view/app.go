@@ -430,8 +430,7 @@ func (a *App) refreshSession(profile string, region string) {
 	if a.cloudConfig.UseLocalStack {
 		cfg, err = aws.GetLocalstackCfg(region)
 	} else {
-		cfg, err = aws.GetCfg(region, profile)
-
+		cfg, err = aws.GetCfg(profile, region)
 	}
 
 	//sess, err := aws.GetSession(profile, region)
