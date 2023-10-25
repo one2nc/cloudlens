@@ -415,12 +415,13 @@ func (a *App) regionChanged(region string, index int) {
 
 func (a *App) refreshSession(profile string, region string) {
 
-	awsConfigInput := aws.AWSConfigInput{
-		UseLocalStack: a.cloudConfig.UseLocalStack,
-		Profile:       profile,
-		Region:        region,
+	var cfg cfg.Config
+	var err error
+	if a.cloudConfig.UseLocalStack {
+		cfg, err = aws.GetLocalstackCfg(region)
+	} else {
+		cfg, err = aws.GetCfg(profile, region)
 	}
-	cfg, err := aws.GetCfg(awsConfigInput)
 	//sess, err := aws.GetSession(profile, region)
 	if err != nil {
 		a.App.Flash().Err(err)
