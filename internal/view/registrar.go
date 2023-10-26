@@ -55,4 +55,7 @@ func coreViewers(vv MetaViewers) {
 	vv[internal.LowercaseStorage] = MetaViewer{
 		viewerFn: NewStorage,
 	}
+	vv[internal.LowerVmInstance] = MetaViewer{
+		viewerFn: NewVM,
+	}
 }

@@ -59,6 +59,8 @@ const (
 	UppercaseLamda       string     = "LAMBDA"
 	LowercaseStorage     string     = "storage"
 	UppercaseStorage     string     = "STORAGE"
+	LowerVmInstance      string     = "vm"
+	UppercaseVmInstance  string     = "VM"
 	Help                 string     = "help"
 	LowercaseH           string     = "h"
 	QuestionMark         string     = "?"
@@ -96,5 +98,5 @@ const (
 const (
 	FOLDER_TYPE string = "Folder"
 	FILE_TYPE   string = "File"
-	NONE string = "-"
+	NONE        string = "-"
 )
