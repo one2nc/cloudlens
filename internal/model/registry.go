@@ -87,4 +87,8 @@ var Registry = map[string]ResourceMeta{
 		DAO:      &dao.Storage{},
 		Renderer: &render.Storage{},
 	},
+	internal.LowerVmInstance: {
+		DAO:      &dao.VM{},
+		Renderer: &render.VM{},
+	},
 }
