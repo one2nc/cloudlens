@@ -10,6 +10,7 @@ import (
 	"github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/aws/aws-sdk-go-v2/service/ec2"
 	"github.com/aws/aws-sdk-go-v2/service/ec2/types"
+	"github.com/one2nc/cloudlens/internal/config"
 	"github.com/rs/zerolog/log"
 )
 
@@ -26,7 +27,7 @@ func GetInstances(cfg aws.Config) ([]EC2Resp, error) {
 	for _, reservation := range resultec2.Reservations {
 		for _, instance := range reservation.Instances {
 			launchTime := instance.LaunchTime
-			localZone, err := GetLocalTimeZone() // Empty string loads the local timezone
+			localZone, err := config.GetLocalTimeZone() // Empty string loads the local timezone
 			if err != nil {
 				fmt.Println("Error loading local timezone:", err)
 				return nil, err
@@ -104,7 +105,7 @@ func GetVolumes(cfg aws.Config) ([]EBSResp, error) {
 	}
 	for _, v := range result.Volumes {
 		launchTime := v.CreateTime
-		localZone, err := GetLocalTimeZone() // Empty string loads the local timezone
+		localZone, err := config.GetLocalTimeZone() // Empty string loads the local timezone
 		if err != nil {
 			fmt.Println("Error loading local timezone:", err)
 			return nil, err
@@ -152,7 +153,7 @@ func GetSnapshots(cfg aws.Config) []Snapshot {
 	var snapshots []Snapshot
 	for _, s := range result.Snapshots {
 		launchTime := s.StartTime
-		localZone, err := GetLocalTimeZone() // Empty string loads the local timezone
+		localZone, err := config.GetLocalTimeZone() // Empty string loads the local timezone
 		if err != nil {
 			fmt.Println("Error loading local timezone:", err)
 			return nil
@@ -297,13 +298,4 @@ func GetSingleSubnet(cfg aws.Config, sId string) string {
 	}
 	subnetString, err := json.MarshalIndent(result.Subnets[0], "", " ")
 	return string(subnetString)
-}
-
-func GetLocalTimeZone() (string, error) {
-	localZone, err := time.LoadLocation("") // Empty string loads the local timezone
-	if err != nil {
-		fmt.Println("Error loading local timezone:", err)
-		return "", err
-	}
-	return localZone.String(), nil
 }

@@ -10,6 +10,7 @@ import (
 	awsV2 "github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/aws/aws-sdk-go-v2/service/sqs"
 	"github.com/aws/aws-sdk-go-v2/service/sqs/types"
+	"github.com/one2nc/cloudlens/internal/config"
 	"github.com/rs/zerolog/log"
 )
 
@@ -35,7 +36,7 @@ func GetAllQueues(cfg awsV2.Config) ([]SQSResp, error) {
 		}
 		mp := qAttributes.Attributes
 		launchTime, _ := strconv.Atoi(mp["CreatedTimestamp"])
-		localZone, err := GetLocalTimeZone() // Empty string loads the local timezone
+		localZone, err := config.GetLocalTimeZone() // Empty string loads the local timezone
 		if err != nil {
 			fmt.Println("Error loading local timezone:", err)
 			return nil, err

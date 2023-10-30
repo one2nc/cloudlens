@@ -13,6 +13,7 @@ import (
 	"github.com/aws/aws-sdk-go-v2/feature/s3/manager"
 	"github.com/aws/aws-sdk-go-v2/service/s3"
 	"github.com/aws/aws-sdk-go-v2/service/s3/types"
+	"github.com/one2nc/cloudlens/internal/config"
 	"github.com/rs/zerolog/log"
 )
 
@@ -36,7 +37,7 @@ func ListBuckets(cfg aws.Config) ([]BucketResp, error) {
 	}
 	for _, buc := range lbop.Buckets {
 		launchTime := buc.CreationDate
-		localZone, err := GetLocalTimeZone() // Empty string loads the local timezone
+		localZone, err := config.GetLocalTimeZone() // Empty string loads the local timezone
 		if err != nil {
 			fmt.Println("Error loading local timezone:", err)
 			return nil, err

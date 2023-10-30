@@ -70,10 +70,10 @@ func setFoldersAndFiles(folders []types.CommonPrefix, files []types.Object) []aw
 			keyA := strings.Split(*bi.Prefix, "/")
 			o := aws.S3Object{
 				Name:         keyA[len(keyA)-2],
-				ObjectType:   "Folder",
-				LastModified: "-",
-				Size:         "-",
-				StorageClass: "-",
+				ObjectType:   internal.FOLDER_TYPE,
+				LastModified: internal.NONE,
+				Size:         internal.NONE,
+				StorageClass: internal.NONE,
 			}
 			s3Objects = append(s3Objects, o)
 			indx++
@@ -94,7 +94,7 @@ func setFoldersAndFiles(folders []types.CommonPrefix, files []types.Object) []aw
 			if keyA[len(keyA)-1] != "" {
 				o := aws.S3Object{
 					Name:         keyA[len(keyA)-1],
-					ObjectType:   "File",
+					ObjectType:   internal.FILE_TYPE,
 					LastModified: IST.Format("Mon Jan _2 15:04:05 2006"),
 					SizeInBytes:  fi.Size,
 					Size:         humanize.Bytes(uint64(fi.Size)),

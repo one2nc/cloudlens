@@ -3,8 +3,6 @@ package aws
 import (
 	"context"
 	"errors"
-	"fmt"
-	"log"
 	"os"
 	"strings"
 
@@ -15,6 +13,7 @@ import (
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/credentials"
 	"github.com/aws/aws-sdk-go/aws/defaults"
+	"github.com/rs/zerolog/log"
 	"gopkg.in/ini.v1"
 )
 
@@ -26,6 +25,12 @@ type credentialProvider struct {
 	awsV2.Credentials
 }
 
+type AWSConfigInput struct {
+	Profile, Region string
+	UseLocalStack   bool
+	UseEnvVariables bool
+}
+
 func (c credentialProvider) Retrieve() (credentials.Value, error) {
 	return credentials.Value{AccessKeyID: c.AccessKeyID, SecretAccessKey: c.SecretAccessKey, SessionToken: os.Getenv("AWS_SESSION_TOKEN")}, nil
 }
@@ -34,25 +39,36 @@ func (c credentialProvider) IsExpired() bool {
 	return c.Expired()
 }
 
-func GetCfg(profile, region string) (awsV2.Config, error) {
-	cfg, err := awsV2Config.LoadDefaultConfig(
-		context.TODO(),
-		awsV2Config.WithSharedConfigProfile(profile),
-		awsV2Config.WithRegion(region),
-	)
+func GetCfg(cfgInput AWSConfigInput) (awsV2.Config, error) {
+
+	var cfg awsV2.Config
+	var err error
+
+	if cfgInput.UseLocalStack {
+		cfg, err = GetLocalstackCfg(cfgInput.Region)
+	} else if cfgInput.UseEnvVariables {
+		cfg, err = GetCfgUsingEnvVariables(cfgInput.Profile, cfgInput.Region)
+	} else {
+		cfg, err = awsV2Config.LoadDefaultConfig(
+			context.TODO(),
+			awsV2Config.WithSharedConfigProfile(cfgInput.Profile),
+			awsV2Config.WithRegion(cfgInput.Region),
+		)
+	}
+
 	if err != nil {
-		fmt.Printf("failed to load config")
+		log.Print("failed to load config")
 		return awsV2.Config{}, err
 	}
 	creds, err := cfg.Credentials.Retrieve(context.TODO())
 	if err != nil {
-		fmt.Printf("failed to read credentials")
+		log.Print("failed to read credentials ", err)
 		return awsV2.Config{}, err
 	}
 
 	credentialProvider := credentialProvider{Credentials: creds}
 	if credentialProvider.IsExpired() {
-		fmt.Println("Credentials have expired")
+		log.Print("Credentials have expired")
 		return awsV2.Config{}, errors.New("AWS Credentials expired")
 	}
 	return cfg, err
@@ -70,18 +86,18 @@ func GetCfgUsingEnvVariables(profile, region string) (awsV2.Config, error) {
 		),
 	)
 	if err != nil {
-		fmt.Printf("failed to load config")
+		log.Print("failed to load config")
 		return awsV2.Config{}, err
 	}
 	creds, err := cfg.Credentials.Retrieve(context.TODO())
 	if err != nil {
-		fmt.Printf("failed to read credentials")
+		log.Print("failed to read credentials ", err)
 		return awsV2.Config{}, err
 	}
 
 	credentialProvider := credentialProvider{Credentials: creds}
 	if credentialProvider.IsExpired() {
-		fmt.Println("Credentials have expired")
+		log.Print("Credentials have expired")
 		return awsV2.Config{}, errors.New("AWS Credentials expired")
 	}
 	return cfg, err
@@ -138,7 +154,7 @@ func GetLocalstackCfg(region string) (awsV2.Config, error) {
 		config.WithEndpointResolver(customResolver),
 	)
 	if err != nil {
-		log.Fatalf("Cannot load the AWS configs: %s", err)
+		log.Fatal().Err(err)
 	}
 	return awsLSCfg, nil
 }

@@ -1,11 +1,13 @@
 package view
 
 import (
+	"errors"
 	"fmt"
 	"regexp"
 	"strings"
 	"sync"
 
+	"github.com/one2nc/cloudlens/internal"
 	"github.com/one2nc/cloudlens/internal/dao"
 	"github.com/one2nc/cloudlens/internal/model"
 	"github.com/rs/zerolog/log"
@@ -34,7 +36,8 @@ func NewCommand(app *App) *Command {
 // Init initializes the command.
 func (c *Command) Init() error {
 	c.alias = dao.NewAlias()
-	if _, err := c.alias.Ensure(); err != nil {
+	cloud := c.app.context.Value(internal.KeySelectedCloud).(string)
+	if _, err := c.alias.Ensure(cloud); err != nil {
 		log.Error().Err(err).Msgf("command init failed!")
 		return err
 	}
@@ -50,7 +53,8 @@ func (c *Command) Reset(clear bool) error {
 	if clear {
 		c.alias.Clear()
 	}
-	if _, err := c.alias.Ensure(); err != nil {
+	cloud := c.app.context.Value(internal.KeySelectedCloud).(string)
+	if _, err := c.alias.Ensure(cloud); err != nil {
 		return err
 	}
 	return nil
@@ -77,7 +81,17 @@ func (c *Command) run(cmd, path string, clearStack bool) error {
 }
 
 func (c *Command) defaultCmd() error {
-	return c.run("ec2", "", true)
+	ctx := c.app.context
+	cloud := ctx.Value(internal.KeySelectedCloud)
+	switch cloud {
+	case internal.AWS:
+		return c.run(internal.LowercaseEc2, "", true)
+	case internal.GCP:
+		return c.run(internal.LowercaseStorage, "", true)
+	default:
+		return errors.New("Invalid command")
+	}
+
 }
 
 func (c *Command) specialCmd(cmd, path string) bool {

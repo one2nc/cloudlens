@@ -62,11 +62,11 @@ func (a *Alias) Get(_ context.Context, _ string) (Object, error) {
 }
 
 // Ensure makes sure alias are loaded.
-func (a *Alias) Ensure() (config.Alias, error) {
+func (a *Alias) Ensure(cloud string) (config.Alias, error) {
 
-	return a.Alias, a.load()
+	return a.Alias, a.load(cloud)
 }
 
-func (a *Alias) load() error {
-	return a.Load()
+func (a *Alias) load(cloud string) error {
+	return a.Load(cloud)
 }
