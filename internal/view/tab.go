@@ -29,6 +29,7 @@ func (t *Tab) Add() {
 		t.items = append(t.items, t.App.region())
 	case internal.GCP:
 		t.items = append(t.items, t.App.project())
+		t.items = append(t.items, t.App.zone())
 	}
 }
 
@@ -39,8 +40,8 @@ func (t *Tab) tabAction(event *tcell.EventKey) *tcell.EventKey {
 
 	focusIdx := t.currentFocusIdx()
 
-	if event.Key() == tcell.KeyTAB  {
-		if focusIdx + 1 == len(t.items) {
+	if event.Key() == tcell.KeyTAB {
+		if focusIdx+1 == len(t.items) {
 			t.App.Application.SetFocus(t.Content.Pages.Current())
 			return event
 		}
