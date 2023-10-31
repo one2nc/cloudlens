@@ -11,6 +11,7 @@ const (
 	KeyActiveProfile     ContextKey = "active-profile"
 	KeyActiveRegion      ContextKey = "active-region"
 	KeyActiveProject     ContextKey = "active-project"
+	KeyActiveZone        ContextKey = "active-zone"
 	KeySession           ContextKey = "session"
 	BucketName           ContextKey = "bucket_name"
 	StorageBucketName    ContextKey = "storage_bucket_name"
