@@ -5,14 +5,15 @@ import (
 
 	compute "cloud.google.com/go/compute/apiv1"
 	"cloud.google.com/go/compute/apiv1/computepb"
+	"github.com/one2nc/cloudlens/internal"
 	"google.golang.org/api/iterator"
 )
 
 func ListInstances(ctx context.Context) ([]VMResp, error) {
 	var vmResp = []VMResp{}
-	projectID := "projectID"
-	zone := "zone"
 
+	projectID := ctx.Value(internal.KeyActiveProject).(string)
+	zone := ctx.Value(internal.KeyActiveZone).(string)
 	instancesClient, err := compute.NewInstancesRESTClient(ctx)
 	if err != nil {
 		return vmResp, err
@@ -41,7 +42,6 @@ func ListInstances(ctx context.Context) ([]VMResp, error) {
 			AvailabilityZone: *instance.Zone,
 			InstanceState:    *instance.Status,
 			LaunchTime:       *instance.CreationTimestamp,
-			
 		}
 		vmResp = append(vmResp, vm)
 	}
