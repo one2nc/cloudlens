@@ -15,7 +15,7 @@ func (vm VM) Header() Header {
 	return Header{
 		HeaderColumn{Name: "Instance-Id", SortIndicatorIdx: 9, Align: tview.AlignLeft, Hide: false, Wide: false, MX: false, Time: false},
 		HeaderColumn{Name: "Instance-State", SortIndicatorIdx: 9, Align: tview.AlignLeft, Hide: false, Wide: false, MX: false, Time: false},
-		// HeaderColumn{Name: "Instance-Type", SortIndicatorIdx: 9, Align: tview.AlignLeft, Hide: false, Wide: false, MX: false, Time: false},
+		HeaderColumn{Name: "Instance-Type", SortIndicatorIdx: 9, Align: tview.AlignLeft, Hide: false, Wide: false, MX: false, Time: false},
 		// HeaderColumn{Name: "Monitoring-State", SortIndicatorIdx: 0, Align: tview.AlignLeft, Hide: false, Wide: false, MX: false, Time: false},
 		HeaderColumn{Name: "Launch-Time", SortIndicatorIdx: 0, Align: tview.AlignLeft, Hide: false, Wide: false, MX: false, Time: true},
 		// HeaderColumn{Name: "Public-DNS", SortIndicatorIdx: 0, Align: tview.AlignLeft, Hide: false, Wide: true, MX: false, Time: false},
@@ -34,7 +34,7 @@ func (vm VM) Render(o interface{}, ns string, row *Row) error {
 	row.Fields = Fields{
 		vmResp.InstanceId,
 		vmResp.InstanceState,
-		// vmResp.InstanceType,
+		vmResp.InstanceType,
 		// ec2Resp.MonitoringState,
 		vmResp.LaunchTime,
 		// ec2Resp.PublicDNS,
