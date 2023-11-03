@@ -140,7 +140,9 @@ func (a *App) handleAWS() {
 	ctx = context.WithValue(ctx, internal.KeyActiveProfile, profiles[0])
 	ctx = context.WithValue(ctx, internal.KeyActiveRegion, regions[0])
 	ctx = context.WithValue(ctx, internal.KeySelectedCloud, internal.AWS)
+	ctx = context.WithValue(ctx, internal.KeySelectedCloud, internal.AWS)
 	a.SetContext(ctx)
+	a.App.UpdateContext(ctx)
 	a.App.UpdateContext(ctx)
 
 	p := ui.NewDropDown("Profile:", profiles)
@@ -243,6 +245,10 @@ func (a *App) handleCloudSelection(seletedCloud string) error {
 		return err
 	}
 	if err := a.command.defaultCmd(); err != nil {
+		log.Print(err)
+		return err
+	}
+	if err := a.command.defaultCmd(); err != nil {
 		return err
 	}
 	return nil
@@ -267,6 +273,7 @@ func (a *App) layout(ctx context.Context) {
 	a.Main.AddPage(internal.GCP_SCREEN, gcp, true, false)
 
 	a.Main.AddPage(internal.SPLASH_SCREEN, ui.NewSplash("0.1.3"), true, true)
+	a.Main.AddPage(internal.SPLASH_SCREEN, ui.NewSplash("0.1.3"), true, true)
 }
 
 // QueueUpdateDraw queues up a ui action and redraw the ui.
@@ -284,6 +291,17 @@ func (a *App) Run() error {
 	go func() {
 		<-time.After(splashDelay)
 		a.QueueUpdateDraw(func() {
+
+			switch a.cloudConfig.SelectedCloud {
+			case "":
+				a.Main.SwitchToPage(internal.MAIN_SCREEN)
+
+			case internal.AWS:
+				a.Main.SwitchToPage(internal.AWS_SCREEN)
+
+			case internal.GCP:
+				a.Main.SwitchToPage(internal.GCP_SCREEN)
+			}
 
 			switch a.cloudConfig.SelectedCloud {
 			case "":
@@ -446,6 +464,7 @@ func (a *App) refreshSession(profile string, region string) {
 		Region:        region,
 	}
 	cfg, err := aws.GetCfg(awsConfigInput)
+
 	//sess, err := aws.GetSession(profile, region)
 	if err != nil {
 		a.App.Flash().Err(err)
@@ -554,6 +573,16 @@ func readAndValidateProfile() ([]string, error) {
 	return profiles, nil
 }
 
+func getDefaultAWSRegion() string {
+	cfg, err := cfg.LoadDefaultConfig(context.TODO())
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "failed to load AWS SDK config: %v\n", err)
+		os.Exit(1)
+	}
+	region := cfg.Region
+	return region
+}
+
 func readAndValidateRegion() []string {
 	regions := aws.GetAllRegions()
 	regions, isSwapped := config.SwapFirstIndexWithValue(regions, region)
@@ -564,14 +593,4 @@ func readAndValidateRegion() []string {
 		}
 	}
 	return regions
-}
-
-func getDefaultAWSRegion() string {
-	cfg, err := cfg.LoadDefaultConfig(context.TODO())
-	if err != nil {
-		fmt.Fprintf(os.Stderr, "failed to load AWS SDK config: %v\n", err)
-		os.Exit(1)
-	}
-	region := cfg.Region
-	return region
 }

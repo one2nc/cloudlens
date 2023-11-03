@@ -150,9 +150,6 @@ func (a *Aliases) loadDefaultAliases(cloud string) {
 		a.declare(internal.LowerVmInstance, internal.UppercaseVmInstance)
 
 	}
-	a.declare(internal.Help, internal.QuestionMark, internal.LowercaseH)
-	a.declare(internal.Quit, internal.LowercaseQ, internal.QFactorial, internal.UppercaseQ)
-	// a.declare(internal.Alias,internal.Aliases, internal.LowercaseA)
 }
 
 // Save alias to disk.
