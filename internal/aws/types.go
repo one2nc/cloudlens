@@ -138,3 +138,12 @@ type EcsClusterResp struct {
 	ClusterArn        string
 	RunningTasksCount string
 }
+
+type EcsServiceResp struct {
+    ServiceName     string
+    Status          string
+    DesiredCount    string
+    RunningCount    string
+    TaskDefinition  string
+    ServiceArn      string
+}

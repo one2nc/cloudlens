@@ -12,6 +12,7 @@ const (
 	KeyActiveRegion      ContextKey = "active-region"
 	KeyActiveProject     ContextKey = "active-project"
 	KeySession           ContextKey = "session"
+	ECSClusterName       ContextKey = "ecs_cluster_name"
 	BucketName           ContextKey = "bucket_name"
 	StorageBucketName    ContextKey = "storage_bucket_name"
 	ObjectName           ContextKey = "object_name"
@@ -32,6 +33,7 @@ const (
 	LowercaseEc2         string     = "ec2"
 	UppercaseEc2         string     = "Ec2"
 	LowercaseEcsCluster  string     = "ecs:c"
+	LowercaseEcsServices string     = "ecs:s"
 	UppercaseEcsCluster  string     = "ECS:C"
 	LowercaseS3          string     = "s3"
 	UppercaseS3          string     = "S3"
@@ -98,5 +100,5 @@ const (
 const (
 	FOLDER_TYPE string = "Folder"
 	FILE_TYPE   string = "File"
-	NONE string = "-"
+	NONE        string = "-"
 )
