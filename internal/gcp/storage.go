@@ -49,7 +49,7 @@ func ListBuckets(ctx context.Context) ([]StorageResp, error) {
 		bucketInfo = append(bucketInfo, *storageResp)
 	}
 
-	ListInstances(ctx)
+	// ListInstances(ctx)
 	return bucketInfo, nil
 }
 
