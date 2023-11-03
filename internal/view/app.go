@@ -90,6 +90,9 @@ func (a *App) handleAWS() {
 
 	region = a.cloudConfig.Region
 	profile = a.cloudConfig.Profile
+	awsConfigInput := aws.AWSConfigInput{
+		UseLocalStack: a.cloudConfig.UseLocalStack,
+	}
 	var regions, profiles []string
 	if a.cloudConfig.UseLocalStack {
 		profile = "localstack"
@@ -116,30 +119,24 @@ func (a *App) handleAWS() {
 
 			regions = readAndValidateRegion()
 
-			cfg, err := aws.GetCfg(profiles[0], regions[0])
-			if err != nil {
-				panic(fmt.Sprintf("aws session init failed -- %v", err))
-			}
-
-			ctx := context.WithValue(a.context, internal.KeySession, cfg)
-			a.SetContext(ctx)
-
 		} else {
 			profile := awsS.String(os.Getenv(internal.AWS_PROFILE))
 			profiles = []string{*profile}
 			region := awsS.String(os.Getenv(internal.AWS_DEFAULT_REGION))
 			regions = []string{*region}
-			cfg, err := aws.GetCfgUsingEnvVariables(profiles[0], regions[0])
-			if err != nil {
-				panic(fmt.Sprintf("aws session init failed -- %v", err))
-			}
-			ctx := context.WithValue(a.context, internal.KeySession, cfg)
-			a.SetContext(ctx)
-
+			awsConfigInput.UseEnvVariables = true
 		}
 	}
 
-	ctx := a.GetContext()
+	awsConfigInput.Profile = profiles[0]
+	awsConfigInput.Region = regions[0]
+	cfg, err := aws.GetCfg(awsConfigInput)
+	if err != nil {
+		panic(fmt.Sprintf("aws session init failed -- %v", err))
+	}
+	ctx := context.WithValue(a.context, internal.KeySession, cfg)
+	a.SetContext(ctx)
+
 	ctx = context.WithValue(ctx, internal.KeyActiveProfile, profiles[0])
 	ctx = context.WithValue(ctx, internal.KeyActiveRegion, regions[0])
 	ctx = context.WithValue(ctx, internal.KeySelectedCloud, internal.AWS)
@@ -443,14 +440,12 @@ func (a *App) regionChanged(region string, index int) {
 
 func (a *App) refreshSession(profile string, region string) {
 
-	var cfg cfg.Config
-	var err error
-	if a.cloudConfig.UseLocalStack {
-		cfg, err = aws.GetLocalstackCfg(region)
-	} else {
-		cfg, err = aws.GetCfg(profile, region)
+	awsConfigInput := aws.AWSConfigInput{
+		UseLocalStack: a.cloudConfig.UseLocalStack,
+		Profile:       profile,
+		Region:        region,
 	}
-
+	cfg, err := aws.GetCfg(awsConfigInput)
 	//sess, err := aws.GetSession(profile, region)
 	if err != nil {
 		a.App.Flash().Err(err)
