@@ -2,8 +2,11 @@ package dao
 
 import (
 	"context"
+	"encoding/json"
+	"fmt"
 
 	"github.com/one2nc/cloudlens/internal/gcp"
+	"github.com/rs/zerolog/log"
 )
 
 type VM struct {
@@ -25,15 +28,20 @@ func (vm *VM) List(ctx context.Context) ([]Object, error) {
 	return objs, err
 }
 
-// func (vm *VM) Get(ctx context.Context, path string) (Object, error) {
-// 	return nil, nil
-// }
+func (vm *VM) Describe(instanceId string) (string, error) {
 
-// func (vm *VM) Describe(instanceId string) (string, error) {
-// 	cfg, ok := vm.ctx.Value(internal.KeySession).(awsV2.Config)
-// 	if !ok {
-// 		log.Err(fmt.Errorf("conversion err: Expected awsV2.Config but got %v", cfg))
-// 	}
-// 	res := aws.GetSingleInstance(cfg, instanceId)
-// 	return fmt.Sprintf("%v", res), nil
-// }
+	instance, err := gcp.GetInstance(vm.ctx, instanceId)
+
+	if err != nil {
+		log.Err(fmt.Errorf("Error while fetching instance: %s", err.Error()))
+		return "", err
+	}
+	res, err := json.MarshalIndent(instance, "", " ")
+
+	if err != nil {
+		log.Err(fmt.Errorf("Error while parsing json: %s", err.Error()))
+		return "", err
+	}
+	return fmt.Sprintf("%v", string(res)), nil
+}
+

@@ -95,7 +95,6 @@ func (a *App) handleAWS() {
 		profile = "localstack"
 		profiles = []string{profile}
 		regions = readAndValidateRegion()
-		log.Print(regions)
 		cfg, err := aws.GetLocalstackCfg(regions[0])
 		if err != nil {
 			panic(fmt.Sprintf("aws session init failed -- %v", err))
