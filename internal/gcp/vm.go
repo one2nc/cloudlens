@@ -60,7 +60,6 @@ func ListInstances(ctx context.Context) ([]VMResp, error) {
 		loc, _ := time.LoadLocation(localZone)
 		IST := launchTime.In(loc)
 
-
 		vm := VMResp{
 			InstanceId:       *instance.Name,
 			InstanceType:     machineType,
@@ -71,4 +70,24 @@ func ListInstances(ctx context.Context) ([]VMResp, error) {
 		vmResp = append(vmResp, vm)
 	}
 	return vmResp, nil
+}
+
+func GetInstance(ctx context.Context, instaceId string) (*computepb.Instance, error) {
+	projectID := ctx.Value(internal.KeyActiveProject).(string)
+	zone := ctx.Value(internal.KeyActiveZone).(string)
+	instancesClient, err := compute.NewInstancesRESTClient(ctx)
+	if err != nil {
+		return nil, err
+	}
+	defer instancesClient.Close()
+
+	instance, err := instancesClient.Get(ctx, &computepb.GetInstanceRequest{
+		Zone:     zone,
+		Instance: instaceId,
+		Project:  projectID,
+	})
+	if err != nil {
+		return nil, err
+	}
+	return instance, nil
 }
