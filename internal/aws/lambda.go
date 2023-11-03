@@ -8,6 +8,7 @@ import (
 
 	awsV2 "github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/aws/aws-sdk-go-v2/service/lambda"
+	"github.com/one2nc/cloudlens/internal/config"
 	"github.com/rs/zerolog/log"
 )
 
@@ -25,7 +26,7 @@ func GetAllLambdaFunctions(cfg awsV2.Config) ([]LambdaResp, error) {
 			log.Info().Msg(fmt.Sprintf("error in converting 8601 %v", err))
 			return nil, err
 		}
-		localZone, err := GetLocalTimeZone() // Empty string loads the local timezone
+		localZone, err := config.GetLocalTimeZone() // Empty string loads the local timezone
 		if err != nil {
 			fmt.Println("Error loading local timezone:", err)
 			return nil, err

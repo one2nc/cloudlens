@@ -7,6 +7,7 @@ import (
 
 	awsV2 "github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/aws/aws-sdk-go-v2/service/iam"
+	"github.com/one2nc/cloudlens/internal/config"
 	"github.com/rs/zerolog/log"
 )
 
@@ -20,7 +21,7 @@ func GetUsers(cfg awsV2.Config) []IAMUSerResp {
 	var users []IAMUSerResp
 	for _, u := range result.Users {
 		launchTime := u.CreateDate
-		localZone, err := GetLocalTimeZone() // Empty string loads the local timezone
+		localZone, err := config.GetLocalTimeZone() // Empty string loads the local timezone
 		if err != nil {
 			fmt.Println("Error loading local timezone:", err)
 			return nil
@@ -133,7 +134,7 @@ func GetIamRoles(cfg awsV2.Config) []IamRoleResp {
 	var roles []IamRoleResp
 	for _, r := range result.Roles {
 		launchTime := r.CreateDate
-		localZone, err := GetLocalTimeZone() // Empty string loads the local timezone
+		localZone, err := config.GetLocalTimeZone() // Empty string loads the local timezone
 		if err != nil {
 			fmt.Println("Error loading local timezone:", err)
 			return nil
