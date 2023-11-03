@@ -25,7 +25,7 @@ func gcpCommand() *cobra.Command {
 
 func selectGCP() {
 	cloudConfig.SelectedCloud = internal.GCP
-	os.Setenv("GOOGLE_APPLICATION_CREDENTIALS", gcpCredFilePath)
+	os.Setenv(internal.GOOGLE_APPLICATION_CREDENTIALS, gcpCredFilePath)
 	cloudConfig.CredFilePath = gcpCredFilePath
 
 	initView()

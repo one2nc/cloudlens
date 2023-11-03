@@ -96,5 +96,10 @@ const (
 const (
 	FOLDER_TYPE string = "Folder"
 	FILE_TYPE   string = "File"
-	NONE string = "-"
+	NONE        string = "-"
+)
+
+const (
+	LOCALSTACK_PORT                string = "LOCALSTACK_PORT"
+	GOOGLE_APPLICATION_CREDENTIALS string = "GOOGLE_APPLICATION_CREDENTIALS"
 )

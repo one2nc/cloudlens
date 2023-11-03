@@ -157,7 +157,7 @@ func (a *App) handleAWS() {
 func (a *App) handleGCP() error {
 	ctx := a.GetContext()
 	ctx = context.WithValue(ctx, internal.KeySelectedCloud, internal.GCP)
-	credFilePath := os.Getenv("GOOGLE_APPLICATION_CREDENTIALS")
+	credFilePath := os.Getenv(internal.GOOGLE_APPLICATION_CREDENTIALS)
 	if credFilePath == "" {
 		go func() {
 			<-time.After(splashDelay)
