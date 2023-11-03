@@ -21,13 +21,13 @@ func NewVM(resource string) ResourceViewer {
 func (e *VM) bindKeys(aa ui.KeyActions) {
 	aa.Add(ui.KeyActions{
 		ui.KeyShiftI: ui.NewKeyAction("Sort Instance-Id", e.GetTable().SortColCmd("Instance-Id", true), true),
-		// ui.KeyShiftS:    ui.NewKeyAction("Sort Instance-State", e.GetTable().SortColCmd("Instance-State", true), true),
-		// ui.KeyShiftT:    ui.NewKeyAction("Sort Instance-Type", e.GetTable().SortColCmd("Instance-Type", true), true),
-		// ui.KeyShiftL:    ui.NewKeyAction("Sort Launch-Time", e.GetTable().SortColCmd("Launch-Time", true), true),
+		ui.KeyShiftS:    ui.NewKeyAction("Sort Instance-State", e.GetTable().SortColCmd("Instance-State", true), true),
+		ui.KeyShiftT:    ui.NewKeyAction("Sort Instance-Type", e.GetTable().SortColCmd("Instance-Type", true), true),
+		ui.KeyShiftL:    ui.NewKeyAction("Sort Launch-Time", e.GetTable().SortColCmd("Launch-Time", true), true),
 		// ui.KeyShiftM:    ui.NewKeyAction("Sort Monitoring-State", e.GetTable().SortColCmd("Monitoring-State", true), true),
 		// ui.KeyShiftP:    ui.NewKeyAction("Sort Public-DNS", e.GetTable().SortColCmd("Public-DNS", true), false),
 		tcell.KeyEscape: ui.NewKeyAction("Back", e.App().PrevCmd, false),
-		// tcell.KeyEnter:  ui.NewKeyAction("View", e.enterCmd, false),
+		tcell.KeyEnter:  ui.NewKeyAction("View", e.enterCmd, false),
 	})
 }
 

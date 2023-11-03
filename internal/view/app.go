@@ -98,6 +98,12 @@ func (a *App) handleAWS() {
 		profile = "localstack"
 		profiles = []string{profile}
 		regions = readAndValidateRegion()
+		cfg, err := aws.GetLocalstackCfg(regions[0])
+		if err != nil {
+			panic(fmt.Sprintf("aws session init failed -- %v", err))
+		}
+		ctx := context.WithValue(a.context, internal.KeySession, cfg)
+		a.SetContext(ctx)
 	} else {
 		var err error
 		profiles, err = readAndValidateProfile()
