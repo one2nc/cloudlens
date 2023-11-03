@@ -10,7 +10,6 @@ import (
 
 func FecthZones(ctx context.Context) ([]string, error) {
 
-	
 	zonesResp := []string{}
 
 	// Create a client with default credentials.

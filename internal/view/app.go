@@ -98,12 +98,6 @@ func (a *App) handleAWS() {
 		profile = "localstack"
 		profiles = []string{profile}
 		regions = readAndValidateRegion()
-		cfg, err := aws.GetLocalstackCfg(regions[0])
-		if err != nil {
-			panic(fmt.Sprintf("aws session init failed -- %v", err))
-		}
-		ctx := context.WithValue(a.context, internal.KeySession, cfg)
-		a.SetContext(ctx)
 	} else {
 		var err error
 		profiles, err = readAndValidateProfile()
@@ -181,27 +175,13 @@ func (a *App) handleGCP() error {
 	}
 
 	ctx = context.WithValue(ctx, internal.KeyActiveProject, serviceAccount.ProjectID)
-	zones, err := gcp.FecthZones(ctx)
-
-	if err != nil {
-		go func() {
-			<-time.After(splashDelay)
-			dialog.ShowError(a.Content.Pages, "Invalid path to google credentials")
-
-		}()
-	}
-	ctx = context.WithValue(ctx, internal.KeyActiveZone, zones[0])
 
 	p := ui.NewDropDown("Projects:", []string{serviceAccount.ProjectID})
 	p.SetSelectedFunc(a.projectchanged)
 	a.Views()["project"] = p
-	z := ui.NewDropDown("Zones:", zones)
-	z.SetSelectedFunc(a.zonechanged)
-	a.Views()["zone"] = z
 
 	infoData := map[string]tview.Primitive{
 		"project": a.project(),
-		"zone":    a.zone(),
 	}
 	a.Views()["info"] = ui.NewInfo(infoData)
 	a.SetContext(ctx)
@@ -237,7 +217,6 @@ func (a *App) handleCloudSelection(seletedCloud string) error {
 		a.Main.SwitchToPage(internal.GCP_SCREEN)
 	}
 	a.command = NewCommand(a)
-	a.bindKeys()
 	if err := a.command.Init(); err != nil {
 		log.Print(err)
 		return err
@@ -429,10 +408,6 @@ func (a *App) projectchanged(project string, index int) {
 	a.refreshProject(project)
 }
 
-func (a *App) zonechanged(zone string, index int) {
-	a.refreshZone(zone)
-}
-
 func (a *App) regionChanged(region string, index int) {
 	profile := a.GetContext().Value(internal.KeyActiveProfile).(string)
 	a.refreshSession(profile, region)
@@ -440,13 +415,12 @@ func (a *App) regionChanged(region string, index int) {
 
 func (a *App) refreshSession(profile string, region string) {
 
-	var cfg cfg.Config
-	var err error
-	if a.cloudConfig.UseLocalStack {
-		cfg, err = aws.GetLocalstackCfg(region)
-	} else {
-		cfg, err = aws.GetCfg(profile, region)
+	awsConfigInput := aws.AWSConfigInput{
+		UseLocalStack: a.cloudConfig.UseLocalStack,
+		Profile:       profile,
+		Region:        region,
 	}
+	cfg, err := aws.GetCfg(awsConfigInput)
 	//sess, err := aws.GetSession(profile, region)
 	if err != nil {
 		a.App.Flash().Err(err)
@@ -461,14 +435,6 @@ func (a *App) refreshSession(profile string, region string) {
 
 func (a *App) refreshProject(project string) {
 	ctx := context.WithValue(a.GetContext(), internal.KeyActiveProject, project)
-	a.SetContext(ctx)
-	stackedViews := a.Content.Pages.Stack.Flatten()
-	a.gotoResource(stackedViews[0], "", true)
-	a.App.Flash().Infof("Refreshing %v...", stackedViews[0])
-}
-
-func (a *App) refreshZone(zone string) {
-	ctx := context.WithValue(a.GetContext(), internal.KeyActiveZone, zone)
 	a.SetContext(ctx)
 	stackedViews := a.Content.Pages.Stack.Flatten()
 	a.gotoResource(stackedViews[0], "", true)
@@ -531,6 +497,7 @@ func (a *App) profile() *ui.DropDown {
 func (a *App) project() *ui.DropDown {
 	return a.Views()["project"].(*ui.DropDown)
 }
+
 func (a *App) zone() *ui.DropDown {
 	return a.Views()["zone"].(*ui.DropDown)
 }

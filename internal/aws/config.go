@@ -39,13 +39,23 @@ func (c credentialProvider) IsExpired() bool {
 	return c.Expired()
 }
 
-func GetCfg(profile, region string) (awsV2.Config, error) {
+func GetCfg(cfgInput AWSConfigInput) (awsV2.Config, error) {
 
-	cfg, err := awsV2Config.LoadDefaultConfig(
-		context.TODO(),
-		awsV2Config.WithSharedConfigProfile(profile),
-		awsV2Config.WithRegion(region),
-	)
+	var cfg awsV2.Config
+	var err error
+
+	if cfgInput.UseLocalStack {
+		cfg, err = GetLocalstackCfg(cfgInput.Region)
+	} else if cfgInput.UseEnvVariables {
+		cfg, err = GetCfgUsingEnvVariables(cfgInput.Profile, cfgInput.Region)
+	} else {
+		cfg, err = awsV2Config.LoadDefaultConfig(
+			context.TODO(),
+			awsV2Config.WithSharedConfigProfile(cfgInput.Profile),
+			awsV2Config.WithRegion(cfgInput.Region),
+		)
+	}
+
 	if err != nil {
 		log.Print("failed to load config")
 		return awsV2.Config{}, err
