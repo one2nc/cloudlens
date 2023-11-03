@@ -1,9 +1,11 @@
 package config
 
 import (
+	"fmt"
 	"os"
 	"path/filepath"
 	"strings"
+	"time"
 
 	"github.com/rs/zerolog/log"
 )
@@ -58,4 +60,12 @@ func SwapFirstIndexWithValue(array []string, value string) ([]string, IsSwapHapp
 	} else {
 		return nil, false
 	}
+}
+func GetLocalTimeZone() (string, error) {
+	localZone, err := time.LoadLocation("") // Empty string loads the local timezone
+	if err != nil {
+		fmt.Println("Error loading local timezone:", err)
+		return "", err
+	}
+	return localZone.String(), nil
 }

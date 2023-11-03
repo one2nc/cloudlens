@@ -39,7 +39,7 @@ func (obj *S3FileViewer) bindKeys(aa ui.KeyActions) {
 	aa.Add(ui.KeyActions{
 		ui.KeyShiftN:    ui.NewKeyAction("Sort Name", obj.GetTable().SortColCmd("Name", true), true),
 		ui.KeyShiftM:    ui.NewKeyAction("Sort Modification-Time", obj.GetTable().SortColCmd("Last-Modified", true), true),
-		ui.KeyShiftS:    ui.NewKeyAction("Sort Size", obj.GetTable().SortColCmd("Size", true), true),
+		ui.KeyShiftS:    ui.NewKeyAction("Sort Size", obj.GetTable().SortColCmd("SizeInBytes", true), true),
 		ui.KeyShiftC:    ui.NewKeyAction("Sort Storage-Class", obj.GetTable().SortColCmd("Storage-Class", true), true),
 		tcell.KeyEscape: ui.NewKeyAction("Back", obj.App().PrevCmd, false),
 		tcell.KeyEnter:  ui.NewKeyAction("View", obj.enterCmd, false),
@@ -51,7 +51,7 @@ func (obj *S3FileViewer) bindKeys(aa ui.KeyActions) {
 func (obj *S3FileViewer) enterCmd(evt *tcell.EventKey) *tcell.EventKey {
 	objName := obj.GetTable().GetSelectedItem()
 	fileType := obj.GetTable().GetSecondColumn()
-	if fileType == "Folder" {
+	if fileType == internal.FOLDER_TYPE {
 		o := NewS3FileViewer(obj.path+"/"+objName, objName)
 		ctx := obj.App().GetContext()
 		bn := ctx.Value(internal.BucketName)
@@ -74,7 +74,7 @@ func (obj *S3FileViewer) downloadCmd(evt *tcell.EventKey) *tcell.EventKey {
 	objName := obj.GetTable().GetSelectedItem()
 	fileType := obj.GetTable().GetSecondColumn()
 
-	if fileType == "File" {
+	if fileType == internal.FILE_TYPE {
 		ctx := obj.App().GetContext()
 		op := getObjectParams(ctx, objName)
 		res := aws.DownloadObject(op.cfg, op.bucketName, op.key)
@@ -88,7 +88,7 @@ func (obj *S3FileViewer) preSignedUrlCmd(evt *tcell.EventKey) *tcell.EventKey {
 	objNmae := obj.GetTable().GetSelectedItem()
 	fileType := obj.GetTable().GetSecondColumn()
 
-	if fileType == "File" {
+	if fileType == internal.FILE_TYPE {
 		ctx := obj.App().GetContext()
 		op := getObjectParams(ctx, objNmae)
 		url := aws.GetPreSignedUrl(op.cfg, op.bucketName, op.key)

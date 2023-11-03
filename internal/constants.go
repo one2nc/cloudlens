@@ -5,12 +5,15 @@ type ContextKey string
 
 // A collection of context keys.
 const (
+	KeySelectedCloud     ContextKey = "seleted_cloud"
 	KeyFactory           ContextKey = "factory"
 	KeyApp               ContextKey = "app"
 	KeyActiveProfile     ContextKey = "active-profile"
 	KeyActiveRegion      ContextKey = "active-region"
+	KeyActiveProject     ContextKey = "active-project"
 	KeySession           ContextKey = "session"
 	BucketName           ContextKey = "bucket_name"
+	StorageBucketName    ContextKey = "storage_bucket_name"
 	ObjectName           ContextKey = "object_name"
 	FolderName           ContextKey = "folder_name"
 	KeyAliases           ContextKey = "aliases"
@@ -56,6 +59,8 @@ const (
 	UppercaseSubnet      string     = "SUBNET"
 	LowercaseLamda       string     = "lambda"
 	UppercaseLamda       string     = "LAMBDA"
+	LowercaseStorage     string     = "storage"
+	UppercaseStorage     string     = "STORAGE"
 	Help                 string     = "help"
 	LowercaseH           string     = "h"
 	QuestionMark         string     = "?"
@@ -67,8 +72,31 @@ const (
 	Alias                string     = "alias"
 	LowercaseA           string     = "a"
 	Object               string     = "OBJ"
+	StorageObject        string     = "STORAGE_OBJ"
 	UserPolicy           string     = "User Policy"
 	UserGroupPolicy      string     = "User Group Policy"
 	RolePolicy           string     = "Role Policy"
 	GroupUsers           string     = "Group Users"
+)
+
+const (
+	AWS_SCREEN    string = "AWS"
+	GCP_SCREEN    string = "GCP"
+	MAIN_SCREEN   string = "MAIN"
+	SPLASH_SCREEN string = "SPLASH"
+)
+const (
+	AWS string = "AWS"
+	GCP string = "GCP"
+)
+
+const (
+	AWS_PROFILE        string = "AWS_PROFILE"
+	AWS_DEFAULT_REGION string = "AWS_DEFAULT_REGION"
+)
+
+const (
+	FOLDER_TYPE string = "Folder"
+	FILE_TYPE   string = "File"
+	NONE string = "-"
 )

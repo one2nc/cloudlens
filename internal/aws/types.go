@@ -17,6 +17,7 @@ type EC2Resp struct {
 }
 
 type S3Object struct {
+	SizeInBytes int64
 	Name, ObjectType, LastModified, Size, StorageClass string
 }
 

@@ -19,6 +19,10 @@ var Registry = map[string]ResourceMeta{
 		DAO:      &dao.SG{},
 		Renderer: &render.SG{},
 	},
+	internal.StorageObject: {
+		DAO:      &dao.SBObj{},
+		Renderer: &render.SOBJ{},
+	},
 	internal.Object: {
 		DAO:      &dao.BObj{},
 		Renderer: &render.BObj{},
@@ -82,5 +86,9 @@ var Registry = map[string]ResourceMeta{
 	internal.LowercaseEcsCluster: {
 		DAO:      &dao.ECSClusters{},
 		Renderer: &render.EcsClusters{},
+	},
+	internal.LowercaseStorage: {
+		DAO:      &dao.Storage{},
+		Renderer: &render.Storage{},
 	},
 }
