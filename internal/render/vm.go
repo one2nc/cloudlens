@@ -27,7 +27,7 @@ func (vm VM) Render(o interface{}, ns string, row *Row) error {
 	vmResp, ok := o.(gcp.VMResp)
 
 	if !ok {
-		return fmt.Errorf("Expected EC2Resp, but got %T", o)
+		return fmt.Errorf("Expected VMResp, but got %T", o)
 	}
 
 	row.ID = ns
