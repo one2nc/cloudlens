@@ -148,6 +148,7 @@ func (a *Aliases) loadDefaultAliases(cloud string) {
 	case internal.GCP:
 		a.declare(internal.LowercaseStorage, internal.UppercaseStorage)
 		a.declare(internal.LowerVmInstance, internal.UppercaseVmInstance)
+		a.declare(internal.LowerDisk, internal.UppercaseDisk)
 
 	}
 	a.declare(internal.Help, internal.QuestionMark, internal.LowercaseH)

@@ -151,6 +151,10 @@ func (h *Help) showServices() model.MenuHints {
 				Mnemonic:    "vm",
 				Description: "view VM instances",
 			},
+			{
+				Mnemonic:    "disk",
+				Description: "view Disk",
+			},
 		}
 
 	}

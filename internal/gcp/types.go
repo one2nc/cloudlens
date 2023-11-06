@@ -21,3 +21,8 @@ type VMResp struct {
 	MonitoringState  string
 	LaunchTime       string
 }
+
+type DiskResp struct {
+	Name, Type, Size,CreationTime,Status string
+	Zone string
+}
