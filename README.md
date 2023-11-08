@@ -54,6 +54,14 @@ For updating to latest version, use:
 ```console
 cloudlens update
 ```
+### Using Localstack
+- Configure localstack server. 
+-  Use our repo [cloud-lens-populator](https://github.com/one2nc/cloud-lens-populator) to setup and populate dummy data.
+- To run cloudlens with localstack use `aws` sub-command with `-l` or `--localstack` flag 
+- By default cloudlens use port `4566`. Use   `--port` flag to pass different port
+```console
+cloudlens aws --localstack --port 4000
+```
 
 ## Features
 
