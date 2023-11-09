@@ -5,6 +5,9 @@ type StorageResp struct {
 	CreationTime string
 	Region       string
 }
+type SnapshotResp struct {
+	Name,  Size, CreatedAt string
+}
 
 type StorageObjResp struct {
 	SizeInBytes                                        int64
@@ -23,6 +26,6 @@ type VMResp struct {
 }
 
 type DiskResp struct {
-	Name, Type, Size,CreationTime,Status string
-	Zone string
+	Name, Type, Size, CreationTime, Status string
+	Zone                                   string
 }

@@ -62,6 +62,8 @@ const (
 	UppercaseStorage     string     = "STORAGE"
 	LowerVmInstance      string     = "vm"
 	UppercaseVmInstance  string     = "VM"
+	LowerVmSnapshot      string     = "vm:S"
+	UppercaseVmSnapshot  string     = "VM:S"
 	LowerDisk            string     = "disk"
 	UppercaseDisk        string     = "DISK"
 	Help                 string     = "help"
