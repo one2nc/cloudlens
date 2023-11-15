@@ -64,4 +64,7 @@ func coreViewers(vv MetaViewers) {
 	vv[internal.LowerDisk] = MetaViewer{
 		viewerFn: NewDisk,
 	}
+	vv[internal.LowerVmImage] = MetaViewer{
+		viewerFn: NewVMI,
+	}
 }

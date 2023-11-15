@@ -6,7 +6,10 @@ type StorageResp struct {
 	Region       string
 }
 type SnapshotResp struct {
-	Name,  Size, CreatedAt string
+	Name, Size, CreatedAt string
+}
+type ImageResp struct {
+	Name,  Location, CreatedAt, Status string
 }
 
 type StorageObjResp struct {

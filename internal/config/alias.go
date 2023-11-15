@@ -150,6 +150,7 @@ func (a *Aliases) loadDefaultAliases(cloud string) {
 		a.declare(internal.LowerVmInstance, internal.UppercaseVmInstance)
 		a.declare(internal.LowerDisk, internal.UppercaseDisk)
 		a.declare(internal.LowerVmSnapshot, internal.UppercaseVmSnapshot)
+		a.declare(internal.LowerVmImage, internal.UppercaseVmImage)
 
 	}
 	a.declare(internal.Help, internal.QuestionMark, internal.LowercaseH)

@@ -11,7 +11,7 @@ func TestDiskRender(t *testing.T) {
 	resp := gcp.DiskResp{Name: "disk-1", Size: "32", Type: "pd-balanced", Status: "READY", Zone: "asia-south1-c", CreationTime: "9:00:00"}
 	var disk Disk
 
-	r := NewRow(7)
+	r := NewRow(6)
 	err := disk.Render(resp, "disk", &r)
 
 	assert.Nil(t, err)

@@ -11,7 +11,7 @@ func TestVMSnapshotRender(t *testing.T) {
 	resp := gcp.SnapshotResp{Name: "snap-1", Size: "10 GB", CreatedAt: "9:00:00"}
 	var vms VMS
 
-	r := NewRow(6)
+	r := NewRow(3)
 	err := vms.Render(resp, "vms", &r)
 
 	assert.Nil(t, err)
