@@ -3,6 +3,7 @@ package aws
 import (
 	"context"
 	"errors"
+	"fmt"
 	"os"
 	"strings"
 
@@ -13,6 +14,7 @@ import (
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/credentials"
 	"github.com/aws/aws-sdk-go/aws/defaults"
+	"github.com/one2nc/cloudlens/internal"
 	"github.com/rs/zerolog/log"
 	"gopkg.in/ini.v1"
 )
@@ -144,7 +146,7 @@ func GetProfiles() (profiles []string, err error) {
 func GetLocalstackCfg(region string) (awsV2.Config, error) {
 	customResolver := awsV2.EndpointResolverFunc(func(service, region string) (awsV2.Endpoint, error) {
 		return awsV2.Endpoint{
-			URL:           "http://localhost:4566",
+			URL:           GetLocastackEndpoint(),
 			SigningRegion: region,
 		}, nil
 	})
@@ -157,4 +159,11 @@ func GetLocalstackCfg(region string) (awsV2.Config, error) {
 		log.Fatal().Err(err)
 	}
 	return awsLSCfg, nil
+}
+
+func GetLocastackEndpoint() string {
+
+	port := os.Getenv(internal.LOCALSTACK_PORT)
+
+	return fmt.Sprintf("http://localhost:%v", port)
 }
