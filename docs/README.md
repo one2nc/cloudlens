@@ -1,5 +1,5 @@
 ---
-description: k9s like CLI for AWS
+description: k9s like CLI for AWS and GCP
 ---
 
 # 👋 Cloudlens
