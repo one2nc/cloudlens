@@ -7,9 +7,10 @@ type CloudConfig struct {
 }
 
 type AWSConfig struct {
-	Profile string
-	Region  string
-	UseLocalStack bool
+	Profile        string
+	Region         string
+	UseLocalStack  bool
+	LocalStackPort string
 }
 type GCPConfig struct {
 	CredFilePath string

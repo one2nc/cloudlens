@@ -102,3 +102,8 @@ const (
 	FILE_TYPE   string = "File"
 	NONE        string = "-"
 )
+
+const (
+	LOCALSTACK_PORT                string = "LOCALSTACK_PORT"
+	GOOGLE_APPLICATION_CREDENTIALS string = "GOOGLE_APPLICATION_CREDENTIALS"
+)

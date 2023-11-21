@@ -13,12 +13,12 @@ import (
 )
 
 var (
-	profile, region, gcpCredFilePath string
-	useLocalStack bool
-	version                          = "dev"
-	commit                           = "dev"
-	date                             = "today"
-	rootCmd                          = &cobra.Command{
+	profile, region, gcpCredFilePath, localStackPort string
+	useLocalStack                                    bool
+	version                                          = "dev"
+	commit                                           = "dev"
+	date                                             = "today"
+	rootCmd                                          = &cobra.Command{
 		Use:   `cloudlens`,
 		Short: `cli for cloud services`,
 		Long:  `cli for cloud services[aws,gcp]`,
