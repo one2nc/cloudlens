@@ -53,5 +53,6 @@ func (ecs *EcsClusters) describeCluster(evt *tcell.EventKey) *tcell.EventKey {
 		f = ecs.GetTable().enterFn
 	}
 	f(ecs.App(), ecs.GetTable().GetModel(), ecs.Resource(), clusterName)
+	ecs.App().Flash().Infof("Cluster %s", clusterName)
 	return nil
 }

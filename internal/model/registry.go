@@ -91,6 +91,14 @@ var Registry = map[string]ResourceMeta{
 		DAO:      &dao.ECSServices{},
 		Renderer: &render.EcsServices{},
 	},
+	internal.LowercaseEcsTasks: {
+		DAO:      &dao.ECSTasks{},
+		Renderer: &render.EcsTasks{},
+	},
+	internal.LowercaseEcsContainer: {
+		DAO:      &dao.ECSContainers{},
+		Renderer: &render.EcsContainers{},
+	},
 	internal.LowercaseStorage: {
 		DAO:      &dao.Storage{},
 		Renderer: &render.Storage{},

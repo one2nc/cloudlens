@@ -1,6 +1,9 @@
 package view
 
 import (
+	"context"
+	"fmt"
+
 	"github.com/gdamore/tcell/v2"
 	"github.com/one2nc/cloudlens/internal"
 	"github.com/one2nc/cloudlens/internal/ui"
@@ -25,15 +28,26 @@ func (ecs *EcsServices) Name() string {
 
 func (ecs *EcsServices) bindKeys(aa ui.KeyActions) {
 	aa.Add(ui.KeyActions{
-		ui.KeyShiftB:    ui.NewKeyAction("Sort Cluster-Arn", ecs.GetTable().SortColCmd("Cluster-Arn", true), true),
+		ui.KeyD:         ui.NewKeyAction("Describe", ecs.describeEcsService, true),
 		tcell.KeyEscape: ui.NewKeyAction("Back", ecs.App().PrevCmd, false),
 		tcell.KeyEnter:  ui.NewKeyAction("View", ecs.enterCmd, false),
 	})
 }
 
 func (ecs *EcsServices) enterCmd(evt *tcell.EventKey) *tcell.EventKey {
-	// TODO: Navigate to the tasks screen
-	return ecs.describeEcsService(evt)
+	serviceName := ecs.GetTable().GetSelectedItem()
+	if serviceName == "" {
+		return nil
+	}
+	ecsTaskScreen := NewEcsTask(serviceName)
+	ctx := ecs.App().GetContext()
+	clusterName := ctx.Value(internal.ECSClusterName).(string)
+	ctx = context.WithValue(ctx, internal.ECSServiceName, serviceName)
+	ecs.App().SetContext(ctx)
+	ecs.App().inject(ecsTaskScreen)
+	ecsTaskScreen.GetTable().SetTitle(fmt.Sprintf(" ecs://%s/%s ", clusterName, serviceName))
+	ecsTaskScreen.App().Flash().Info(fmt.Sprintf("Viewing %s service...", serviceName))
+	return nil
 }
 
 func (ecs *EcsServices) describeEcsService(evt *tcell.EventKey) *tcell.EventKey {

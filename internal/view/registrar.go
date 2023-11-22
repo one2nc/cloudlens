@@ -61,4 +61,10 @@ func coreViewers(vv MetaViewers) {
 	vv[internal.LowercaseEcsServices] = MetaViewer{
 		viewerFn: NewEcsService,
 	}
+	vv[internal.LowercaseEcsTasks] = MetaViewer{
+		viewerFn: NewEcsTask,
+	}
+	vv[internal.LowercaseEcsContainer] = MetaViewer{
+		viewerFn: NewEcsContainer,
+	}
 }
