@@ -40,27 +40,50 @@ func (ecs EcsTasks) Render(o interface{}, ns string, row *Row) error {
 	if task.StartedAt != nil {
 		startedTime = *task.StartedAt
 	}
-
-	containerArn := ""
+	containerInstanceArn, taskDefinitionArn, lastStatus, desiredStatus, platformVersion, cpu, memory, group, startedBy := "", "", "", "", "", "", "", "", ""
 	if task.ContainerInstanceArn != nil {
-		containerArn = *task.ContainerInstanceArn
+		containerInstanceArn = *task.ContainerInstanceArn
+	}
+	if task.TaskDefinitionArn != nil {
+		taskDefinitionArn = *task.TaskDefinitionArn
+	}
+	if task.LastStatus != nil {
+		lastStatus = *task.LastStatus
+	}
+	if task.DesiredStatus != nil {
+		desiredStatus = *task.DesiredStatus
+	}
+	if task.PlatformVersion != nil {
+		platformVersion = *task.PlatformVersion
+	}
+	if task.Cpu != nil {
+		cpu = *task.Cpu
+	}
+	if task.Memory != nil {
+		memory = *task.Memory
+	}
+	if task.Group != nil {
+		group = *task.Group
+	}
+	if task.StartedBy != nil {
+		startedBy = *task.StartedBy
 	}
 	row.ID = ns
 	row.Fields = Fields{
 		task.TaskId,
 		*task.TaskArn,
-		containerArn,
-		*task.TaskDefinitionArn,
-		*task.LastStatus,
-		*task.DesiredStatus,
+		taskDefinitionArn,
+		containerInstanceArn,
+		lastStatus,
+		desiredStatus,
 		fmt.Sprintf("%v", task.HealthStatus),
 		startedTime.String(),
 		fmt.Sprintf("%v", task.LaunchType),
-		*task.PlatformVersion,
-		*task.Cpu,
-		*task.Memory,
-		*task.Group,
-		*task.StartedBy,
+		platformVersion,
+		cpu,
+		memory,
+		group,
+		startedBy,
 	}
 	return nil
 }
