@@ -30,15 +30,37 @@ func (ecs EcsContainers) Render(o interface{}, ns string, row *Row) error {
 		return fmt.Errorf("expected EcsServiceResp, but got %T", o)
 	}
 	row.ID = ns
+	name, runtimeId, image, imageDigest, lastStatus, cpu, memory := "", "", "", "", "", "", ""
+	if container.Name != nil {
+		name = *container.Name
+	}
+	if container.RuntimeId != nil {
+		runtimeId = *container.RuntimeId
+	}
+	if container.Image != nil {
+		image = *container.Image
+	}
+	if container.ImageDigest != nil {
+		imageDigest = *container.ImageDigest
+	}
+	if container.LastStatus != nil {
+		lastStatus = *container.LastStatus
+	}
+	if container.Cpu != nil {
+		cpu = *container.Cpu
+	}
+	if container.Memory != nil {
+		memory = *container.Memory
+	}
 	row.Fields = Fields{
-		*container.Name,
-		*container.RuntimeId,
-		*container.Image,
-		*container.ImageDigest,
-		*container.LastStatus,
+		name,
+		runtimeId,
+		image,
+		imageDigest,
+		lastStatus,
 		fmt.Sprintf("%v", container.HealthStatus),
-		*container.Cpu,
-		*container.Memory,
+		cpu,
+		memory,
 	}
 	return nil
 }
