@@ -67,4 +67,16 @@ func coreViewers(vv MetaViewers) {
 	vv[internal.LowercaseEcsContainer] = MetaViewer{
 		viewerFn: NewEcsContainer,
 	}
+	vv[internal.LowerVmInstance] = MetaViewer{
+		viewerFn: NewVM,
+	}
+	vv[internal.LowerVmSnapshot] = MetaViewer{
+		viewerFn: NewVMS,
+	}
+	vv[internal.LowerDisk] = MetaViewer{
+		viewerFn: NewDisk,
+	}
+	vv[internal.LowerVmImage] = MetaViewer{
+		viewerFn: NewVMI,
+	}
 }
