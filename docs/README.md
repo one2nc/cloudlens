@@ -1,5 +1,5 @@
 ---
-description: k9s like CLI for AWS
+description: k9s like CLI for AWS and GCP
 ---
 
 # 👋 Cloudlens
@@ -8,7 +8,7 @@ description: k9s like CLI for AWS
 
 ## Terminal-ate Your Cloud Worries!
 
-AWS Console in your terminal! well, almost. Explore AWS services like EC2, S3, IAM, VPC, etc. from your terminal. If you like k9s for Kubernetes, you'll love cloudlens.
+AWS and GCP Console in your terminal! well, almost. Explore AWS and GCP services like EC2, S3, IAM, VPC, VM, Storage  etc. from your terminal. If you like k9s for Kubernetes, you'll love cloudlens.
 
 ### Got 2 minutes? Check out a video overview of cloudlens:
 
@@ -36,7 +36,7 @@ cloudlens
 
 </details>
 
-### Features
+### AWS Features
 
 | Services                            | Description                                                           | Alias   |
 | ----------------------------------- | --------------------------------------------------------------------- | ------- |
@@ -44,6 +44,7 @@ cloudlens
 | [EC2](./#ec2)                       | view all instances and their associated metadata, including JSON data | `ec2`   |
 | [EC2 Snapshot](./#ec2-snapshot)     | view a list of all EC2 snapshots                                      | `ec2:s` |
 | [EC2 Image](./#ec2-image)           | See a list of all EC2 images                                          | `ec2:i` |
+| [ECS Clusters](./#ecs-clusters)     | View all ECS Clusters                                                 | `ecs:c` |
 | [VPC](./#vpc)                       | view all  VPC's and their associated metadata, including JSON data    | `vpc`   |
 | [Security Group](./#security-group) | Security Groups and their associated metadata                         | `sg`    |
 | [IAM users](./#iam-users)           | view all IAM users and their associated metadata                      | `iam:u` |
@@ -52,6 +53,16 @@ cloudlens
 | [EBS](./#ebs)                       | View all available EBS volumes                                        | `ebs`   |
 | [SQS](./#sqs)                       | view a list of all SQS queues                                         | `sqs`   |
 | [Lambda](./#lambda)                 | view a list of all Lambda functions                                   | `lamda` |
+
+### GCP Features
+
+| Services                            | Description                                                           | Alias   |
+| ----------------------------------- | --------------------------------------------------------------------- | ------- |
+| [Storage](./#storage)                         | View all storage buckets and their contents                                | `storage`    |
+| [VM](./#vm)                       | view all instances and their associated metadata, including JSON data | `vm`   |
+| [VM Snapshot](./#vm-snapshot)     | view a list of all VM snapshots                                      | `vm:S` |
+| [VM Image](./#vm-image)           | See a list of all VM images                                          | `vm:I` |
+| [Disk](./#disk)                       | View all available disks                                         | `disk`   |
 
 ### Prompt
 
@@ -76,6 +87,8 @@ The resources window located in the top right corner of the terminal provides yo
 You can switch between the dropdown options using the tab button.
 
 <figure><img src=".gitbook/assets/image (28).png" alt="Dropdowns"><figcaption><p>Dropdowns</p></figcaption></figure>
+
+## AWS Resources
 
 ### S3
 
@@ -108,6 +121,20 @@ To access the <mark style="color:blue;">EC2 image</mark> page, enter `ec2:i` in 
 <figure><img src=".gitbook/assets/image (3).png" alt="EC2 Image Page"><figcaption><p>EC2 Image Page</p></figcaption></figure>
 
 <figure><img src=".gitbook/assets/image (21).png" alt="EC2 Image Details Page"><figcaption><p>EC2 Image Details Page</p></figcaption></figure>
+
+### ECS Clusters
+
+To acess the <mark style="color:blue;">ECS Clusters</mark> page, enter `ecs:c`  in your prompt and press Enter. This will display a list of all deployed Clusetrs.
+
+<figure><img src=".gitbook/assets/ecs-cluster.png" alt="ECS Cluster Page"><figcaption><p>ECS Cluster Page</p></figcaption></figure>
+
+From the ECS cluster page, you can navigate down through various layers:
+
+- **Clusters**: Get an overview of available clusters.
+- **Services**: Explore services associated with each cluster.
+- **Tasks**: View individual tasks running within these services.
+- **Containers**: Access detailed information about specific containers.
+
 
 ### VPC
 
@@ -170,3 +197,45 @@ To view <mark style="color:orange;">SQS queues</mark>, enter `sqs` in the comman
 View all your Lambda functions easily by entering 'lambda' command in your terminal prompt.
 
 <figure><img src=".gitbook/assets/image (12).png" alt=""><figcaption></figcaption></figure>
+
+## GCP Resources
+
+### Storage
+
+To view the <mark style="color:orange;">Storage buckets</mark> page, use the command `storage` in your prompt. Pressing enter will display all the available buckets, folders, and files. You can use the escape key to go back to the previous page.. Additionally, you can download a CSV file using the `z` command.
+
+<figure><img src=".gitbook/assets/gcp_storage.png" alt="S3 Page"><figcaption><p>Storage Page</p></figcaption></figure>
+
+<figure><img src=".gitbook/assets/gcp_storage_details.png" alt="Storage Details Page"><figcaption><p>Storage Details Page</p></figcaption></figure>
+
+### VM
+
+To view the <mark style="color:purple;">VM</mark> page, enter the command `vm` in your prompt. Pressing enter will display all available instances. To view specific details about an instance, select it and press enter to display a JSON with the VM information. You can use the escape key to navigate back to the previous page. Additionally, you can download a CSV file by using the `z` command.
+
+<figure><img src=".gitbook/assets/gcp_vm.png" alt="VM Page"><figcaption><p>VM Page</p></figcaption></figure>
+
+<figure><img src=".gitbook/assets/gcp_vm_details.png" alt="VM Details Page"><figcaption><p>VM Details Page</p></figcaption></figure>
+
+### VM Snapshot
+
+To access the <mark style="color:blue;">VM snapshots</mark> page, enter `vm:S` in your prompt and press Enter. This will display a list of all available snapshots. Select a snapshot to view its details, then press Enter again. To return to the previous page, press the Escape key.
+
+<figure><img src=".gitbook/assets/gcp_vm_snapshots.png" alt="VM Snapshot Page"><figcaption><p>VM Snapshot Page</p></figcaption></figure>
+
+<figure><img src=".gitbook/assets/gcp_snapshot_details.png" alt="VM Snapshot Details Page"><figcaption><p>VM Snapshot Details Page</p></figcaption></figure>
+
+### VM Image
+
+To access the <mark style="color:blue;">VM image</mark> page, enter `vm:I` in your prompt and press Enter. This will display a list of all available images. Select an image to view its details, then press Enter again. To return to the previous page, press the Escape key.
+
+<figure><img src=".gitbook/assets/gcp_vm_images.png" alt="VM Image Page"><figcaption><p>VM Image Page</p></figcaption></figure>
+
+<figure><img src=".gitbook/assets/gcp_image_details.png" alt="VM Image Details Page"><figcaption><p>VM Image Details Page</p></figcaption></figure>
+
+### Disk
+
+To view <mark style="color:green;">Disks</mark>, enter `disk` in the command prompt and press Enter to show a list of disks. Select a disk and press Enter to view its details. To return to the previous page, press the Escape key.
+
+<figure><img src=".gitbook/assets/gcp_disks.png" alt="Disk Page"><figcaption><p>Disk Page</p></figcaption></figure>
+
+<figure><img src=".gitbook/assets/gcp_disks_details.png" alt="Disk Details Page"><figcaption><p>Disk Details Page</p></figcaption></figure>

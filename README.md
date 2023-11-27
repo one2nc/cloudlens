@@ -2,11 +2,11 @@
       <img src="assets/cloudlens.png" alt="Cloudlens" width="225" height="150" >
 </p>
 
-## Cloudlens - k9s like CLI for AWS. 
+## Cloudlens - k9s like CLI for AWS and GCP. 
 
 ![](./assets/cloudlensdemo.gif)
 
-AWS Console in your terminal! well, almost. Explore AWS services like EC2, S3, IAM, VPC, etc. from your terminal. If you like k9s for Kubernetes, you'll love cloudlens.
+AWS and GCP Console in your terminal! well, almost. Explore AWS and GCP services like EC2, S3, IAM, VPC, VM, Storage  etc. from your terminal. If you like k9s for Kubernetes, you'll love cloudlens.
 
 ## Installation
 
@@ -38,12 +38,24 @@ AWS Console in your terminal! well, almost. Explore AWS services like EC2, S3, I
 
 ## Usage
 
-For the simple usage, just run the command without any options.
+### Using UI
+- For the simple usage, just run the `cloudlens` command without any options.
+- This will open an UI to select cloud platform.
+- Note: when selecting `GCP` as cloud, make sure to set `GOOGLE_APPLICATION_CREDENTIALS` env variable to gcp-credentials file's path.
 
 ```shell
 cloudlens
 ```
-
+### Using Sub-Commands
+- Alternative to UI, you could also use sub-commands and flags to select cloud platform.
+- To select AWS.
+```shell
+cloudlens aws
+```
+- To select GCP.
+```shell
+cloudlens gcp --cf="path/to/gcp-credentials.json"
+```
 For knowing all the options available, use:
 ```shell
 cloudlens help
@@ -65,10 +77,15 @@ cloudlens aws --localstack --port 4000
 
 ## Features
 
-Cloudlens supports viewing EC2 instances, S3 buckets, EBS volumes, VPCs, SQS queues, Lambda functions, Subnets, Security Groups, and IAM roles. Read the [cloudlens documentation](https://one2n.gitbook.io/docs/) to know more.
+### AWS
+For AWS Cloudlens supports viewing EC2 instances, S3 buckets, EBS volumes, VPCs, SQS queues, Lambda functions, Subnets, Security Groups, and IAM roles. 
+### GCP
+For GCP Cloudlens supports viewing VM instances, Storage buckets, Disks, Snapshots, Images.
+
+ Read the [cloudlens documentation](https://one2n.gitbook.io/docs/) to know more.
 
 ## Screenshots
-
+### AWS
 1. EC2
       <img src="assets/ec2.png"/>
 1. EC2 Details
@@ -78,6 +95,16 @@ Cloudlens supports viewing EC2 instances, S3 buckets, EBS volumes, VPCs, SQS que
       <img src="assets/s3.png"/>
 2. S3 Details
       <img src="assets/s3Details.png"/>
+### GCP
+1. VM
+      <img src="assets/gcp_vm.png"/>
+1. VM Details
+      <img src="assets/gcp_vm_details.png"/>
+
+2. Storage
+      <img src="assets/gcp_storage.png"/>
+2. Storage Details
+      <img src="assets/gcp_storage_details.png"/>
 
 ## Documentation
 
@@ -94,6 +121,7 @@ Cloudlens uses k9s like shortcuts for navigation. Listed below are few of the sh
 | To bail out of cloudlens                  | :q ,   ctrl-c |
 | Bails out of view/command/filter mode     | esc         |
 | To view and switch to another AWS Service | :S3/EC2/VPC⏎  |
+| To view and switch to another GCP Service | :storage/vm/disk⏎  |
 
 ## Note
 **Cloudlens reads your ~/.aws/config file, but it does not store or send your access and secret key anywhere. The access and secret key is used only to securely connect to AWS API via AWS SDK.**

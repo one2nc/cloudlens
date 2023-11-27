@@ -83,8 +83,40 @@ var Registry = map[string]ResourceMeta{
 		DAO:      &dao.Lambda{},
 		Renderer: &render.Lambda{},
 	},
+	internal.LowercaseEcsCluster: {
+		DAO:      &dao.ECSClusters{},
+		Renderer: &render.EcsClusters{},
+	},
+	internal.LowercaseEcsServices: {
+		DAO:      &dao.ECSServices{},
+		Renderer: &render.EcsServices{},
+	},
+	internal.LowercaseEcsTasks: {
+		DAO:      &dao.ECSTasks{},
+		Renderer: &render.EcsTasks{},
+	},
+	internal.LowercaseEcsContainer: {
+		DAO:      &dao.ECSContainers{},
+		Renderer: &render.EcsContainers{},
+	},
 	internal.LowercaseStorage: {
 		DAO:      &dao.Storage{},
 		Renderer: &render.Storage{},
+	},
+	internal.LowerVmInstance: {
+		DAO:      &dao.VM{},
+		Renderer: &render.VM{},
+	},
+	internal.LowerDisk: {
+		DAO:      &dao.Disk{},
+		Renderer: &render.Disk{},
+	},
+	internal.LowerVmSnapshot: {
+		DAO:      &dao.VMS{},
+		Renderer: &render.VMS{},
+	},
+	internal.LowerVmImage: {
+		DAO:      &dao.VMI{},
+		Renderer: &render.VMI{},
 	},
 }
