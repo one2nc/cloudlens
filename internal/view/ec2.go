@@ -1,6 +1,7 @@
 package view
 
 import (
+
 	"github.com/gdamore/tcell/v2"
 	"github.com/one2nc/cloudlens/internal/ui"
 )

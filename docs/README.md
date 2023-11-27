@@ -44,6 +44,7 @@ cloudlens
 | [EC2](./#ec2)                       | view all instances and their associated metadata, including JSON data | `ec2`   |
 | [EC2 Snapshot](./#ec2-snapshot)     | view a list of all EC2 snapshots                                      | `ec2:s` |
 | [EC2 Image](./#ec2-image)           | See a list of all EC2 images                                          | `ec2:i` |
+| [ECS Clusters](./#ecs-clusters)     | View all ECS Clusters                                                 | `ecs:c` |
 | [VPC](./#vpc)                       | view all  VPC's and their associated metadata, including JSON data    | `vpc`   |
 | [Security Group](./#security-group) | Security Groups and their associated metadata                         | `sg`    |
 | [IAM users](./#iam-users)           | view all IAM users and their associated metadata                      | `iam:u` |
@@ -108,6 +109,10 @@ To access the <mark style="color:blue;">EC2 image</mark> page, enter `ec2:i` in 
 <figure><img src=".gitbook/assets/image (3).png" alt="EC2 Image Page"><figcaption><p>EC2 Image Page</p></figcaption></figure>
 
 <figure><img src=".gitbook/assets/image (21).png" alt="EC2 Image Details Page"><figcaption><p>EC2 Image Details Page</p></figcaption></figure>
+
+### ECS Clusters
+
+To acess the <mark style="color:blue;">ECS Clusters</mark> page, enter `ecs:c`  in your prompt and press Enter. This will display a list of all deployed Clusetrs.
 
 ### VPC
 

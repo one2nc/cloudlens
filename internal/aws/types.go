@@ -1,6 +1,7 @@
 package aws
 
 import (
+	ecsTypes "github.com/aws/aws-sdk-go-v2/service/ecs/types"
 	"github.com/aws/aws-sdk-go-v2/service/s3/types"
 	"github.com/aws/aws-sdk-go/service/ec2"
 )
@@ -17,7 +18,7 @@ type EC2Resp struct {
 }
 
 type S3Object struct {
-	SizeInBytes int64
+	SizeInBytes                                        int64
 	Name, ObjectType, LastModified, Size, StorageClass string
 }
 
@@ -130,4 +131,25 @@ type SGResp struct {
 	Description string
 	OwnerId     string
 	VpcId       string
+}
+
+type EcsClusterResp struct {
+	ClusterName       string
+	Status            string
+	ClusterArn        string
+	RunningTasksCount string
+}
+
+type EcsServiceResp struct {
+	ServiceName    string
+	Status         string
+	DesiredCount   string
+	RunningCount   string
+	TaskDefinition string
+	ServiceArn     string
+}
+
+type EcsTaskResp struct {
+	TaskId string
+	*ecsTypes.Task
 }
