@@ -25,7 +25,7 @@ brews:
   -
     name: cloudlens
     homepage: https://github.com/one2nc/cloudlens
-    tap:
+    repository:
       owner: one2nc
       name: homebrew-cloudlens
     commit_author:
