@@ -260,7 +260,7 @@ func (a *App) layout(ctx context.Context) {
 	gcp.AddItem(flash, 1, 1, false)
 	a.Main.AddPage(internal.GCP_SCREEN, gcp, true, false)
 
-	a.Main.AddPage(internal.SPLASH_SCREEN, ui.NewSplash("0.1.3"), true, true)
+	a.Main.AddPage(internal.SPLASH_SCREEN, ui.NewSplash(a.version), true, true)
 }
 
 // QueueUpdateDraw queues up a ui action and redraw the ui.

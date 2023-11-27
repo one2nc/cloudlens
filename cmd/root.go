@@ -15,7 +15,7 @@ import (
 var (
 	profile, region, gcpCredFilePath, localStackPort string
 	useLocalStack                                    bool
-	version                                          = "dev"
+	version                                          = "v0.1.4"
 	commit                                           = "dev"
 	date                                             = "today"
 	rootCmd                                          = &cobra.Command{
