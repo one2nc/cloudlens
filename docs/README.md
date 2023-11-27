@@ -126,6 +126,16 @@ To access the <mark style="color:blue;">EC2 image</mark> page, enter `ec2:i` in 
 
 To acess the <mark style="color:blue;">ECS Clusters</mark> page, enter `ecs:c`  in your prompt and press Enter. This will display a list of all deployed Clusetrs.
 
+<figure><img src=".gitbook/assets/ecs-cluster.png" alt="ECS Cluster Page"><figcaption><p>ECS Cluster Page</p></figcaption></figure>
+
+From the ECS cluster page, you can navigate down through various layers:
+
+- **Clusters**: Get an overview of available clusters.
+- **Services**: Explore services associated with each cluster.
+- **Tasks**: View individual tasks running within these services.
+- **Containers**: Access detailed information about specific containers.
+
+
 ### VPC
 
 To access the <mark style="color:green;">VPC</mark> management functionality, type `vpc` in the command prompt to display a list of available VPCs. Selecting a specific VPC and pressing enter will show a JSON file with its information. You can view the VPC's subnets by using the  `s` command and navigate back to the previous page by pressing the escape key. Additionally, you can download a CSV file using the `z` command.
