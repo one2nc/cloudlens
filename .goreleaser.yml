@@ -28,7 +28,7 @@ brews:
     repository:
       owner: one2nc
       name: homebrew-cloudlens
-      token: "{{.Env.GITHUB_TOKEN}}"
+      token: "{{.Env.HOMEBREW_CLOUDLENS_TOKEN}}"
     commit_author:
       name: one2nc
       email: chinmay@one2n.in
