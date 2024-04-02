@@ -13,8 +13,8 @@ type EC2 struct {
 // Header returns a header row.
 func (e EC2) Header() Header {
 	return Header{
-		HeaderColumn{Name: "Name", SortIndicatorIdx: 9, Align: tview.AlignLeft, Hide: false, Wide: false, MX: false, Time: false},
 		HeaderColumn{Name: "Instance-Id", SortIndicatorIdx: 9, Align: tview.AlignLeft, Hide: false, Wide: false, MX: false, Time: false},
+		HeaderColumn{Name: "Name", SortIndicatorIdx: 9, Align: tview.AlignLeft, Hide: false, Wide: false, MX: false, Time: false},
 		HeaderColumn{Name: "Instance-State", SortIndicatorIdx: 9, Align: tview.AlignLeft, Hide: false, Wide: false, MX: false, Time: false},
 		HeaderColumn{Name: "Instance-Type", SortIndicatorIdx: 9, Align: tview.AlignLeft, Hide: false, Wide: false, MX: false, Time: false},
 		HeaderColumn{Name: "Monitoring-State", SortIndicatorIdx: 0, Align: tview.AlignLeft, Hide: false, Wide: false, MX: false, Time: false},
@@ -33,8 +33,8 @@ func (e EC2) Render(o interface{}, ns string, row *Row) error {
 
 	row.ID = ns
 	row.Fields = Fields{
-		ec2Resp.Name,
 		ec2Resp.InstanceId,
+		ec2Resp.Name,
 		ec2Resp.InstanceState,
 		ec2Resp.InstanceType,
 		ec2Resp.MonitoringState,
