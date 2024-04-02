@@ -1,7 +1,6 @@
 package view
 
 import (
-
 	"github.com/gdamore/tcell/v2"
 	"github.com/one2nc/cloudlens/internal/ui"
 )
@@ -21,6 +20,7 @@ func NewEC2(resource string) ResourceViewer {
 
 func (e *EC2) bindKeys(aa ui.KeyActions) {
 	aa.Add(ui.KeyActions{
+		ui.KeyShiftN:    ui.NewKeyAction("Sort Name", e.GetTable().SortColCmd("Name", true), true),
 		ui.KeyShiftI:    ui.NewKeyAction("Sort Instance-Id", e.GetTable().SortColCmd("Instance-Id", true), true),
 		ui.KeyShiftS:    ui.NewKeyAction("Sort Instance-State", e.GetTable().SortColCmd("Instance-State", true), true),
 		ui.KeyShiftT:    ui.NewKeyAction("Sort Instance-Type", e.GetTable().SortColCmd("Instance-Type", true), true),
