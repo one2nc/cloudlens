@@ -14,7 +14,7 @@ type EC2 struct {
 func (e EC2) Header() Header {
 	return Header{
 		HeaderColumn{Name: "Instance-Id", SortIndicatorIdx: 9, Align: tview.AlignLeft, Hide: false, Wide: false, MX: false, Time: false},
-		HeaderColumn{Name: "Name", SortIndicatorIdx: 9, Align: tview.AlignLeft, Hide: false, Wide: false, MX: false, Time: false},
+		HeaderColumn{Name: "Name", SortIndicatorIdx: 0, Align: tview.AlignLeft, Hide: false, Wide: false, MX: false, Time: false},
 		HeaderColumn{Name: "Instance-State", SortIndicatorIdx: 9, Align: tview.AlignLeft, Hide: false, Wide: false, MX: false, Time: false},
 		HeaderColumn{Name: "Instance-Type", SortIndicatorIdx: 9, Align: tview.AlignLeft, Hide: false, Wide: false, MX: false, Time: false},
 		HeaderColumn{Name: "Monitoring-State", SortIndicatorIdx: 0, Align: tview.AlignLeft, Hide: false, Wide: false, MX: false, Time: false},
