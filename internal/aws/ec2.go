@@ -34,7 +34,14 @@ func GetInstances(cfg aws.Config) ([]EC2Resp, error) {
 			}
 			loc, _ := time.LoadLocation(localZone)
 			IST := launchTime.In(loc)
+
+			tags := map[string]string{}
+			for key := range instance.Tags {
+				tags[*instance.Tags[key].Key] = *instance.Tags[key].Value
+			}
+
 			ec2Resp := &EC2Resp{
+				Name:             tags["Name"],
 				InstanceId:       *instance.InstanceId,
 				InstanceType:     string(instance.InstanceType),
 				AvailabilityZone: *instance.Placement.AvailabilityZone,

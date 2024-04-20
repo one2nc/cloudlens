@@ -15,6 +15,7 @@ type EC2Resp struct {
 	PublicDNS        string
 	MonitoringState  string
 	LaunchTime       string
+	Name             string
 }
 
 type S3Object struct {
