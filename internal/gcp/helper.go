@@ -12,11 +12,11 @@ func GetLocalTime(timestamp string) (string, error) {
 
 	launchTime, err := time.Parse("2006-01-02T15:04:05.999-07:00", timestamp)
 	if err != nil {
-		return "", fmt.Errorf("Error parsing timestamp : ", err)
+		return "", fmt.Errorf("Error parsing timestamp: %v", err)
 	}
 	localZone, err := config.GetLocalTimeZone()
 	if err != nil {
-		return "", fmt.Errorf("Error loading local timezone: ", err)
+		return "", fmt.Errorf("Error loading local timezone: %v", err)
 	}
 	loc, _ := time.LoadLocation(localZone)
 	IST := launchTime.In(loc)

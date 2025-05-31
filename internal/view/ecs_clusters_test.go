@@ -10,5 +10,5 @@ func TestNewEcsCluster(t *testing.T) {
 	ecs := NewEcs("ecs:c")
 	assert.Nil(t, ecs.Init(makeCtx()))
 	assert.Equal(t, "ecs:c", ecs.Name())
-	assert.Equal(t, 5, len(ecs.Hints()))
+	assert.Equal(t, 7, len(ecs.Hints()))
 }
