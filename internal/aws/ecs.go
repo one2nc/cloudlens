@@ -55,8 +55,7 @@ func GetClusterJSONResponse(cfg aws.Config, clusterName string) (string, error) 
 	}
 	// Check if the cluster was found
 	if len(result.Clusters) == 0 {
-		errMessage := fmt.Sprintf("Cluster %s not found", clusterName)
-		return "", fmt.Errorf(errMessage)
+		return "", fmt.Errorf("cluster %s not found", clusterName)
 	}
 	// Marshal the cluster into a JSON string
 	jsonResponse, err := json.MarshalIndent(result.Clusters[0], "", " ")
@@ -126,8 +125,7 @@ func GetEcsServiceJSONResponse(cfg aws.Config, clusterName, serviceName string) 
 	}
 	// Check if the service was found
 	if len(result.Services) == 0 {
-		errMessage := fmt.Sprintf("Service %s not found in cluster %s", serviceName, clusterName)
-		return "", fmt.Errorf(errMessage)
+		return "", fmt.Errorf("service %s not found in cluster %s", serviceName, clusterName)
 	}
 	// Marshal the service into a JSON string
 	jsonResponse, err := json.MarshalIndent(result.Services[0], "", "  ")

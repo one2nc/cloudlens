@@ -180,7 +180,7 @@ func (d *Describe) describe(ctx context.Context, resource, path string) (string,
 	}
 	desc, ok := meta.DAO.(dao.Describer)
 	if !ok {
-		return "", fmt.Errorf(fmt.Sprintf("%T", meta.DAO))
+		return "", fmt.Errorf("%T", meta.DAO)
 	}
 
 	desc.Init(ctx)
