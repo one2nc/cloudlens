@@ -24,19 +24,19 @@ func (ecsServices *ECSServices) List(ctx context.Context) ([]Object, error) {
 	cfg, ok := ctx.Value(internal.KeySession).(awsV2.Config)
 	if !ok {
 		errMsg = fmt.Sprintf("conversion err: Expected awsV2.Config but got %v", cfg)
-		log.Err(fmt.Errorf(errMsg))
+		log.Err(fmt.Errorf("%s", errMsg))
 	}
 	clusterName, ok := ctx.Value(internal.ECSClusterName).(string)
 	if !ok || clusterName == "" {
 		errMsg = "failed to get ECS cluster name from context"
-		log.Err(fmt.Errorf(errMsg))
-		return nil, fmt.Errorf(errMsg)
+		log.Err(fmt.Errorf("%s", errMsg))
+		return nil, fmt.Errorf("%s", errMsg)
 	}
 	listEcsServiceResp, err := aws.ListEcsServices(cfg, clusterName)
 	if err != nil {
 		errMsg = fmt.Sprintf("failed to list ECS services: %v", err)
-		log.Err(fmt.Errorf(errMsg))
-		return nil, fmt.Errorf(errMsg)
+		log.Err(fmt.Errorf("%s", errMsg))
+		return nil, fmt.Errorf("%s", errMsg)
 	}
 	objs := make([]Object, len(listEcsServiceResp))
 	for i, obj := range listEcsServiceResp {
@@ -55,20 +55,20 @@ func (ecsServices *ECSServices) Describe(serviceName string) (string, error) {
 	cfg, ok := ecsServices.ctx.Value(internal.KeySession).(awsV2.Config)
 	if !ok {
 		errMsg = fmt.Sprintf("conversion err: Expected awsV2.Config but got %v", cfg)
-		log.Err(fmt.Errorf(errMsg))
-		return "", fmt.Errorf(errMsg)
+		log.Err(fmt.Errorf("%s", errMsg))
+		return "", fmt.Errorf("%s", errMsg)
 	}
 	clusterName, ok := ecsServices.ctx.Value(internal.ECSClusterName).(string)
 	if !ok || clusterName == "" {
 		errMsg = "failed to get ECS cluster name from context"
-		log.Err(fmt.Errorf(errMsg))
-		return "", fmt.Errorf(errMsg)
+		log.Err(fmt.Errorf("%s", errMsg))
+		return "", fmt.Errorf("%s", errMsg)
 	}
 	res, err := aws.GetEcsServiceJSONResponse(cfg, clusterName, serviceName)
 	if err != nil {
 		errMsg = fmt.Sprintf("failed to get ECS service: %v", err)
-		log.Err(fmt.Errorf(errMsg))
-		return "", fmt.Errorf(errMsg)
+		log.Err(fmt.Errorf("%s", errMsg))
+		return "", fmt.Errorf("%s", errMsg)
 	}
 	return fmt.Sprintf("%v", res), nil
 }

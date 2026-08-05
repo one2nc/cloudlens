@@ -45,14 +45,14 @@ func (ecsClusters *ECSClusters) Describe(clusterName string) (string, error) {
 	cfg, ok := ecsClusters.ctx.Value(internal.KeySession).(awsV2.Config)
 	if !ok {
 		errMsg = fmt.Sprintf("conversion err: Expected awsV2.Config but got %v", cfg)
-		log.Err(fmt.Errorf(errMsg))
-		return "", fmt.Errorf(errMsg)
+		log.Err(fmt.Errorf("%s", errMsg))
+		return "", fmt.Errorf("%s", errMsg)
 	}
 	res, err := aws.GetClusterJSONResponse(cfg, clusterName)
 	if err != nil {
 		errMsg = fmt.Sprintf("failed to get ECS cluster: %v", err)
-		log.Err(fmt.Errorf(errMsg))
-		return "", fmt.Errorf(errMsg)
+		log.Err(fmt.Errorf("%s", errMsg))
+		return "", fmt.Errorf("%s", errMsg)
 	}
 	return fmt.Sprintf("%v", res), nil
 }
