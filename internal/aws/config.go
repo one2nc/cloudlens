@@ -6,7 +6,6 @@ import (
 	"fmt"
 	"os"
 	"strings"
-
 	awsV2 "github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/aws/aws-sdk-go-v2/config"
 	awsV2Config "github.com/aws/aws-sdk-go-v2/config"
@@ -43,7 +42,6 @@ func (c credentialProvider) IsExpired() bool {
 }
 
 func GetCfg(cfgInput AWSConfigInput) (awsV2.Config, error) {
-
 	var cfg awsV2.Config
 	var err error
 
@@ -107,6 +105,21 @@ func GetCfgUsingEnvVariables(profile, region string) (awsV2.Config, error) {
 }
 
 func GetProfiles() (profiles []string, err error) {
+	files, err := profileFiles()
+	if err != nil {
+		return nil, err
+	}
+	ret := make([]string, 0)
+	seen := map[string]struct{}{}
+	for _, fp := range files {
+		if err = appendProfilesFromFile(fp, seen, &ret); err != nil {
+			return nil, err
+		}
+	}
+	return ret, nil
+}
+
+func profileFiles() ([]string, error) {
 	fpCred := defaults.SharedCredentialsFilename()
 	_, errCred := os.Stat(fpCred)
 	fpConf := defaults.SharedConfigFilename()
@@ -114,34 +127,49 @@ func GetProfiles() (profiles []string, err error) {
 	if os.IsNotExist(errCred) && os.IsNotExist(errConf) {
 		return nil, errConf
 	}
-	var ret []string
-	defaultReturn := &Profiles{Data: nil, Error: ""}
-	fp := defaults.SharedCredentialsFilename()
-	_, err = os.Stat(fp)
-	if os.IsNotExist(err) {
-		fp = defaults.SharedConfigFilename()
+	files := make([]string, 0, 2)
+	if !os.IsNotExist(errCred) {
+		files = append(files, fpCred)
 	}
-	f, err := ini.Load(fp) // Load ini file
+	if !os.IsNotExist(errConf) {
+		files = append(files, fpConf)
+	}
+	return files, nil
+}
+
+func appendProfilesFromFile(fp string, seen map[string]struct{}, ret *[]string) error {
+	f, err := ini.Load(fp)
 	if err != nil {
-		defaultReturn.Error = err.Error()
-	} else {
-		arr := []string{}
-		for _, v := range f.Sections() {
-			if len(v.Keys()) != 0 {
-				arr = append(arr, v.Name())
-			}
-		}
-		defaultReturn.Data = arr
+		return err
 	}
-	for i := 0; i < len(defaultReturn.Data); i++ {
-		spltiArr := strings.Split(defaultReturn.Data[i], " ")
-		if len(spltiArr) == 1 {
-			ret = append(ret, spltiArr[len(spltiArr)-1])
-		} else if len(spltiArr) > 1 && spltiArr[0] == "profile" {
-			ret = append(ret, spltiArr[len(spltiArr)-1])
+	for _, v := range f.Sections() {
+		if len(v.Keys()) == 0 {
+			continue
+		}
+		if name, ok := profileNameFromSection(v.Name()); ok {
+			addProfile(name, seen, ret)
 		}
 	}
-	return ret, nil
+	return nil
+}
+
+func profileNameFromSection(section string) (string, bool) {
+	parts := strings.Split(section, " ")
+	if len(parts) == 1 {
+		return parts[0], true
+	}
+	if len(parts) > 1 && parts[0] == "profile" {
+		return parts[len(parts)-1], true
+	}
+	return "", false
+}
+
+func addProfile(name string, seen map[string]struct{}, ret *[]string) {
+	if _, ok := seen[name]; ok {
+		return
+	}
+	seen[name] = struct{}{}
+	*ret = append(*ret, name)
 }
 
 func GetLocalstackCfg(region string) (awsV2.Config, error) {
