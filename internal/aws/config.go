@@ -11,6 +11,7 @@ import (
 	"github.com/aws/aws-sdk-go-v2/config"
 	awsV2Config "github.com/aws/aws-sdk-go-v2/config"
 	creds "github.com/aws/aws-sdk-go-v2/credentials"
+	"github.com/aws/aws-sdk-go-v2/feature/ec2/imds"
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/credentials"
 	"github.com/aws/aws-sdk-go/aws/defaults"
@@ -154,11 +155,27 @@ func GetLocalstackCfg(region string) (awsV2.Config, error) {
 	awsLSCfg, err := config.LoadDefaultConfig(context.TODO(),
 		config.WithRegion(region),
 		config.WithEndpointResolver(customResolver),
+		config.WithCredentialsProvider(localstackCredentialsProvider(region)),
 	)
 	if err != nil {
 		log.Fatal().Err(err)
 	}
 	return awsLSCfg, nil
+}
+
+func localstackCredentialsProvider(region string) awsV2.CredentialsProviderFunc {
+	return func(ctx context.Context) (awsV2.Credentials, error) {
+		real, err := config.LoadDefaultConfig(ctx,
+			config.WithRegion(region),
+			config.WithEC2IMDSClientEnableState(imds.ClientDisabled),
+		)
+		if err == nil {
+			if realCreds, err := real.Credentials.Retrieve(ctx); err == nil {
+				return realCreds, nil
+			}
+		}
+		return creds.NewStaticCredentialsProvider("test", "test", "").Retrieve(ctx)
+	}
 }
 
 func GetLocastackEndpoint() string {
