@@ -74,9 +74,15 @@ func (*Describe) rxFilter(q string, lines []string) fuzzy.Matches {
 	}
 	matches := make(fuzzy.Matches, 0, len(lines))
 	for i, l := range lines {
-		if loc := rx.FindStringIndex(l); len(loc) == 2 {
-			matches = append(matches, fuzzy.Match{Str: q, Index: i, MatchedIndexes: loc})
+		loc := rx.FindStringIndex(l)
+		if len(loc) != 2 {
+			continue
 		}
+		indexes := make([]int, 0, loc[1]-loc[0])
+		for p := loc[0]; p < loc[1]; p++ {
+			indexes = append(indexes, p)
+		}
+		matches = append(matches, fuzzy.Match{Str: q, Index: i, MatchedIndexes: indexes})
 	}
 
 	return matches
@@ -96,6 +102,8 @@ func (d *Describe) fireResourceFailed(err error) {
 
 // ClearFilter clear out the filter.
 func (d *Describe) ClearFilter() {
+	d.query = ""
+	d.filterChanged(d.lines)
 }
 
 // Peek returns current model state.

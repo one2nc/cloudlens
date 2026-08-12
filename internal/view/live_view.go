@@ -92,12 +92,7 @@ func (v *LiveView) ResourceChanged(lines []string, matches fuzzy.Matches) {
 	v.app.QueueUpdateDraw(func() {
 		v.text.SetTextAlign(tview.AlignLeft)
 		v.maxRegions = len(matches)
-		ll := make([]string, len(lines))
-		copy(ll, lines)
-		for i, m := range matches {
-			loc, line := m.MatchedIndexes, ll[m.Index]
-			ll[m.Index] = line[:loc[0]] + `<<<"search_` + strconv.Itoa(i) + `">>>` + line[loc[0]:loc[1]] + `<<<"">>>` + line[loc[1]:]
-		}
+		ll := highlightMatches(lines, matches)
 
 		if v.text.GetText(true) == "" {
 			v.text.ScrollToBeginning()
@@ -110,6 +105,20 @@ func (v *LiveView) ResourceChanged(lines []string, matches fuzzy.Matches) {
 			v.text.ScrollToHighlight()
 		}
 	})
+}
+
+func highlightMatches(lines []string, matches fuzzy.Matches) []string {
+	ll := make([]string, len(lines))
+	copy(ll, lines)
+	for i, m := range matches {
+		loc, line := m.MatchedIndexes, ll[m.Index]
+		if len(loc) == 0 {
+			continue
+		}
+		start, end := loc[0], loc[len(loc)-1]+1
+		ll[m.Index] = line[:start] + `["search_` + strconv.Itoa(i) + `"]` + line[start:end] + `[""]` + line[end:]
+	}
+	return ll
 }
 
 // BufferChanged indicates the buffer was changed.
@@ -127,17 +136,15 @@ func (v *LiveView) BufferActive(state bool, k model.BufferKind) {
 
 func (v *LiveView) bindKeys() {
 	v.actions.Set(ui.KeyActions{
-		//tcell.KeyEnter:  ui.NewSharedKeyAction("Filter", v.filterCmd, false),
+		tcell.KeyEnter:  ui.NewSharedKeyAction("Filter", v.filterCmd, false),
 		tcell.KeyEscape: ui.NewKeyAction("Back", v.resetCmd, false),
-		// tcell.KeyCtrlS:  ui.NewKeyAction("Save", v.saveCmd, false),
-		// ui.KeyC:         ui.NewKeyAction("Copy", cpCmd(v.app.Flash(), v.text), true),
-		ui.KeyF: ui.NewKeyAction("Toggle FullScreen", v.toggleFullScreenCmd, true),
-		ui.KeyR: ui.NewKeyAction("Toggle Auto-Refresh", v.toggleRefreshCmd, true),
-		ui.KeyC: ui.NewKeyAction("Copy Json", v.copyJson, true),
-		//ui.KeyN:         ui.NewKeyAction("Next Match", v.nextCmd, true),
-		//ui.KeyShiftN:    ui.NewKeyAction("Prev Match", v.prevCmd, true),
-		//ui.KeySlash:     ui.NewSharedKeyAction("Filter Mode", v.activateCmd, false),
-		//tcell.KeyDelete: ui.NewSharedKeyAction("Erase", v.eraseCmd, false),
+		ui.KeyF:         ui.NewKeyAction("Toggle FullScreen", v.toggleFullScreenCmd, true),
+		ui.KeyR:         ui.NewKeyAction("Toggle Auto-Refresh", v.toggleRefreshCmd, true),
+		ui.KeyC:         ui.NewKeyAction("Copy Json", v.copyJson, true),
+		ui.KeyN:         ui.NewKeyAction("Next Match", v.nextCmd, true),
+		ui.KeyShiftN:    ui.NewKeyAction("Prev Match", v.prevCmd, true),
+		ui.KeySlash:     ui.NewSharedKeyAction("Filter Mode", v.activateCmd, false),
+		tcell.KeyDelete: ui.NewSharedKeyAction("Erase", v.eraseCmd, false),
 	})
 
 	// if v.title == "YAML" {
