@@ -5,6 +5,7 @@ import (
 	"sync"
 
 	"github.com/gdamore/tcell/v2"
+	"github.com/one2nc/cloudlens/internal/model"
 	"github.com/one2nc/cloudlens/internal/ui"
 )
 
@@ -35,6 +36,7 @@ func (b *Browser) Init(ctx context.Context) error {
 	for _, f := range b.bindKeysFn {
 		f(b.Actions())
 	}
+	b.CmdBuff().AddListener(b)
 
 	row, _ := b.GetSelection()
 	if row == 0 && b.GetRowCount() > 0 {
@@ -46,8 +48,10 @@ func (b *Browser) Init(ctx context.Context) error {
 
 func (b *Browser) bindKeys(aa ui.KeyActions) {
 	aa.Add(ui.KeyActions{
-		ui.KeyR:       ui.NewSharedKeyAction("Filter Reset", b.resetCmd, false),
-		tcell.KeyHelp: ui.NewSharedKeyAction("Help", b.helpCmd, false),
+		ui.KeyR:         ui.NewSharedKeyAction("Filter Reset", b.resetCmd, false),
+		tcell.KeyEscape: ui.NewSharedKeyAction("Filter Reset", b.resetCmd, false),
+		tcell.KeyHelp:   ui.NewSharedKeyAction("Help", b.helpCmd, false),
+		ui.KeySlash:     ui.NewSharedKeyAction("Filter Mode", b.activateCmd, false),
 	})
 }
 
@@ -56,7 +60,6 @@ func (b *Browser) Start() {
 	b.Stop()
 	//b.GetModel().AddListener(b)
 	b.Table.Start()
-	//b.CmdBuff().AddListener(b)
 	b.Table.GetModel().Refresh(b.prepareContext())
 	b.Refresh()
 	// if err := b.GetModel().Watch(b.context); err != nil {
@@ -102,6 +105,33 @@ func (b *Browser) helpCmd(evt *tcell.EventKey) *tcell.EventKey {
 }
 
 func (b *Browser) resetCmd(evt *tcell.EventKey) *tcell.EventKey {
+	if !b.CmdBuff().Empty() {
+		b.CmdBuff().Reset()
+		return evt
+	}
 	b.Refresh()
 	return evt
+}
+
+func (b *Browser) activateCmd(evt *tcell.EventKey) *tcell.EventKey {
+	if b.App().InCmdMode() {
+		return evt
+	}
+	b.App().ResetPrompt(b.CmdBuff())
+	return evt
+}
+
+func (b *Browser) BufferChanged(_, _ string) {}
+
+func (b *Browser) BufferCompleted(text, _ string) {
+	b.App().QueueUpdateDraw(func() {
+		b.Filter(text)
+	})
+}
+
+func (b *Browser) BufferActive(state bool, kind model.BufferKind) {
+	b.App().BufferActive(state, kind)
+	if !state {
+		b.App().SetFocus(b)
+	}
 }

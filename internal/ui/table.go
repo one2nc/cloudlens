@@ -21,6 +21,7 @@ type Table struct {
 	actions KeyActions
 	wide    bool
 	toast   bool
+	cmdBuff *model.FishBuff
 }
 
 // NewTable returns a new table view.
@@ -33,6 +34,7 @@ func NewTable(res string) *Table {
 		},
 		resource: res,
 		actions:  make(KeyActions),
+		cmdBuff:  model.NewFishBuff('/', model.FilterBuffer),
 	}
 }
 
@@ -82,8 +84,30 @@ func (t *Table) Hints() model.MenuHints {
 // Update table content.
 func (t *Table) Update(data *render.TableData) {
 	t.header = data.Header
-	t.doUpdate(data)
+	t.doUpdate(t.filtered(data))
 	t.UpdateTitle()
+}
+
+func (t *Table) filtered(data *render.TableData) *render.TableData {
+	return data.Filter(t.cmdBuff.GetText())
+}
+
+func (t *Table) CmdBuff() *model.FishBuff {
+	return t.cmdBuff
+}
+
+func (t *Table) FilterInput(r rune) bool {
+	if !t.cmdBuff.IsActive() {
+		return false
+	}
+	t.cmdBuff.Add(r)
+	t.Refresh()
+
+	return true
+}
+
+func (t *Table) Filter(string) {
+	t.Refresh()
 }
 
 func (t *Table) doUpdate(data *render.TableData) {
@@ -178,6 +202,9 @@ func (t *Table) Refresh() {
 // UpdateTitle refreshes the table title.
 func (t *Table) UpdateTitle() {
 	title := strings.Join([]string{" ", strings.ToUpper(t.Resource()), " "}, "")
+	if buff := t.cmdBuff.GetText(); buff != "" {
+		title = fmt.Sprintf("%s(filter: %s) ", title, buff)
+	}
 	t.SetTitle(fmt.Sprintf("[aqua::b]%s", title))
 }
 

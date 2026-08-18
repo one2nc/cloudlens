@@ -122,6 +122,9 @@ Cloudlens uses k9s like shortcuts for navigation. Listed below are few of the sh
 | Bails out of view/command/filter mode     | esc         |
 | To view and switch to another AWS Service | :S3/EC2/VPC⏎  |
 | To view and switch to another GCP Service | :storage/vm/disk⏎  |
+| Activate filter (works on list and detail views) | /      |
+| Show only rows/lines that don't match     | !text (after activating filter) |
+| Fuzzy match instead of exact text         | -f text (after activating filter) |
 
 ## Note
 **Cloudlens reads your ~/.aws/config file, but it does not store or send your access and secret key anywhere. The access and secret key is used only to securely connect to AWS API via AWS SDK.**
