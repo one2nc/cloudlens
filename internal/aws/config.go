@@ -20,10 +20,6 @@ import (
 	"gopkg.in/ini.v1"
 )
 
-type Profiles struct {
-	Data  []string
-	Error string
-}
 type credentialProvider struct {
 	awsV2.Credentials
 }
@@ -107,41 +103,53 @@ func GetCfgUsingEnvVariables(profile, region string) (awsV2.Config, error) {
 }
 
 func GetProfiles() (profiles []string, err error) {
-	fpCred := defaults.SharedCredentialsFilename()
-	_, errCred := os.Stat(fpCred)
-	fpConf := defaults.SharedConfigFilename()
-	_, errConf := os.Stat(fpConf)
-	if os.IsNotExist(errCred) && os.IsNotExist(errConf) {
-		return nil, errConf
+	files := []struct {
+		path         string
+		sharedConfig bool
+	}{
+		{path: defaults.SharedCredentialsFilename()},
+		{path: defaults.SharedConfigFilename(), sharedConfig: true},
 	}
-	var ret []string
-	defaultReturn := &Profiles{Data: nil, Error: ""}
-	fp := defaults.SharedCredentialsFilename()
-	_, err = os.Stat(fp)
-	if os.IsNotExist(err) {
-		fp = defaults.SharedConfigFilename()
-	}
-	f, err := ini.Load(fp) // Load ini file
-	if err != nil {
-		defaultReturn.Error = err.Error()
-	} else {
-		arr := []string{}
-		for _, v := range f.Sections() {
-			if len(v.Keys()) != 0 {
-				arr = append(arr, v.Name())
+
+	seen := make(map[string]struct{})
+	foundFile := false
+	for _, file := range files {
+		if _, statErr := os.Stat(file.path); statErr != nil {
+			if os.IsNotExist(statErr) {
+				continue
+			}
+			return nil, statErr
+		}
+		foundFile = true
+
+		f, loadErr := ini.Load(file.path)
+		if loadErr != nil {
+			return nil, loadErr
+		}
+		for _, section := range f.Sections() {
+			if len(section.Keys()) == 0 {
+				continue
+			}
+
+			name := section.Name()
+			if file.sharedConfig && name != "default" {
+				const profilePrefix = "profile "
+				if !strings.HasPrefix(name, profilePrefix) || len(name) == len(profilePrefix) {
+					continue
+				}
+				name = name[len(profilePrefix):]
+			}
+			if _, exists := seen[name]; !exists {
+				profiles = append(profiles, name)
+				seen[name] = struct{}{}
 			}
 		}
-		defaultReturn.Data = arr
 	}
-	for i := 0; i < len(defaultReturn.Data); i++ {
-		spltiArr := strings.Split(defaultReturn.Data[i], " ")
-		if len(spltiArr) == 1 {
-			ret = append(ret, spltiArr[len(spltiArr)-1])
-		} else if len(spltiArr) > 1 && spltiArr[0] == "profile" {
-			ret = append(ret, spltiArr[len(spltiArr)-1])
-		}
+
+	if !foundFile {
+		return nil, os.ErrNotExist
 	}
-	return ret, nil
+	return profiles, nil
 }
 
 func GetLocalstackCfg(region string) (awsV2.Config, error) {
